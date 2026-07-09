@@ -1,1 +1,706 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMART Contract & Risk Intelligence</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+  :root{
+    --navy:#0f2a4a;
+    --navy-light:#1c3f66;
+    --gold:#c9a227;
+    --gold-light:#f2e6bd;
+    --bg:#f6f5f1;
+    --card:#ffffff;
+    --border:#e0ddd3;
+    --text:#20262e;
+    --text-muted:#5c6570;
+    --green:#2f7a4f; --green-bg:#e4f1e9;
+    --amber:#a5750f; --amber-bg:#faf1da;
+    --orange:#b0512a; --orange-bg:#f9e3d7;
+    --red:#8b1e1e; --red-bg:#f4dbdb;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family: Arial, "Segoe UI", sans-serif;
+    font-size:15px; line-height:1.5;
+  }
+  h1,h2,h3{ font-family: Georgia, "Times New Roman", serif; font-weight:normal; margin:0; }
+  header{
+    background:var(--navy); color:#fff; padding:28px 32px;
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
+  }
+  header .brand{ display:flex; align-items:center; gap:14px; }
+  header .brand .mark{
+    width:40px; height:40px; border:1.5px solid var(--gold); border-radius:4px;
+    display:flex; align-items:center; justify-content:center; font-family:Georgia,serif;
+    color:var(--gold); font-size:18px; flex-shrink:0;
+  }
+  header h1{ font-size:22px; letter-spacing:0.2px; }
+  header p{ margin:2px 0 0; color:#c7d2e0; font-size:13px; }
+  .container{ max-width:1080px; margin:0 auto; padding:28px 24px 80px; }
+  .grid{ display:grid; grid-template-columns: 320px 1fr; gap:24px; align-items:start; }
+  @media (max-width: 860px){ .grid{ grid-template-columns: 1fr; } }
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:8px;
+    padding:20px 22px;
+  }
+  .card + .card{ margin-top:20px; }
+  .card h2{ font-size:16px; color:var(--navy); margin-bottom:4px; }
+  .card .hint{ font-size:12.5px; color:var(--text-muted); margin-bottom:14px; }
+  .dropzone{
+    border:1.5px dashed var(--border); border-radius:6px; padding:26px 16px;
+    text-align:center; cursor:pointer; transition:border-color .15s, background .15s;
+  }
+  .dropzone:hover, .dropzone.drag{ border-color:var(--gold); background:var(--gold-light); }
+  .dropzone .icon{ font-size:26px; color:var(--navy-light); margin-bottom:8px; }
+  .dropzone .label{ font-size:13.5px; color:var(--text-muted); }
+  input[type=file]{ display:none; }
+  .file-info{
+    margin-top:14px; padding:10px 12px; background:var(--bg); border-radius:6px;
+    font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .file-info .name{ font-weight:bold; word-break:break-all; }
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    background:var(--navy); color:#fff; border:none; padding:11px 20px;
+    border-radius:6px; font-size:14px; cursor:pointer; width:100%; margin-top:14px;
+    font-family:inherit;
+  }
+  .btn:hover{ background:var(--navy-light); }
+  .btn:disabled{ background:#a9a9a9; cursor:not-allowed; }
+  .btn.secondary{ background:transparent; color:var(--navy); border:1px solid var(--border); }
+  .btn.secondary:hover{ background:var(--bg); }
+  .btn.small{ width:auto; padding:7px 14px; font-size:12.5px; margin-top:0; }
 
+  .pipeline{ display:flex; flex-direction:column; gap:0; margin:6px 0 4px; }
+  .pipe-step{ display:flex; align-items:center; gap:12px; padding:8px 0; font-size:13.5px; color:var(--text-muted); }
+  .pipe-step .dot{
+    width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;
+    color:var(--text-muted);
+  }
+  .pipe-step.active .dot{ border-color:var(--gold); background:var(--gold); color:#fff; }
+  .pipe-step.active{ color:var(--text); font-weight:bold; }
+  .pipe-step.done .dot{ border-color:var(--green); background:var(--green); color:#fff; }
+  .pipe-step.done{ color:var(--text); }
+  .pipe-line{ width:1.5px; height:14px; background:var(--border); margin-left:9.5px; }
+
+  .kb-item{
+    border:1px solid var(--border); border-radius:6px; padding:10px 12px; margin-bottom:8px;
+  }
+  .kb-item .kb-title{ font-weight:bold; font-size:13px; margin-bottom:4px; }
+  .kb-item .kb-text{ font-size:12.5px; color:var(--text-muted); line-height:1.5; }
+  .kb-item .kb-tags{ margin-top:6px; }
+  .tag{
+    display:inline-block; background:var(--bg); color:var(--text-muted); font-size:11px;
+    padding:2px 7px; border-radius:10px; margin:2px 4px 0 0;
+  }
+  .kb-actions{ display:flex; gap:6px; margin-top:8px; }
+  .kb-actions button{
+    background:none; border:none; color:var(--text-muted); font-size:11.5px; cursor:pointer;
+    text-decoration:underline; padding:0;
+  }
+  .kb-form{ margin-top:12px; }
+  .kb-form input, .kb-form textarea{
+    width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:5px;
+    font-family:inherit; font-size:13px; margin-bottom:8px; resize:vertical;
+  }
+
+  .summary-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+  .summary-card{
+    border-radius:7px; padding:14px 12px; text-align:center; border:1px solid var(--border);
+  }
+  .summary-card .num{ font-family:Georgia,serif; font-size:26px; }
+  .summary-card .lbl{ font-size:12px; margin-top:2px; text-transform:uppercase; letter-spacing:0.4px; }
+  .summary-card.kritisch{ background:var(--red-bg); }
+  .summary-card.kritisch .num, .summary-card.kritisch .lbl{ color:var(--red); }
+  .summary-card.hoch{ background:var(--orange-bg); }
+  .summary-card.hoch .num, .summary-card.hoch .lbl{ color:var(--orange); }
+  .summary-card.mittel{ background:var(--amber-bg); }
+  .summary-card.mittel .num, .summary-card.mittel .lbl{ color:var(--amber); }
+  .summary-card.niedrig{ background:var(--green-bg); }
+  .summary-card.niedrig .num, .summary-card.niedrig .lbl{ color:var(--green); }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .table-scroll{ overflow-x:auto; }
+  th{
+    text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:0.3px;
+    color:var(--text-muted); border-bottom:1.5px solid var(--border); padding:8px 10px;
+  }
+  td{ padding:10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  .badge{
+    display:inline-block; padding:3px 10px; border-radius:12px; font-size:11.5px; font-weight:bold;
+  }
+  .badge.kritisch{ background:var(--red-bg); color:var(--red); }
+  .badge.hoch{ background:var(--orange-bg); color:var(--orange); }
+  .badge.mittel{ background:var(--amber-bg); color:var(--amber); }
+  .badge.niedrig{ background:var(--green-bg); color:var(--green); }
+  .cat{ font-size:11.5px; color:var(--text-muted); }
+  .empty{ text-align:center; padding:50px 20px; color:var(--text-muted); }
+  .empty .icon{ font-size:30px; margin-bottom:10px; color:var(--border); }
+  .status-line{ font-size:12.5px; color:var(--text-muted); margin-top:10px; min-height:16px; }
+  .error-box{
+    background:var(--red-bg); color:var(--red); border-radius:6px; padding:10px 12px;
+    font-size:12.5px; margin-top:10px;
+  }
+  .frist-list{ list-style:none; margin:0; padding:0; }
+  .frist-list li{
+    padding:9px 0; border-bottom:1px solid var(--border); font-size:13px; display:flex; gap:10px;
+  }
+  .frist-list li:last-child{ border-bottom:none; }
+  .frist-list .fdot{ width:6px; height:6px; border-radius:50%; background:var(--gold); margin-top:6px; flex-shrink:0; }
+  .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
+  @media print{
+    header, .card.no-print, .top-actions{ display:none !important; }
+    body{ background:#fff; }
+    .grid{ display:block; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="mark">S</div>
+    <div>
+      <h1>SMART Contract & Risk Intelligence</h1>
+      <p>BuiltSmart AI — Vertrags- und Risikoanalyse für Bau &amp; Immobilien</p>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid">
+
+    <!-- LEFT COLUMN -->
+    <div>
+      <div class="card">
+        <h2>API-Zugang</h2>
+        <p class="hint">Dein Anthropic-API-Key wird nur lokal in deinem Browser gespeichert, nie an Dritte übertragen</p>
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13px; margin-bottom:8px;">
+        <select id="modelSelect" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13px; margin-bottom:8px;">
+          <option value="claude-sonnet-5">Claude Sonnet 5 (empfohlen)</option>
+          <option value="claude-opus-4-8">Claude Opus 4.8 (höchste Genauigkeit)</option>
+          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (schnell &amp; günstig)</option>
+        </select>
+        <button class="btn secondary small" id="saveKeyBtn" style="width:100%;">Key speichern</button>
+        <div class="status-line" id="keyStatus"></div>
+      </div>
+
+      <div class="card">
+        <h2>Dokument</h2>
+        <p class="hint">PDF, Word (.docx) oder Text-Datei hochladen</p>
+        <div class="dropzone" id="dropzone">
+          <div class="icon">&#128196;</div>
+          <div class="label">Datei hierher ziehen oder klicken</div>
+          <input type="file" id="fileInput" accept=".pdf,.docx,.txt">
+        </div>
+        <div id="fileInfo"></div>
+        <button class="btn" id="analyzeBtn" disabled>Analyse starten</button>
+        <button class="btn secondary small" id="testBtn" style="width:100%; margin-top:8px;">API-Verbindung testen</button>
+        <div class="status-line" id="statusLine"></div>
+        <div id="errorBox"></div>
+      </div>
+
+      <div class="card">
+        <h2>Analyse-Pipeline</h2>
+        <p class="hint">Mehrstufiger Ablauf je Prüfung</p>
+        <div class="pipeline" id="pipeline">
+          <div class="pipe-step" data-step="1"><div class="dot">1</div><div>Extraktion relevanter Klauseln</div></div>
+          <div class="pipe-line"></div>
+          <div class="pipe-step" data-step="2"><div class="dot">2</div><div>Risiko-Klassifikation</div></div>
+          <div class="pipe-line"></div>
+          <div class="pipe-step" data-step="3"><div class="dot">3</div><div>Maßnahmenvorschläge</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Wissensbasis</h2>
+        <p class="hint">Fließt als Referenz in die Risikobewertung ein</p>
+        <div id="kbList"></div>
+        <button class="btn secondary small" id="kbAddBtn">+ Eintrag hinzufügen</button>
+        <div class="kb-form" id="kbForm" style="display:none;">
+          <input type="text" id="kbTitleInput" placeholder="Titel">
+          <textarea id="kbTextInput" rows="3" placeholder="Inhalt / Praxiswissen"></textarea>
+          <input type="text" id="kbTagsInput" placeholder="Tags, kommagetrennt (z.B. frist, vob)">
+          <button class="btn small" id="kbSaveBtn">Speichern</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+      <div class="top-actions" id="topActions" style="display:none;">
+        <button class="btn secondary small" onclick="window.print()">Als PDF exportieren</button>
+      </div>
+      <div id="resultsArea">
+        <div class="card">
+          <div class="empty">
+            <div class="icon">&#128203;</div>
+            <div>Noch keine Analyse durchgeführt.<br>Lade links ein Dokument hoch und starte die Prüfung.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let MODEL = "claude-sonnet-5";
+let apiKey = "";
+
+function loadApiKey(){
+  apiKey = localStorage.getItem('scri-api-key') || "";
+  const savedModel = localStorage.getItem('scri-model');
+  if(savedModel) MODEL = savedModel;
+  document.getElementById('apiKeyInput').value = apiKey;
+  document.getElementById('modelSelect').value = MODEL;
+  document.getElementById('keyStatus').textContent = apiKey ? 'Key gespeichert.' : 'Noch kein API-Key hinterlegt.';
+}
+document.getElementById('saveKeyBtn').onclick = () => {
+  apiKey = document.getElementById('apiKeyInput').value.trim();
+  MODEL = document.getElementById('modelSelect').value;
+  localStorage.setItem('scri-api-key', apiKey);
+  localStorage.setItem('scri-model', MODEL);
+  document.getElementById('keyStatus').textContent = apiKey ? 'Key gespeichert.' : 'Key entfernt.';
+};
+
+const DEFAULT_KB = [
+  {id:"kb1", title:"HOAI – Leistungsphasen & Honorar",
+   text:"Die HOAI regelt Honorare für Planungsleistungen in 9 Leistungsphasen. Nachträgliche Erweiterungen des Leistungsumfangs ohne schriftliche Vereinbarung führen häufig zu Honorarstreitigkeiten. Kritisch: fehlende Abgrenzung zwischen Grundleistungen und Besonderen Leistungen.",
+   tags:["honorar","leistungsphase","hoai","nachtrag"]},
+  {id:"kb2", title:"VOB/B – Fristen & Mängelrüge",
+   text:"Nach VOB/B beträgt die Gewährleistungsfrist regelmäßig 4 Jahre, bei BGB-Verträgen 5 Jahre. Fehlt eine klare Fristenregelung im Vertrag, gilt die gesetzliche Regelung – ein häufig übersehenes Risiko.",
+   tags:["frist","gewährleistung","mängel","vob"]},
+  {id:"kb3", title:"Vertragsstrafen",
+   text:"Vertragsstrafenregelungen sind nur wirksam, wenn sie eindeutig formuliert und der Höhe nach angemessen sind (Richtwert ca. 5% der Auftragssumme, VOB/B). Unklare oder unangemessen hohe Regelungen sind rechtlich angreifbar.",
+   tags:["vertragsstrafe","kündigung","haftung"]},
+  {id:"kb4", title:"Kündigungsklauseln",
+   text:"Kündigungsrechte aus wichtigem Grund müssen konkret benannt sein. Pauschale oder einseitig formulierte Kündigungsklauseln zugunsten einer Partei bergen ein erhöhtes Streitrisiko.",
+   tags:["kündigung","risiko"]},
+  {id:"kb5", title:"Zahlungsbedingungen & Abschlagszahlungen",
+   text:"Abschlagszahlungen sollten sich am tatsächlichen Baufortschritt orientieren. Vorleistungspflichten ohne Sicherheiten (Bürgschaft, Einbehalt) stellen ein erhebliches finanzielles Risiko für den Auftraggeber dar.",
+   tags:["zahlung","abschlag","sicherheit"]},
+  {id:"kb6", title:"Nachtragsmanagement",
+   text:"Fehlende oder unklare Regelungen zum Umgang mit Nachträgen (Leistungsänderungen, Mehrmengen) sind eine der häufigsten Ursachen für Kostenüberschreitungen und Streitigkeiten in Bauprojekten.",
+   tags:["nachtrag","kosten","risiko"]}
+];
+
+let knowledgeBase = [];
+let extractedText = "";
+let currentFileName = "";
+let isScanned = false;
+let documentImages = [];
+
+// ---------- storage ----------
+async function loadKB(){
+  try{
+    const raw = localStorage.getItem('scri-knowledge-base');
+    knowledgeBase = raw ? JSON.parse(raw) : DEFAULT_KB.slice();
+  }catch(e){
+    knowledgeBase = DEFAULT_KB.slice();
+  }
+  if(!knowledgeBase.length) knowledgeBase = DEFAULT_KB.slice();
+  saveKB();
+  renderKB();
+}
+async function saveKB(){
+  try{ localStorage.setItem('scri-knowledge-base', JSON.stringify(knowledgeBase)); }
+  catch(e){ console.error('Storage-Fehler', e); }
+}
+
+function renderKB(){
+  const el = document.getElementById('kbList');
+  el.innerHTML = knowledgeBase.map(k => `
+    <div class="kb-item">
+      <div class="kb-title">${escapeHtml(k.title)}</div>
+      <div class="kb-text">${escapeHtml(k.text)}</div>
+      <div class="kb-tags">${k.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+      <div class="kb-actions"><button onclick="deleteKB('${k.id}')">Entfernen</button></div>
+    </div>
+  `).join('');
+}
+window.deleteKB = async function(id){
+  knowledgeBase = knowledgeBase.filter(k => k.id !== id);
+  await saveKB();
+  renderKB();
+};
+
+document.getElementById('kbAddBtn').onclick = () => {
+  document.getElementById('kbForm').style.display = 'block';
+};
+document.getElementById('kbSaveBtn').onclick = async () => {
+  const title = document.getElementById('kbTitleInput').value.trim();
+  const text = document.getElementById('kbTextInput').value.trim();
+  const tags = document.getElementById('kbTagsInput').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
+  if(!title || !text) return;
+  knowledgeBase.push({id:'kb'+Date.now(), title, text, tags});
+  await saveKB();
+  renderKB();
+  document.getElementById('kbTitleInput').value='';
+  document.getElementById('kbTextInput').value='';
+  document.getElementById('kbTagsInput').value='';
+  document.getElementById('kbForm').style.display='none';
+};
+
+// ---------- file handling ----------
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+dropzone.onclick = () => fileInput.click();
+dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('drag'); };
+dropzone.ondragleave = () => dropzone.classList.remove('drag');
+dropzone.ondrop = (e) => {
+  e.preventDefault(); dropzone.classList.remove('drag');
+  if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+};
+fileInput.onchange = (e) => { if(e.target.files.length) handleFile(e.target.files[0]); };
+
+async function handleFile(file){
+  currentFileName = file.name;
+  setError('');
+  setStatus('Lese Dokument …');
+  isScanned = false;
+  documentImages = [];
+  const ext = file.name.split('.').pop().toLowerCase();
+  try{
+    if(ext === 'pdf'){
+      extractedText = sanitizeText(await extractPdf(file));
+      if(extractedText.trim().length < 50){
+        setStatus('Kein Textlayer gefunden – rendere Seiten als Bilder für Bilderkennung …');
+        const result = await renderPdfPagesAsImages(file);
+        documentImages = result.images;
+        isScanned = true;
+        document.getElementById('fileInfo').innerHTML = `
+          <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
+          <span>Scan · ${result.totalPages} Seite${result.totalPages===1?'':'n'}${result.truncated?' (erste 15 analysiert)':''}</span></div>`;
+        document.getElementById('analyzeBtn').disabled = documentImages.length === 0;
+        setStatus(documentImages.length ? 'Gescanntes Dokument erkannt. Bereit zur Analyse per Bilderkennung.' : 'Konnte keine Seiten rendern.');
+        return;
+      }
+    } else if(ext === 'docx'){
+      extractedText = sanitizeText(await extractDocx(file));
+    } else if(ext === 'txt'){
+      extractedText = sanitizeText(await file.text());
+    } else {
+      throw new Error('Nicht unterstütztes Dateiformat: .' + ext);
+    }
+    document.getElementById('fileInfo').innerHTML = `
+      <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
+      <span>${Math.round(extractedText.length/1000)} Tsd. Zeichen</span></div>`;
+    document.getElementById('analyzeBtn').disabled = extractedText.trim().length < 20;
+    setStatus(extractedText.trim().length < 20 ? 'Kein auswertbarer Text gefunden.' : 'Bereit zur Analyse.');
+  }catch(err){
+    console.error(err);
+    setError('Fehler beim Einlesen: ' + err.message);
+    setStatus('');
+  }
+}
+
+function sanitizeText(str){
+  // Steuerzeichen entfernen (außer Zeilenumbruch/Tab), die bei PDF-Extraktion oft entstehen
+  str = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+  // Verwaiste (unpaarige) Surrogate entfernen, die JSON-Serialisierung brechen können
+  str = str.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g, '');
+  str = str.replace(/(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/g, m => m.slice(0, -1));
+  // Mehrfache Leerzeichen/Zeilenumbrüche glätten
+  str = str.replace(/[ \t]{2,}/g, ' ').replace(/\n{3,}/g, '\n\n');
+  return str.trim();
+}
+
+async function extractPdf(file){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  let text = "";
+  for(let i=1;i<=pdf.numPages;i++){
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(it => it.str).join(' ') + '\n';
+  }
+  return text;
+}
+async function renderPdfPagesAsImages(file, maxPages){
+  maxPages = maxPages || 8;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({data:buf}).promise;
+  const pageCount = Math.min(pdf.numPages, maxPages);
+  const images = [];
+  for(let i=1;i<=pageCount;i++){
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({scale:1.0});
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({canvasContext: ctx, viewport: viewport}).promise;
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+    images.push(dataUrl.split(',')[1]);
+  }
+  return {images, truncated: pdf.numPages > maxPages, totalPages: pdf.numPages};
+}
+async function extractDocx(file){
+  const buf = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({arrayBuffer: buf});
+  return result.value;
+}
+
+// ---------- retrieval ----------
+function retrieveContextForItem(item, topN){
+  topN = topN || 2;
+  const text = (item.kategorie + ' ' + item.text).toLowerCase();
+  const scored = knowledgeBase.map(kb => {
+    const score = kb.tags.reduce((s,t) => s + (text.includes(t) ? 1 : 0), 0);
+    return {kb, score};
+  }).filter(x => x.score > 0).sort((a,b) => b.score - a.score);
+  return scored.slice(0, topN).map(x => x.kb);
+}
+
+// ---------- Claude API ----------
+async function callClaude(content){
+  if(!apiKey){
+    throw new Error('Kein API-Key hinterlegt. Bitte oben im Feld "API-Zugang" deinen Anthropic-API-Key eintragen und speichern.');
+  }
+  let response;
+  try{
+    response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 2048,
+        messages: [{role:"user", content: content}]
+      })
+    });
+  }catch(networkErr){
+    throw new Error('Netzwerkfehler beim API-Aufruf (' + (networkErr.name||'Error') + '): ' + networkErr.message);
+  }
+  if(!response.ok){
+    let bodyText = '';
+    try{ bodyText = await response.text(); }catch(e){}
+    throw new Error('API antwortete mit Status ' + response.status + ': ' + bodyText.slice(0,200));
+  }
+  let bodyText;
+  try{
+    bodyText = await response.text();
+  }catch(readErr){
+    throw new Error('Antwort-Body konnte nicht gelesen werden (' + readErr.name + '): ' + readErr.message);
+  }
+  let data;
+  try{
+    data = JSON.parse(bodyText);
+  }catch(parseErr){
+    throw new Error('Antwort ist kein gültiges JSON (' + parseErr.name + '): ' + parseErr.message + ' | Rohtext (' + bodyText.length + ' Zeichen), Anfang: ' + bodyText.slice(0,300));
+  }
+  const textBlock = (data.content||[]).find(c => c.type === 'text');
+  if(!textBlock) throw new Error('Keine Textantwort im API-Ergebnis enthalten.');
+  return textBlock.text;
+}
+function parseJson(raw){
+  const cleaned = raw.replace(/```json/gi,'').replace(/```/g,'').trim();
+  try{
+    return JSON.parse(cleaned);
+  }catch(e){
+    throw new Error('Modellantwort war kein gültiges JSON (' + e.message + '). Ausschnitt: ' + cleaned.slice(0,150));
+  }
+}
+
+// ---------- pipeline UI ----------
+function setPipelineStep(step, state){
+  const el = document.querySelector(`.pipe-step[data-step="${step}"]`);
+  if(!el) return;
+  el.classList.remove('active','done');
+  if(state) el.classList.add(state);
+}
+function resetPipeline(){ [1,2,3].forEach(s => setPipelineStep(s, null)); }
+function setStatus(msg){ document.getElementById('statusLine').textContent = msg; }
+function setError(msg){
+  document.getElementById('errorBox').innerHTML = msg ? `<div class="error-box">${escapeHtml(msg)}</div>` : '';
+}
+
+// ---------- analysis ----------
+async function callClaudeWithRetry(content, statusPrefix){
+  const maxRetries = 2;
+  let lastErr;
+  for(let attempt=0; attempt<=maxRetries; attempt++){
+    try{
+      return await callClaude(content);
+    }catch(err){
+      lastErr = err;
+      if(attempt < maxRetries){
+        console.warn('Versuch ' + (attempt+1) + ' fehlgeschlagen, wiederhole …', err.message);
+        if(statusPrefix) setStatus(statusPrefix + ' (erneuter Versuch ' + (attempt+2) + '/' + (maxRetries+1) + ' …)');
+        await new Promise(r => setTimeout(r, 700 + attempt*600));
+      }
+    }
+  }
+  throw lastErr;
+}
+
+document.getElementById('analyzeBtn').onclick = runAnalysis;
+
+document.getElementById('testBtn').onclick = async () => {
+  setError('');
+  setStatus('Teste API-Verbindung …');
+  try{
+    const raw = await callClaude("Antworte ausschließlich mit dem einzelnen Wort: OK");
+    setStatus('Verbindung erfolgreich. Antwort: ' + raw.trim());
+  }catch(err){
+    console.error(err);
+    setError('Verbindungstest fehlgeschlagen: ' + err.message);
+    setStatus('');
+  }
+};
+
+async function runAnalysis(){
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  setError('');
+  resetPipeline();
+  const docExcerpt = extractedText.slice(0, 12000);
+
+  try{
+    // Stage 1: Extraktion
+    setPipelineStep(1,'active');
+    setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …');
+    const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Bauträgerrecht) mit langjähriger Praxis. Analysiere den Vertragstext und extrahiere die 6 bis 10 wichtigsten vertraglich relevanten Punkte: Fristen, Pflichten, Haftungsregelungen, Kündigungsklauseln, Vertragsstrafen, Zahlungsbedingungen.
+Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
+[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sonstiges","text":"kurze Paraphrase auf Deutsch, max 25 Wörter"}]`;
+    let extractContent;
+    if(isScanned && documentImages.length){
+      extractContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
+      extractContent.push({type:"text", text: extractInstruction + "\n\nDie Bilder zeigen die Seiten des gescannten Vertragsdokuments in der richtigen Reihenfolge."});
+    } else {
+      extractContent = extractInstruction + "\n\nVertragstext:\n" + docExcerpt;
+    }
+    const stage1Raw = await callClaudeWithRetry(extractContent, 'Extrahiere relevante Klauseln …');
+    let items = parseJson(stage1Raw);
+    setPipelineStep(1,'done');
+
+    // Stage 2: Klassifikation
+    setPipelineStep(2,'active');
+    setStatus('Bewerte Risiken anhand der Wissensbasis …');
+    const itemsWithContext = items.map(it => {
+      const matches = retrieveContextForItem(it);
+      return {
+        ...it,
+        kontext: matches.length ? matches.map(k => `${k.title}: ${k.text}`).join(' | ') : 'keine spezifische Referenz in der Wissensbasis gefunden',
+        _referenzTitel: matches.map(k => k.title)
+      };
+    });
+    const classifyPrompt = `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
+Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
+[{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","begruendung":"max 20 Wörter"}]
+
+Punkte mit jeweiligem Kontext:
+${JSON.stringify(itemsWithContext.map(({_referenzTitel, ...rest}) => rest))}`;
+    const stage2Raw = await callClaudeWithRetry(classifyPrompt, 'Bewerte Risiken anhand der Wissensbasis …');
+    const classifications = parseJson(stage2Raw);
+    items = items.map(it => {
+      const c = classifications.find(x => x.id === it.id) || {};
+      const withCtx = itemsWithContext.find(x => x.id === it.id);
+      return {...it, risiko: c.risiko || 'mittel', begruendung: c.begruendung || '', referenzen: withCtx ? withCtx._referenzTitel : []};
+    });
+    setPipelineStep(2,'done');
+
+    // Stage 3: Maßnahmen
+    setPipelineStep(3,'active');
+    setStatus('Erstelle Maßnahmenvorschläge …');
+    const critical = items.filter(it => it.risiko === 'hoch' || it.risiko === 'kritisch');
+    if(critical.length){
+      const actionPrompt = `Erstelle für die folgenden hoch/kritisch eingestuften vertraglichen Punkte konkrete, umsetzbare Maßnahmenvorschläge (max 18 Wörter je Punkt).
+Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
+[{"id":"1","massnahme":"..."}]
+
+Punkte:
+${JSON.stringify(critical)}`;
+      const stage3Raw = await callClaudeWithRetry(actionPrompt, 'Erstelle Maßnahmenvorschläge …');
+      const actions = parseJson(stage3Raw);
+      items = items.map(it => {
+        const a = actions.find(x => x.id === it.id);
+        return a ? {...it, massnahme: a.massnahme} : it;
+      });
+    }
+    setPipelineStep(3,'done');
+    setStatus('Analyse abgeschlossen.');
+
+    renderResults(items);
+  }catch(err){
+    console.error(err);
+    const stage = document.querySelector('.pipe-step.active');
+    const stageLabel = stage ? stage.textContent.trim() : 'unbekannt';
+    setError(`Analyse fehlgeschlagen in Stufe "${stageLabel}": ${err.message}`);
+    setStatus('');
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+// ---------- results rendering ----------
+function renderResults(items){
+  const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
+  items.sort((a,b) => (order[a.risiko]??2) - (order[b.risiko]??2));
+
+  const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
+  items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
+
+  const fristen = items.filter(it => it.kategorie === 'Frist');
+
+  const rows = items.map(it => `
+    <tr>
+      <td><div>${escapeHtml(it.text)}</div><div class="cat">${escapeHtml(it.kategorie)}</div></td>
+      <td><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span></td>
+      <td>${escapeHtml(it.begruendung||'')}</td>
+      <td>${it.massnahme ? escapeHtml(it.massnahme) : '<span style="color:var(--text-muted)">—</span>'}</td>
+      <td>${(it.referenzen && it.referenzen.length) ? it.referenzen.map(r=>`<span class="tag">${escapeHtml(r)}</span>`).join('') : '<span style="color:var(--text-muted)">—</span>'}</td>
+    </tr>
+  `).join('');
+
+  const fristHtml = fristen.length
+    ? `<ul class="frist-list">${fristen.map(f=>`<li><div class="fdot"></div><div>${escapeHtml(f.text)}</div></li>`).join('')}</ul>`
+    : `<p class="hint">Keine expliziten Fristen erkannt.</p>`;
+
+  document.getElementById('resultsArea').innerHTML = `
+    <div class="card">
+      <h2>${escapeHtml(currentFileName)}</h2>
+      <p class="hint">Ergebnis der Risikoprüfung</p>
+      <div class="summary-row">
+        <div class="summary-card kritisch"><div class="num">${counts.kritisch}</div><div class="lbl">Kritisch</div></div>
+        <div class="summary-card hoch"><div class="num">${counts.hoch}</div><div class="lbl">Hoch</div></div>
+        <div class="summary-card mittel"><div class="num">${counts.mittel}</div><div class="lbl">Mittel</div></div>
+        <div class="summary-card niedrig"><div class="num">${counts.niedrig}</div><div class="lbl">Niedrig</div></div>
+      </div>
+      <div class="table-scroll">
+      <table>
+        <thead><tr><th>Klausel</th><th>Risiko</th><th>Begründung</th><th>Maßnahme</th><th>Referenz</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Fristen</h2>
+      <p class="hint">Automatisch erkannte fristrelevante Punkte</p>
+      ${fristHtml}
+    </div>
+  `;
+  document.getElementById('topActions').style.display = 'flex';
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+loadApiKey();
+loadKB();
+</script>
+</body>
+</html>
