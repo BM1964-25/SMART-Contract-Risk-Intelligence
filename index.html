@@ -52,11 +52,12 @@
   .card h2{ font-size:16px; color:var(--navy); margin-bottom:4px; }
   .card .hint{ font-size:12.5px; color:var(--text-muted); margin-bottom:14px; }
   .dropzone{
-    border:1.5px dashed var(--border); border-radius:6px; padding:26px 16px;
+    border:1.5px dashed var(--green); border-radius:6px; padding:26px 16px;
     text-align:center; cursor:pointer; transition:border-color .15s, background .15s;
+    background:var(--green-bg);
   }
   .dropzone:hover, .dropzone.drag{ border-color:var(--gold); background:var(--gold-light); }
-  .dropzone .icon{ font-size:26px; color:var(--navy-light); margin-bottom:8px; }
+  .dropzone .icon{ font-size:26px; color:var(--green); margin-bottom:8px; }
   .dropzone .label{ font-size:13.5px; color:var(--text-muted); }
   input[type=file]{ display:none; }
   .file-info{
@@ -65,6 +66,7 @@
   }
   .file-info .name{ font-weight:bold; word-break:break-all; }
   .btn{
+    position:relative;
     display:inline-flex; align-items:center; justify-content:center; gap:8px;
     background:var(--navy); color:#fff; border:none; padding:11px 20px;
     border-radius:6px; font-size:14px; cursor:pointer; width:100%; margin-top:14px;
@@ -75,6 +77,23 @@
   .btn.secondary{ background:transparent; color:var(--navy); border:1px solid var(--border); }
   .btn.secondary:hover{ background:var(--bg); }
   .btn.small{ width:auto; padding:7px 14px; font-size:12.5px; margin-top:0; }
+
+  .spinner{
+    width:13px; height:13px; border:2px solid var(--border); border-top-color:var(--gold);
+    border-radius:50%; display:inline-block; flex-shrink:0; animation:sc-spin .8s linear infinite;
+  }
+  @keyframes sc-spin{ to{ transform:rotate(360deg); } }
+  .status-check{
+    width:15px; height:15px; border-radius:50%; background:var(--green); color:#fff;
+    display:inline-flex; align-items:center; justify-content:center; font-size:10px; flex-shrink:0;
+  }
+  .btn-check{
+    position:absolute; top:50%; right:10px; transform:translateY(-50%) scale(0.4);
+    width:20px; height:20px; border-radius:50%; background:var(--green); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:12px;
+    opacity:0; pointer-events:none; transition:opacity .18s ease, transform .18s ease;
+  }
+  .btn-check.show{ opacity:1; transform:translateY(-50%) scale(1); }
 
   .pipeline{ display:flex; flex-direction:column; gap:0; margin:6px 0 4px; }
   .pipe-step{ display:flex; align-items:center; gap:12px; padding:8px 0; font-size:13.5px; color:var(--text-muted); }
@@ -101,9 +120,11 @@
   }
   .kb-actions{ display:flex; gap:6px; margin-top:8px; }
   .kb-actions button{
+    position:relative;
     background:none; border:none; color:var(--text-muted); font-size:11.5px; cursor:pointer;
-    text-decoration:underline; padding:0;
+    text-decoration:underline; padding:0 16px 0 0;
   }
+  .kb-actions button .btn-check{ width:13px; height:13px; font-size:8px; right:-1px; }
   .kb-form{ margin-top:12px; }
   .kb-form input, .kb-form textarea{
     width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:5px;
@@ -142,17 +163,23 @@
   .cat{ font-size:11.5px; color:var(--text-muted); }
   .empty{ text-align:center; padding:50px 20px; color:var(--text-muted); }
   .empty .icon{ font-size:30px; margin-bottom:10px; color:var(--border); }
-  .status-line{ font-size:12.5px; color:var(--text-muted); margin-top:10px; min-height:16px; }
+  .status-line{ font-size:12.5px; color:var(--text-muted); margin-top:10px; min-height:16px; display:flex; align-items:center; gap:7px; }
   .error-box{
     background:var(--red-bg); color:var(--red); border-radius:6px; padding:10px 12px;
     font-size:12.5px; margin-top:10px;
   }
-  .frist-list{ list-style:none; margin:0; padding:0; }
+  .frist-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
   .frist-list li{
-    padding:9px 0; border-bottom:1px solid var(--border); font-size:13px; display:flex; gap:10px;
+    display:flex; align-items:flex-start; gap:12px;
+    padding:12px 14px; border:1px solid var(--border); border-radius:8px;
+    background:var(--bg); font-size:13.5px; line-height:1.5; width:100%; box-sizing:border-box;
   }
-  .frist-list li:last-child{ border-bottom:none; }
-  .frist-list .fdot{ width:6px; height:6px; border-radius:50%; background:var(--gold); margin-top:6px; flex-shrink:0; }
+  .frist-list .fnum{
+    flex-shrink:0; width:22px; height:22px; border-radius:50%;
+    background:var(--gold); color:#fff; font-size:11.5px; font-weight:bold;
+    display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .frist-list .ftext{ flex:1; word-break:break-word; }
   .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
   @media print{
     header, .no-print, .top-actions{ display:none !important; }
@@ -452,7 +479,7 @@ fileInput.onchange = (e) => { if(e.target.files.length) handleFile(e.target.file
 async function handleFile(file){
   currentFileName = file.name;
   setError('');
-  setStatus('Lese Dokument …');
+  setStatus('Lese Dokument …', 'loading');
   isScanned = false;
   documentImages = [];
   const ext = file.name.split('.').pop().toLowerCase();
@@ -460,7 +487,7 @@ async function handleFile(file){
     if(ext === 'pdf'){
       extractedText = sanitizeText(await extractPdf(file));
       if(extractedText.trim().length < 50){
-        setStatus('Kein Textlayer gefunden – rendere Seiten als Bilder für Bilderkennung …');
+        setStatus('Kein Textlayer gefunden – rendere Seiten als Bilder für Bilderkennung …', 'loading');
         const result = await renderPdfPagesAsImages(file);
         documentImages = result.images;
         isScanned = true;
@@ -468,7 +495,7 @@ async function handleFile(file){
           <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
           <span>Scan · ${result.totalPages} Seite${result.totalPages===1?'':'n'}${result.truncated?' (erste 15 analysiert)':''}</span></div>`;
         document.getElementById('analyzeBtn').disabled = documentImages.length === 0;
-        setStatus(documentImages.length ? 'Gescanntes Dokument erkannt. Bereit zur Analyse per Bilderkennung.' : 'Konnte keine Seiten rendern.');
+        setStatus(documentImages.length ? 'Gescanntes Dokument erkannt. Bereit zur Analyse per Bilderkennung.' : 'Konnte keine Seiten rendern.', documentImages.length ? 'done' : undefined);
         return;
       }
     } else if(ext === 'docx'){
@@ -482,7 +509,7 @@ async function handleFile(file){
       <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
       <span>${Math.round(extractedText.length/1000)} Tsd. Zeichen</span></div>`;
     document.getElementById('analyzeBtn').disabled = extractedText.trim().length < 20;
-    setStatus(extractedText.trim().length < 20 ? 'Kein auswertbarer Text gefunden.' : 'Bereit zur Analyse.');
+    setStatus(extractedText.trim().length < 20 ? 'Kein auswertbarer Text gefunden.' : 'Bereit zur Analyse.', extractedText.trim().length < 20 ? undefined : 'done');
   }catch(err){
     console.error(err);
     setError('Fehler beim Einlesen: ' + err.message);
@@ -616,7 +643,36 @@ function setPipelineStep(step, state){
   if(state) el.classList.add(state);
 }
 function resetPipeline(){ [1,2,3].forEach(s => setPipelineStep(s, null)); }
-function setStatus(msg){ document.getElementById('statusLine').textContent = msg; }
+function setStatus(msg, mode){
+  const el = document.getElementById('statusLine');
+  if(!msg){ el.innerHTML = ''; return; }
+  let icon = '';
+  if(mode === 'loading') icon = '<span class="spinner" aria-hidden="true"></span>';
+  else if(mode === 'done') icon = '<span class="status-check" aria-hidden="true">&#10003;</span>';
+  el.innerHTML = icon + `<span>${escapeHtml(msg)}</span>`;
+}
+
+// ---------- button click confirmation ----------
+function flashButtonCheck(btn){
+  if(!btn) return;
+  let mark = btn.querySelector('.btn-check');
+  if(!mark){
+    mark = document.createElement('span');
+    mark.className = 'btn-check';
+    mark.innerHTML = '&#10003;';
+    mark.setAttribute('aria-hidden','true');
+    btn.appendChild(mark);
+  }
+  mark.classList.remove('show');
+  void mark.offsetWidth;
+  mark.classList.add('show');
+  clearTimeout(mark._timer);
+  mark._timer = setTimeout(() => mark.classList.remove('show'), 900);
+}
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if(btn && !btn.disabled) flashButtonCheck(btn);
+}, true);
 function setError(msg){
   document.getElementById('errorBox').innerHTML = msg ? `<div class="error-box">${escapeHtml(msg)}</div>` : '';
 }
@@ -632,7 +688,7 @@ async function callClaudeWithRetry(content, statusPrefix){
       lastErr = err;
       if(attempt < maxRetries){
         console.warn('Versuch ' + (attempt+1) + ' fehlgeschlagen, wiederhole …', err.message);
-        if(statusPrefix) setStatus(statusPrefix + ' (erneuter Versuch ' + (attempt+2) + '/' + (maxRetries+1) + ' …)');
+        if(statusPrefix) setStatus(statusPrefix + ' (erneuter Versuch ' + (attempt+2) + '/' + (maxRetries+1) + ' …)', 'loading');
         await new Promise(r => setTimeout(r, 700 + attempt*600));
       }
     }
@@ -644,10 +700,10 @@ document.getElementById('analyzeBtn').onclick = runAnalysis;
 
 document.getElementById('testBtn').onclick = async () => {
   setError('');
-  setStatus('Teste API-Verbindung …');
+  setStatus('Teste API-Verbindung …', 'loading');
   try{
     const raw = await callClaude("Antworte ausschließlich mit dem einzelnen Wort: OK");
-    setStatus('Verbindung erfolgreich. Antwort: ' + raw.trim());
+    setStatus('Verbindung erfolgreich. Antwort: ' + raw.trim(), 'done');
   }catch(err){
     console.error(err);
     setError('Verbindungstest fehlgeschlagen: ' + err.message);
@@ -665,7 +721,7 @@ async function runAnalysis(){
   try{
     // Stage 1: Extraktion
     setPipelineStep(1,'active');
-    setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …');
+    setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …', 'loading');
     const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Bauträgerrecht) mit langjähriger Praxis. Analysiere den Vertragstext und extrahiere die 6 bis 10 wichtigsten vertraglich relevanten Punkte: Fristen, Pflichten, Haftungsregelungen, Kündigungsklauseln, Vertragsstrafen, Zahlungsbedingungen.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sonstiges","text":"kurze Paraphrase auf Deutsch, max 25 Wörter"}]`;
@@ -682,7 +738,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
 
     // Stage 2: Klassifikation
     setPipelineStep(2,'active');
-    setStatus('Bewerte Risiken anhand der Wissensbasis …');
+    setStatus('Bewerte Risiken anhand der Wissensbasis …', 'loading');
     const itemsWithContext = items.map(it => {
       const matches = retrieveContextForItem(it);
       return {
@@ -708,7 +764,7 @@ ${JSON.stringify(itemsWithContext.map(({_referenzTitel, ...rest}) => rest))}`;
 
     // Stage 3: Maßnahmen
     setPipelineStep(3,'active');
-    setStatus('Erstelle Maßnahmenvorschläge …');
+    setStatus('Erstelle Maßnahmenvorschläge …', 'loading');
     const critical = items.filter(it => it.risiko === 'hoch' || it.risiko === 'kritisch');
     if(critical.length){
       const actionPrompt = `Erstelle für die folgenden hoch/kritisch eingestuften vertraglichen Punkte konkrete, umsetzbare Maßnahmenvorschläge (max 18 Wörter je Punkt).
@@ -725,7 +781,7 @@ ${JSON.stringify(critical)}`;
       });
     }
     setPipelineStep(3,'done');
-    setStatus('Analyse abgeschlossen.');
+    setStatus('Analyse abgeschlossen.', 'done');
 
     renderResults(items);
     saveHistoryEntry(items);
@@ -761,7 +817,7 @@ function renderResults(items){
   `).join('');
 
   const fristHtml = fristen.length
-    ? `<ul class="frist-list">${fristen.map(f=>`<li><div class="fdot"></div><div>${escapeHtml(f.text)}</div></li>`).join('')}</ul>`
+    ? `<ul class="frist-list">${fristen.map((f,i)=>`<li><div class="fnum">${i+1}</div><div class="ftext">${escapeHtml(f.text)}</div></li>`).join('')}</ul>`
     : `<p class="hint">Keine expliziten Fristen erkannt.</p>`;
 
   document.getElementById('resultsArea').innerHTML = `
