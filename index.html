@@ -155,10 +155,17 @@
   .frist-list .fdot{ width:6px; height:6px; border-radius:50%; background:var(--gold); margin-top:6px; flex-shrink:0; }
   .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
   @media print{
-    header, .card.no-print, .top-actions{ display:none !important; }
+    header, .no-print, .top-actions{ display:none !important; }
     body{ background:#fff; }
     .grid{ display:block; }
+    .print-header{ display:block !important; margin-bottom:20px; }
+    .card{ page-break-inside:avoid; }
+    tr{ page-break-inside:avoid; }
   }
+  .print-header{ display:none; }
+  .print-header h1{ font-size:20px; color:var(--navy); margin-bottom:4px; }
+  .print-header .meta{ font-size:12.5px; color:var(--text-muted); }
+  .print-header hr{ border:none; border-top:1.5px solid var(--gold); margin:12px 0 0; }
 </style>
 </head>
 <body>
@@ -177,7 +184,7 @@
   <div class="grid">
 
     <!-- LEFT COLUMN -->
-    <div>
+    <div class="no-print">
       <div class="card">
         <h2>API-Zugang</h2>
         <p class="hint">Dein Anthropic-API-Key wird nur lokal in deinem Browser gespeichert, nie an Dritte übertragen</p>
@@ -229,6 +236,12 @@
           <input type="text" id="kbTagsInput" placeholder="Tags, kommagetrennt (z.B. frist, vob)">
           <button class="btn small" id="kbSaveBtn">Speichern</button>
         </div>
+      </div>
+
+      <div class="card">
+        <h2>Verlauf</h2>
+        <p class="hint">Bisherige Analysen (lokal in diesem Browser gespeichert)</p>
+        <div id="historyList"></div>
       </div>
     </div>
 
@@ -288,10 +301,26 @@ const DEFAULT_KB = [
    tags:["zahlung","abschlag","sicherheit"]},
   {id:"kb6", title:"Nachtragsmanagement",
    text:"Fehlende oder unklare Regelungen zum Umgang mit Nachträgen (Leistungsänderungen, Mehrmengen) sind eine der häufigsten Ursachen für Kostenüberschreitungen und Streitigkeiten in Bauprojekten.",
-   tags:["nachtrag","kosten","risiko"]}
+   tags:["nachtrag","kosten","risiko"]},
+  {id:"kb7", title:"Behinderung & Bauzeitverlängerung",
+   text:"Behinderungsanzeigen müssen unverzüglich und schriftlich erfolgen (VOB/B § 6). Versäumt der Auftragnehmer die rechtzeitige Anzeige, verliert er in der Regel den Anspruch auf Fristverlängerung – ein häufig unterschätztes Risiko bei eng kalkulierten Bauzeitplänen.",
+   tags:["behinderung","bauzeit","verzug"]},
+  {id:"kb8", title:"Sicherheitseinbehalt & Bürgschaft",
+   text:"Sicherheitseinbehalte sind üblich in Höhe von 5-10% der Auftragssumme. Bürgschaften müssen unbedingt, unbefristet und unter Verzicht auf die Einrede der Vorausklage gestellt werden, um werthaltig zu sein – unklare Bürgschaftsklauseln schwächen die Sicherheit erheblich.",
+   tags:["sicherheit","bürgschaft","einbehalt"]},
+  {id:"kb9", title:"AGB-Kontrolle bei Bauverträgen",
+   text:"Formularmäßig vorformulierte Vertragsklauseln unterliegen der AGB-Inhaltskontrolle nach §§305 ff. BGB. Einseitig benachteiligende Klauseln (z.B. unangemessene Haftungserweiterungen, überlange Fristen) sind häufig unwirksam, auch wenn sie unterschrieben wurden.",
+   tags:["agb","formularvertrag","klausel"]},
+  {id:"kb10", title:"Prüffähigkeit der Schlussrechnung",
+   text:"Eine Schlussrechnung ist erst prüffähig, wenn sie übersichtlich aufgestellt ist und alle erforderlichen Nachweise enthält. Fehlt die Prüffähigkeit, beginnt die Zahlungsfrist nicht zu laufen – das kann Zahlungsverzug des Auftraggebers ungewollt ausschließen oder verzögern.",
+   tags:["schlussrechnung","prüffähig","zahlung"]},
+  {id:"kb11", title:"Mängelbeseitigung & Fristsetzung",
+   text:"Vor Selbstvornahme oder Kündigung wegen Mängeln ist grundsätzlich eine angemessene Frist zur Nacherfüllung zu setzen (§ 637 BGB). Fehlt die Fristsetzung oder ist sie zu kurz bemessen, können daraus resultierende Ansprüche unwirksam sein.",
+   tags:["mängel","nacherfüllung","selbstvornahme"]}
 ];
 
 let knowledgeBase = [];
+let historyEntries = [];
 let extractedText = "";
 let currentFileName = "";
 let isScanned = false;
@@ -306,6 +335,8 @@ async function loadKB(){
     knowledgeBase = DEFAULT_KB.slice();
   }
   if(!knowledgeBase.length) knowledgeBase = DEFAULT_KB.slice();
+  const existingIds = new Set(knowledgeBase.map(k => k.id));
+  DEFAULT_KB.forEach(def => { if(!existingIds.has(def.id)) knowledgeBase.push(def); });
   saveKB();
   renderKB();
 }
@@ -346,6 +377,64 @@ document.getElementById('kbSaveBtn').onclick = async () => {
   document.getElementById('kbTextInput').value='';
   document.getElementById('kbTagsInput').value='';
   document.getElementById('kbForm').style.display='none';
+};
+
+// ---------- history ----------
+function loadHistory(){
+  try{
+    const raw = localStorage.getItem('scri-history');
+    historyEntries = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    historyEntries = [];
+  }
+  renderHistory();
+}
+function saveHistoryEntry(items){
+  const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
+  items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
+  const entry = {
+    id: 'h' + Date.now(),
+    filename: currentFileName,
+    date: new Date().toISOString(),
+    counts,
+    items: JSON.parse(JSON.stringify(items))
+  };
+  historyEntries.unshift(entry);
+  if(historyEntries.length > 20) historyEntries = historyEntries.slice(0, 20);
+  try{ localStorage.setItem('scri-history', JSON.stringify(historyEntries)); }
+  catch(e){ console.error('History-Speicherfehler', e); }
+  renderHistory();
+}
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  if(!el) return;
+  if(!historyEntries.length){
+    el.innerHTML = '<p class="hint">Noch keine Analysen gespeichert.</p>';
+    return;
+  }
+  el.innerHTML = historyEntries.map(h => `
+    <div class="kb-item">
+      <div class="kb-title">${escapeHtml(h.filename)}</div>
+      <div class="kb-text">${new Date(h.date).toLocaleDateString('de-DE')} · ${h.counts.kritisch} kritisch · ${h.counts.hoch} hoch · ${h.counts.mittel} mittel · ${h.counts.niedrig} niedrig</div>
+      <div class="kb-actions">
+        <button onclick="openHistoryEntry('${h.id}')">Öffnen</button>
+        <button onclick="deleteHistoryEntry('${h.id}')">Löschen</button>
+      </div>
+    </div>
+  `).join('');
+}
+window.openHistoryEntry = function(id){
+  const entry = historyEntries.find(h => h.id === id);
+  if(!entry) return;
+  currentFileName = entry.filename;
+  document.getElementById('topActions').style.display = 'flex';
+  renderResults(JSON.parse(JSON.stringify(entry.items)));
+  document.getElementById('resultsArea').scrollIntoView({behavior:'smooth', block:'start'});
+};
+window.deleteHistoryEntry = function(id){
+  historyEntries = historyEntries.filter(h => h.id !== id);
+  try{ localStorage.setItem('scri-history', JSON.stringify(historyEntries)); }catch(e){}
+  renderHistory();
 };
 
 // ---------- file handling ----------
@@ -452,9 +541,14 @@ async function extractDocx(file){
 // ---------- retrieval ----------
 function retrieveContextForItem(item, topN){
   topN = topN || 2;
+  const kategorie = (item.kategorie || '').toLowerCase();
   const text = (item.kategorie + ' ' + item.text).toLowerCase();
   const scored = knowledgeBase.map(kb => {
-    const score = kb.tags.reduce((s,t) => s + (text.includes(t) ? 1 : 0), 0);
+    const score = kb.tags.reduce((s,t) => {
+      if(kategorie === t) return s + 3;
+      if(text.includes(t)) return s + 1;
+      return s;
+    }, 0);
     return {kb, score};
   }).filter(x => x.score > 0).sort((a,b) => b.score - a.score);
   return scored.slice(0, topN).map(x => x.kb);
@@ -634,6 +728,7 @@ ${JSON.stringify(critical)}`;
     setStatus('Analyse abgeschlossen.');
 
     renderResults(items);
+    saveHistoryEntry(items);
   }catch(err){
     console.error(err);
     const stage = document.querySelector('.pipe-step.active');
@@ -661,7 +756,7 @@ function renderResults(items){
       <td><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span></td>
       <td>${escapeHtml(it.begruendung||'')}</td>
       <td>${it.massnahme ? escapeHtml(it.massnahme) : '<span style="color:var(--text-muted)">—</span>'}</td>
-      <td>${(it.referenzen && it.referenzen.length) ? it.referenzen.map(r=>`<span class="tag">${escapeHtml(r)}</span>`).join('') : '<span style="color:var(--text-muted)">—</span>'}</td>
+      <td>${(it.referenzen && it.referenzen.length) ? it.referenzen.map(r=>`<span class="tag">${escapeHtml(r)}</span>`).join(' ') : '<span style="color:var(--text-muted)">—</span>'}</td>
     </tr>
   `).join('');
 
@@ -670,6 +765,11 @@ function renderResults(items){
     : `<p class="hint">Keine expliziten Fristen erkannt.</p>`;
 
   document.getElementById('resultsArea').innerHTML = `
+    <div class="print-header">
+      <h1>SMART Contract &amp; Risk Intelligence</h1>
+      <div class="meta">Risikoprüfung · ${escapeHtml(currentFileName)} · erstellt am ${new Date().toLocaleDateString('de-DE')}</div>
+      <hr>
+    </div>
     <div class="card">
       <h2>${escapeHtml(currentFileName)}</h2>
       <p class="hint">Ergebnis der Risikoprüfung</p>
@@ -701,6 +801,7 @@ function escapeHtml(str){
 
 loadApiKey();
 loadKB();
+loadHistory();
 </script>
 </body>
 </html>
