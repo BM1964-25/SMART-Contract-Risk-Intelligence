@@ -225,6 +225,9 @@
     padding:12px 14px; font-size:12.5px; line-height:1.6; color:var(--text);
     margin-bottom:14px;
   }
+  .disclaimer-card{ background:var(--amber-bg); border-color:var(--amber); }
+  .disclaimer-text{ font-size:12px; line-height:1.6; color:var(--text); }
+  .disclaimer-text b{ color:var(--amber); }
 </style>
 </head>
 <body>
@@ -913,6 +916,15 @@ function renderResults(items){
       <h2>Fristen</h2>
       <p class="hint">Automatisch erkannte fristrelevante Punkte</p>
       ${fristHtml}
+    </div>
+    <div class="card disclaimer-card">
+      <div class="disclaimer-text">
+        <b>Hinweis:</b> Diese Auswertung wurde KI-gestützt erstellt (Modell: ${escapeHtml(MODEL)}) und dient
+        ausschließlich als fachliche Orientierung. Sie ersetzt keine rechtliche Prüfung und stellt keine
+        Rechtsberatung dar. Trotz sorgfältiger Wissensbasis können Fehleinschätzungen, Auslassungen oder nicht
+        berücksichtigte, aktuelle Rechtsprechung auftreten. Für rechtsverbindliche Entscheidungen empfehlen wir
+        die Prüfung durch eine Rechtsanwältin, einen Rechtsanwalt oder eine sonst fachkundige Person.
+      </div>
     </div>
   `;
   document.getElementById('topActions').style.display = 'flex';
