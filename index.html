@@ -193,6 +193,38 @@
   .print-header h1{ font-size:20px; color:var(--navy); margin-bottom:4px; }
   .print-header .meta{ font-size:12.5px; color:var(--text-muted); }
   .print-header hr{ border:none; border-top:1.5px solid var(--gold); margin:12px 0 0; }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(15,42,74,0.45); z-index:1000;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .modal-box{
+    background:var(--card); border-radius:10px; max-width:560px; width:100%;
+    max-height:82vh; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 12px 40px rgba(0,0,0,0.28);
+  }
+  .modal-header{
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom:1px solid var(--border); padding:0 6px 0 18px; flex-shrink:0;
+  }
+  .modal-tabs{ display:flex; gap:4px; }
+  .modal-tab{
+    background:none; border:none; padding:14px 14px 12px; font-size:14px; font-family:inherit;
+    color:var(--text-muted); cursor:pointer; border-bottom:2.5px solid transparent; margin-bottom:-1px;
+  }
+  .modal-tab.active{ color:var(--navy); border-bottom-color:var(--gold); font-weight:bold; }
+  .modal-close{
+    background:none; border:none; font-size:22px; line-height:1; color:var(--text-muted);
+    cursor:pointer; padding:8px 12px;
+  }
+  .modal-close:hover{ color:var(--text); }
+  .modal-body{ padding:18px 22px 22px; overflow-y:auto; }
+  .modal-pane .hint{ margin-top:2px; }
+  .kb-explainer{
+    background:var(--bg); border:1px solid var(--border); border-radius:6px;
+    padding:12px 14px; font-size:12.5px; line-height:1.6; color:var(--text);
+    margin-bottom:14px;
+  }
 </style>
 </head>
 <body>
@@ -253,22 +285,14 @@
       </div>
 
       <div class="card">
-        <h2>Wissensbasis</h2>
-        <p class="hint">Fließt als Referenz in die Risikobewertung ein</p>
-        <div id="kbList"></div>
-        <button class="btn secondary small" id="kbAddBtn">+ Eintrag hinzufügen</button>
-        <div class="kb-form" id="kbForm" style="display:none;">
-          <input type="text" id="kbTitleInput" placeholder="Titel">
-          <textarea id="kbTextInput" rows="3" placeholder="Inhalt / Praxiswissen"></textarea>
-          <input type="text" id="kbTagsInput" placeholder="Tags, kommagetrennt (z.B. frist, vob)">
-          <button class="btn small" id="kbSaveBtn">Speichern</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Verlauf</h2>
-        <p class="hint">Bisherige Analysen (lokal in diesem Browser gespeichert)</p>
-        <div id="historyList"></div>
+        <h2>Weitere Bereiche</h2>
+        <p class="hint">Wissensbasis und bisherige Analysen verwalten</p>
+        <button class="btn secondary small" id="openKbBtn" style="width:100%; justify-content:space-between;">
+          <span>Wissensbasis</span><span class="tag" id="kbCountBadge">0</span>
+        </button>
+        <button class="btn secondary small" id="openHistoryBtn" style="width:100%; justify-content:space-between; margin-top:8px;">
+          <span>Verlauf</span><span class="tag" id="historyCountBadge">0</span>
+        </button>
       </div>
     </div>
 
@@ -287,6 +311,44 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- WISSENSBASIS & VERLAUF MODAL -->
+<div class="modal-overlay no-print" id="modalOverlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabKbBtn">Wissensbasis</button>
+        <button class="modal-tab" id="tabHistoryBtn">Verlauf</button>
+      </div>
+      <button class="modal-close" id="modalCloseBtn" aria-label="Schließen">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-pane" id="paneKb">
+        <p class="hint">Fließt als Referenz in die Risikobewertung ein</p>
+        <div class="kb-explainer">
+          Für jede erkannte Vertragsklausel sucht die App automatisch die zwei am besten passenden Einträge hier
+          heraus und gibt sie der KI als Fachkontext mit. Bewertet wird nach <b>Tags</b>: stimmt ein Tag exakt mit
+          der Klausel-Kategorie überein (z. B. „Frist"), zählt das stärker als ein Tag, der nur im Fließtext der
+          Klausel vorkommt. Je genauer und zahlreicher deine Tags, desto treffsicherer die Zuordnung. Ergänze
+          eigene Einträge zu deinen Vertragsmustern, Standardklauseln oder Erfahrungswerten aus der Praxis –
+          jeder gut getaggte Eintrag verbessert die Qualität der Risikoeinschätzung.
+        </div>
+        <div id="kbList"></div>
+        <button class="btn secondary small" id="kbAddBtn">+ Eintrag hinzufügen</button>
+        <div class="kb-form" id="kbForm" style="display:none;">
+          <input type="text" id="kbTitleInput" placeholder="Titel">
+          <textarea id="kbTextInput" rows="3" placeholder="Inhalt / Praxiswissen"></textarea>
+          <input type="text" id="kbTagsInput" placeholder="Tags, kommagetrennt (z.B. frist, vob)">
+          <button class="btn small" id="kbSaveBtn">Speichern</button>
+        </div>
+      </div>
+      <div class="modal-pane" id="paneHistory" style="display:none;">
+        <p class="hint">Bisherige Analysen (lokal in diesem Browser gespeichert)</p>
+        <div id="historyList"></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -318,8 +380,8 @@ const DEFAULT_KB = [
    text:"Nach VOB/B beträgt die Gewährleistungsfrist regelmäßig 4 Jahre, bei BGB-Verträgen 5 Jahre. Fehlt eine klare Fristenregelung im Vertrag, gilt die gesetzliche Regelung – ein häufig übersehenes Risiko.",
    tags:["frist","gewährleistung","mängel","vob"]},
   {id:"kb3", title:"Vertragsstrafen",
-   text:"Vertragsstrafenregelungen sind nur wirksam, wenn sie eindeutig formuliert und der Höhe nach angemessen sind (Richtwert ca. 5% der Auftragssumme, VOB/B). Unklare oder unangemessen hohe Regelungen sind rechtlich angreifbar.",
-   tags:["vertragsstrafe","kündigung","haftung"]},
+   text:"Vertragsstrafenregelungen sind nur wirksam, wenn sie eindeutig formuliert und der Höhe nach angemessen sind (Obergrenze i.d.R. 5%). Wichtig seit BGH-Urteil v. 15.02.2024 (VII ZR 42/22): Bei Einheitspreisverträgen darf sich die 5%-Grenze nicht auf die vorläufige Auftragssumme, sondern muss sich auf die tatsächliche Abrechnungssumme beziehen – sonst ist die Klausel insgesamt unwirksam. Tagessätze von 0,2–0,3% gelten als üblich, 0,5%/Tag ist unwirksam.",
+   tags:["vertragsstrafe","kündigung","haftung","abrechnungssumme"]},
   {id:"kb4", title:"Kündigungsklauseln",
    text:"Kündigungsrechte aus wichtigem Grund müssen konkret benannt sein. Pauschale oder einseitig formulierte Kündigungsklauseln zugunsten einer Partei bergen ein erhöhtes Streitrisiko.",
    tags:["kündigung","risiko"]},
@@ -382,6 +444,8 @@ function renderKB(){
       <div class="kb-actions"><button onclick="deleteKB('${k.id}')">Entfernen</button></div>
     </div>
   `).join('');
+  const badge = document.getElementById('kbCountBadge');
+  if(badge) badge.textContent = knowledgeBase.length;
 }
 window.deleteKB = async function(id){
   knowledgeBase = knowledgeBase.filter(k => k.id !== id);
@@ -434,6 +498,8 @@ function saveHistoryEntry(items){
 }
 function renderHistory(){
   const el = document.getElementById('historyList');
+  const badge = document.getElementById('historyCountBadge');
+  if(badge) badge.textContent = historyEntries.length;
   if(!el) return;
   if(!historyEntries.length){
     el.innerHTML = '<p class="hint">Noch keine Analysen gespeichert.</p>';
@@ -455,6 +521,7 @@ window.openHistoryEntry = function(id){
   if(!entry) return;
   currentFileName = entry.filename;
   document.getElementById('topActions').style.display = 'flex';
+  closeModal();
   renderResults(JSON.parse(JSON.stringify(entry.items)));
   document.getElementById('resultsArea').scrollIntoView({behavior:'smooth', block:'start'});
 };
@@ -854,6 +921,30 @@ function renderResults(items){
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 }
+
+// ---------- Wissensbasis/Verlauf modal ----------
+const modalOverlay = document.getElementById('modalOverlay');
+function openModal(tab){
+  modalOverlay.style.display = 'flex';
+  switchModalTab(tab);
+}
+function closeModal(){
+  modalOverlay.style.display = 'none';
+}
+function switchModalTab(tab){
+  const isKb = tab === 'kb';
+  document.getElementById('tabKbBtn').classList.toggle('active', isKb);
+  document.getElementById('tabHistoryBtn').classList.toggle('active', !isKb);
+  document.getElementById('paneKb').style.display = isKb ? 'block' : 'none';
+  document.getElementById('paneHistory').style.display = isKb ? 'none' : 'block';
+}
+document.getElementById('openKbBtn').onclick = () => openModal('kb');
+document.getElementById('openHistoryBtn').onclick = () => openModal('history');
+document.getElementById('tabKbBtn').onclick = () => switchModalTab('kb');
+document.getElementById('tabHistoryBtn').onclick = () => switchModalTab('history');
+document.getElementById('modalCloseBtn').onclick = closeModal;
+modalOverlay.onclick = (e) => { if(e.target === modalOverlay) closeModal(); };
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeModal(); });
 
 loadApiKey();
 loadKB();
