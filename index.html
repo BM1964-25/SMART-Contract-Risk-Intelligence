@@ -42,6 +42,32 @@
   header h1{ font-size:22px; letter-spacing:0.2px; }
   header p{ margin:2px 0 0; color:#c7d2e0; font-size:13px; }
   .container{ max-width:1080px; margin:0 auto; padding:28px 24px 80px; }
+
+  .site-footer{
+    border-top:1px solid var(--border);
+    padding:40px 32px 44px;
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap:24px; flex-wrap:wrap;
+  }
+  .site-footer .footer-brand{ display:flex; align-items:center; gap:14px; }
+  .site-footer .footer-mark{
+    width:34px; height:34px; border:1.5px solid var(--gold); border-radius:4px;
+    display:flex; align-items:center; justify-content:center; font-family:Georgia,serif;
+    color:var(--navy); font-size:15px; flex-shrink:0;
+  }
+  .site-footer .footer-name{ font-weight:bold; color:var(--navy); font-size:14.5px; }
+  .site-footer .footer-slogan{ color:var(--text-muted); font-size:12.5px; margin-top:3px; }
+  .site-footer .footer-right{ text-align:right; }
+  .site-footer .footer-copy{ color:var(--text-muted); font-size:12px; }
+  .site-footer .footer-links{ margin-top:8px; font-size:12px; }
+  .site-footer .footer-links a{ color:var(--text-muted); text-decoration:none; }
+  .site-footer .footer-links a:hover{ color:var(--navy); text-decoration:underline; }
+  .site-footer .footer-links .sep{ color:var(--border); margin:0 8px; }
+  @media (max-width:640px){
+    .site-footer{ flex-direction:column; align-items:center; text-align:center; gap:22px; }
+    .site-footer .footer-brand{ flex-direction:column; text-align:center; }
+    .site-footer .footer-right{ text-align:center; }
+  }
   .grid{ display:grid; grid-template-columns: 320px 1fr; gap:24px; align-items:start; }
   @media (max-width: 860px){ .grid{ grid-template-columns: 1fr; } }
   .card{
@@ -118,6 +144,7 @@
     display:inline-block; background:var(--bg); color:var(--text-muted); font-size:11px;
     padding:2px 7px; border-radius:10px; margin:2px 4px 0 0;
   }
+  .tag.typ{ background:var(--gold-light); color:var(--navy); font-weight:bold; }
   .kb-actions{ display:flex; gap:6px; margin-top:8px; }
   .kb-actions button{
     position:relative;
@@ -182,7 +209,7 @@
   .frist-list .ftext{ flex:1; word-break:break-word; }
   .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
   @media print{
-    header, .no-print, .top-actions{ display:none !important; }
+    header, .site-footer, .no-print, .top-actions{ display:none !important; }
     body{ background:#fff; }
     .grid{ display:block; }
     .print-header{ display:block !important; margin-bottom:20px; }
@@ -263,6 +290,18 @@
       <div class="card">
         <h2>Dokument</h2>
         <p class="hint">PDF, Word (.docx) oder Text-Datei hochladen</p>
+        <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Vertragstyp</label>
+        <select id="contractTypeSelect" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13px; margin-bottom:8px;">
+          <option value="bauvertrag">Bauvertrag (VOB/B)</option>
+          <option value="planung">Planungsvertrag (HOAI)</option>
+          <option value="bautraeger">Bauträgervertrag (§ 650u BGB / MaBV)</option>
+          <option value="sonstige">Sonstige / gemischt</option>
+        </select>
+        <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Ich prüfe als</label>
+        <select id="perspectiveSelect" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13px; margin-bottom:8px;">
+          <option value="auftraggeber">Auftraggeber / Käufer</option>
+          <option value="auftragnehmer">Auftragnehmer / Verkäufer</option>
+        </select>
         <div class="dropzone" id="dropzone">
           <div class="icon">&#128196;</div>
           <div class="label">Datei hierher ziehen oder klicken</div>
@@ -317,6 +356,22 @@
   </div>
 </div>
 
+<footer class="site-footer">
+  <div class="footer-brand">
+    <div class="footer-mark">S</div>
+    <div>
+      <div class="footer-name">SMART Contract & Risk Intelligence</div>
+      <div class="footer-slogan">Vertragsrisiken erkennen, bevor sie zum Problem werden.</div>
+    </div>
+  </div>
+  <div class="footer-right">
+    <div class="footer-copy">© 2026 SmartBuilt-AI · Powered by BuiltSmart Hub - Bernhard Metzger</div>
+    <div class="footer-links">
+      <a href="https://www.built-smart-hub.com/impressum" target="_blank" rel="noopener">Impressum</a><span class="sep">|</span><a href="https://www.built-smart-hub.com/datenschutz" target="_blank" rel="noopener">Datenschutz</a><span class="sep">|</span><a href="https://www.built-smart-hub.com/agb" target="_blank" rel="noopener">AGB</a><span class="sep">|</span><a href="https://www.built-smart-hub.com/widerrufbelehrung" target="_blank" rel="noopener">Widerrufbelehrung</a>
+    </div>
+  </div>
+</footer>
+
 <!-- WISSENSBASIS & VERLAUF MODAL -->
 <div class="modal-overlay no-print" id="modalOverlay" style="display:none;">
   <div class="modal-box">
@@ -344,6 +399,13 @@
           <input type="text" id="kbTitleInput" placeholder="Titel">
           <textarea id="kbTextInput" rows="3" placeholder="Inhalt / Praxiswissen"></textarea>
           <input type="text" id="kbTagsInput" placeholder="Tags, kommagetrennt (z.B. frist, vob)">
+          <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Gilt für Vertragstyp(en):</label>
+          <div class="kb-typ-row" style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:10px; font-size:12.5px;">
+            <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="bauvertrag" checked>Bauvertrag</label>
+            <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="planung">Planung</label>
+            <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="bautraeger">Bauträger</label>
+            <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="sonstige">Sonstige</label>
+          </div>
           <button class="btn small" id="kbSaveBtn">Speichern</button>
         </div>
       </div>
@@ -358,6 +420,10 @@
 <script>
 let MODEL = "claude-sonnet-5";
 let apiKey = "";
+let currentContractType = "bauvertrag";
+let currentPerspective = "auftraggeber";
+document.getElementById('contractTypeSelect').onchange = (e) => { currentContractType = e.target.value; };
+document.getElementById('perspectiveSelect').onchange = (e) => { currentPerspective = e.target.value; };
 
 function loadApiKey(){
   apiKey = localStorage.getItem('scri-api-key') || "";
@@ -376,39 +442,48 @@ document.getElementById('saveKeyBtn').onclick = () => {
 };
 
 const DEFAULT_KB = [
-  {id:"kb1", title:"HOAI – Leistungsphasen & Honorar",
+  {id:"kb1", title:"HOAI – Leistungsphasen & Honorar", typ:["planung"],
    text:"Die HOAI regelt Honorare für Planungsleistungen in 9 Leistungsphasen. Nachträgliche Erweiterungen des Leistungsumfangs ohne schriftliche Vereinbarung führen häufig zu Honorarstreitigkeiten. Kritisch: fehlende Abgrenzung zwischen Grundleistungen und Besonderen Leistungen.",
    tags:["honorar","leistungsphase","hoai","nachtrag"]},
-  {id:"kb2", title:"VOB/B – Fristen & Mängelrüge",
+  {id:"kb2", title:"VOB/B – Fristen & Mängelrüge", typ:["bauvertrag"],
    text:"Nach VOB/B beträgt die Gewährleistungsfrist regelmäßig 4 Jahre, bei BGB-Verträgen 5 Jahre. Fehlt eine klare Fristenregelung im Vertrag, gilt die gesetzliche Regelung – ein häufig übersehenes Risiko.",
    tags:["frist","gewährleistung","mängel","vob"]},
-  {id:"kb3", title:"Vertragsstrafen",
+  {id:"kb3", title:"Vertragsstrafen", typ:["bauvertrag","planung"],
    text:"Vertragsstrafenregelungen sind nur wirksam, wenn sie eindeutig formuliert und der Höhe nach angemessen sind (Obergrenze i.d.R. 5%). Wichtig seit BGH-Urteil v. 15.02.2024 (VII ZR 42/22): Bei Einheitspreisverträgen darf sich die 5%-Grenze nicht auf die vorläufige Auftragssumme, sondern muss sich auf die tatsächliche Abrechnungssumme beziehen – sonst ist die Klausel insgesamt unwirksam. Tagessätze von 0,2–0,3% gelten als üblich, 0,5%/Tag ist unwirksam.",
    tags:["vertragsstrafe","kündigung","haftung","abrechnungssumme"]},
-  {id:"kb4", title:"Kündigungsklauseln",
+  {id:"kb4", title:"Kündigungsklauseln", typ:["bauvertrag","planung","bautraeger"],
    text:"Kündigungsrechte aus wichtigem Grund müssen konkret benannt sein. Pauschale oder einseitig formulierte Kündigungsklauseln zugunsten einer Partei bergen ein erhöhtes Streitrisiko.",
    tags:["kündigung","risiko"]},
-  {id:"kb5", title:"Zahlungsbedingungen & Abschlagszahlungen",
-   text:"Abschlagszahlungen sollten sich am tatsächlichen Baufortschritt orientieren. Vorleistungspflichten ohne Sicherheiten (Bürgschaft, Einbehalt) stellen ein erhebliches finanzielles Risiko für den Auftraggeber dar.",
+  {id:"kb5", title:"Zahlungsbedingungen & Abschlagszahlungen", typ:["bauvertrag","planung"],
+   text:"Abschlagszahlungen sollten sich am tatsächlichen Baufortschritt orientieren. Vorleistungspflichten ohne Sicherheiten (Bürgschaft, Einbehalt) stellen ein erhebliches finanzielles Risiko für den Auftraggeber dar. Bei Verbraucherbauverträgen begrenzt § 650m BGB die Summe der Abschlagszahlungen auf 90% der Vergütung zzgl. 5% Sicherheit.",
    tags:["zahlung","abschlag","sicherheit"]},
-  {id:"kb6", title:"Nachtragsmanagement",
+  {id:"kb6", title:"Nachtragsmanagement", typ:["bauvertrag","planung"],
    text:"Fehlende oder unklare Regelungen zum Umgang mit Nachträgen (Leistungsänderungen, Mehrmengen) sind eine der häufigsten Ursachen für Kostenüberschreitungen und Streitigkeiten in Bauprojekten.",
    tags:["nachtrag","kosten","risiko"]},
-  {id:"kb7", title:"Behinderung & Bauzeitverlängerung",
+  {id:"kb7", title:"Behinderung & Bauzeitverlängerung", typ:["bauvertrag"],
    text:"Behinderungsanzeigen müssen unverzüglich und schriftlich erfolgen (VOB/B § 6). Versäumt der Auftragnehmer die rechtzeitige Anzeige, verliert er in der Regel den Anspruch auf Fristverlängerung – ein häufig unterschätztes Risiko bei eng kalkulierten Bauzeitplänen.",
    tags:["behinderung","bauzeit","verzug"]},
-  {id:"kb8", title:"Sicherheitseinbehalt & Bürgschaft",
+  {id:"kb8", title:"Sicherheitseinbehalt & Bürgschaft", typ:["bauvertrag"],
    text:"Sicherheitseinbehalte sind üblich in Höhe von 5-10% der Auftragssumme. Bürgschaften müssen unbedingt, unbefristet und unter Verzicht auf die Einrede der Vorausklage gestellt werden, um werthaltig zu sein – unklare Bürgschaftsklauseln schwächen die Sicherheit erheblich.",
    tags:["sicherheit","bürgschaft","einbehalt"]},
-  {id:"kb9", title:"AGB-Kontrolle bei Bauverträgen",
+  {id:"kb9", title:"AGB-Kontrolle bei Bauverträgen", typ:["bauvertrag","planung","bautraeger","sonstige"],
    text:"Formularmäßig vorformulierte Vertragsklauseln unterliegen der AGB-Inhaltskontrolle nach §§305 ff. BGB. Einseitig benachteiligende Klauseln (z.B. unangemessene Haftungserweiterungen, überlange Fristen) sind häufig unwirksam, auch wenn sie unterschrieben wurden.",
    tags:["agb","formularvertrag","klausel"]},
-  {id:"kb10", title:"Prüffähigkeit der Schlussrechnung",
+  {id:"kb10", title:"Prüffähigkeit der Schlussrechnung", typ:["bauvertrag","planung"],
    text:"Eine Schlussrechnung ist erst prüffähig, wenn sie übersichtlich aufgestellt ist und alle erforderlichen Nachweise enthält. Fehlt die Prüffähigkeit, beginnt die Zahlungsfrist nicht zu laufen – das kann Zahlungsverzug des Auftraggebers ungewollt ausschließen oder verzögern.",
    tags:["schlussrechnung","prüffähig","zahlung"]},
-  {id:"kb11", title:"Mängelbeseitigung & Fristsetzung",
+  {id:"kb11", title:"Mängelbeseitigung & Fristsetzung", typ:["bauvertrag","planung","bautraeger"],
    text:"Vor Selbstvornahme oder Kündigung wegen Mängeln ist grundsätzlich eine angemessene Frist zur Nacherfüllung zu setzen (§ 637 BGB). Fehlt die Fristsetzung oder ist sie zu kurz bemessen, können daraus resultierende Ansprüche unwirksam sein.",
-   tags:["mängel","nacherfüllung","selbstvornahme"]}
+   tags:["mängel","nacherfüllung","selbstvornahme"]},
+  {id:"kb12", title:"Bauträgervertrag – Ratenzahlungsplan nach § 3 MaBV", typ:["bautraeger"],
+   text:"Der Bauträger darf Zahlungen nur nach Baufortschritt in max. 7 Raten aus 13 gesetzlich definierten Bauabschnitten verlangen (§ 3 Abs. 2 MaBV). Erste Rate max. 30% der Vertragssumme (bei Grundstückserwerb) bzw. 20% (bei Erbbaurecht), nach Beginn der Erdarbeiten fällig. Ein davon abweichender, für den Erwerber ungünstigerer Ratenplan ist gemäß § 12 MaBV unwirksam – die Nichtigkeit trifft dann nur den Ratenplan, es gilt ersatzweise § 641 BGB (Fälligkeit erst nach Abnahme).",
+   tags:["bautraeger","rate","zahlung","mabv","abschlag"]},
+  {id:"kb13", title:"Bauträgervertrag – Beurkundungspflicht", typ:["bautraeger"],
+   text:"Bauträgerverträge bedürfen der notariellen Beurkundung (§ 311b BGB), da sie eine Verpflichtung zur Grundstücksübertragung enthalten. Fehlt die Beurkundung, ist der Vertrag zunächst formnichtig; die Nichtigkeit wird erst durch Auflassung und Eintragung ins Grundbuch geheilt (§ 311b Abs. 1 S. 2 BGB) – bis dahin bestehen keine gesicherten Ansprüche.",
+   tags:["bautraeger","form","beurkundung","notar"]},
+  {id:"kb14", title:"Bauträgervertrag – Bürgschaft statt Ratenplan", typ:["bautraeger"],
+   text:"Alternativ zum gesetzlichen Ratenplan kann der Bauträger dem Erwerber eine Fertigstellungsbürgschaft stellen (§ 650m Abs. 2 BGB bzw. § 7 MaBV) und dafür abweichende, ggf. höhere Vorauszahlungen vereinbaren. Für den Erwerber wichtig: Diese Bürgschaft sichert primär die Fertigstellung, nicht automatisch die Mängelfreiheit – Bürgschaftsumfang genau prüfen.",
+   tags:["bautraeger","sicherheit","bürgschaft","fertigstellung","mabv"]}
 ];
 
 let knowledgeBase = [];
@@ -437,11 +512,13 @@ async function saveKB(){
   catch(e){ console.error('Storage-Fehler', e); }
 }
 
+const TYP_LABELS = {bauvertrag:"Bauvertrag", planung:"Planung", bautraeger:"Bauträger", sonstige:"Sonstige"};
 function renderKB(){
   const el = document.getElementById('kbList');
   el.innerHTML = knowledgeBase.map(k => `
     <div class="kb-item">
       <div class="kb-title">${escapeHtml(k.title)}</div>
+      <div class="kb-typ">${(k.typ||[]).map(t=>`<span class="tag typ">${escapeHtml(TYP_LABELS[t]||t)}</span>`).join('')}</div>
       <div class="kb-text">${escapeHtml(k.text)}</div>
       <div class="kb-tags">${k.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
       <div class="kb-actions"><button onclick="deleteKB('${k.id}')">Entfernen</button></div>
@@ -463,13 +540,15 @@ document.getElementById('kbSaveBtn').onclick = async () => {
   const title = document.getElementById('kbTitleInput').value.trim();
   const text = document.getElementById('kbTextInput').value.trim();
   const tags = document.getElementById('kbTagsInput').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
+  const typ = Array.from(document.querySelectorAll('.kbTypCheck:checked')).map(c => c.value);
   if(!title || !text) return;
-  knowledgeBase.push({id:'kb'+Date.now(), title, text, tags});
+  knowledgeBase.push({id:'kb'+Date.now(), title, text, tags, typ: typ.length ? typ : ['bauvertrag','planung','bautraeger','sonstige']});
   await saveKB();
   renderKB();
   document.getElementById('kbTitleInput').value='';
   document.getElementById('kbTextInput').value='';
   document.getElementById('kbTagsInput').value='';
+  document.querySelectorAll('.kbTypCheck').forEach((c,i) => c.checked = i===0);
   document.getElementById('kbForm').style.display='none';
 };
 
@@ -511,7 +590,7 @@ function renderHistory(){
   el.innerHTML = historyEntries.map(h => `
     <div class="kb-item">
       <div class="kb-title">${escapeHtml(h.filename)}</div>
-      <div class="kb-text">${new Date(h.date).toLocaleDateString('de-DE')} · ${h.counts.kritisch} kritisch · ${h.counts.hoch} hoch · ${h.counts.mittel} mittel · ${h.counts.niedrig} niedrig</div>
+      <div class="kb-text">${new Date(h.date).toLocaleDateString('de-DE')} ${new Date(h.date).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} · ${h.counts.kritisch} kritisch · ${h.counts.hoch} hoch · ${h.counts.mittel} mittel · ${h.counts.niedrig} niedrig</div>
       <div class="kb-actions">
         <button onclick="openHistoryEntry('${h.id}')">Öffnen</button>
         <button onclick="deleteHistoryEntry('${h.id}')">Löschen</button>
@@ -640,7 +719,8 @@ function retrieveContextForItem(item, topN){
   topN = topN || 2;
   const kategorie = (item.kategorie || '').toLowerCase();
   const text = (item.kategorie + ' ' + item.text).toLowerCase();
-  const scored = knowledgeBase.map(kb => {
+  const pool = knowledgeBase.filter(kb => !kb.typ || !kb.typ.length || currentContractType === 'sonstige' || kb.typ.includes(currentContractType));
+  const scored = pool.map(kb => {
     const score = kb.tags.reduce((s,t) => {
       if(kategorie === t) return s + 3;
       if(text.includes(t)) return s + 1;
@@ -788,11 +868,24 @@ async function runAnalysis(){
   resetPipeline();
   const docExcerpt = extractedText.slice(0, 12000);
 
+  const TYP_TEXT = {
+    bauvertrag: "einen Bauvertrag (VOB/B bzw. BGB-Werkvertrag zwischen Auftraggeber und bauausführendem Unternehmen)",
+    planung: "einen Planungsvertrag (HOAI-Vertrag mit Architekt/Ingenieur)",
+    bautraeger: "einen Bauträgervertrag (Grundstücks- und Bauleistungskauf nach § 650u BGB / MaBV)",
+    sonstige: "einen Vertrag aus dem Bau-/Immobilienkontext, dessen genauer Typ hier bewusst offen bleibt"
+  };
+  const PERSPECTIVE_TEXT = {
+    auftraggeber: "aus Sicht des Auftraggebers bzw. Käufers/Erwerbers – bewerte Risiken, die diese Partei benachteiligen oder finanziell/rechtlich belasten",
+    auftragnehmer: "aus Sicht des Auftragnehmers bzw. Verkäufers/Bauträgers – bewerte Risiken, die diese Partei benachteiligen oder finanziell/rechtlich belasten"
+  };
+  const typText = TYP_TEXT[currentContractType] || TYP_TEXT.sonstige;
+  const perspectiveText = PERSPECTIVE_TEXT[currentPerspective] || PERSPECTIVE_TEXT.auftraggeber;
+
   try{
     // Stage 1: Extraktion
     setPipelineStep(1,'active');
     setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …', 'loading');
-    const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Bauträgerrecht) mit langjähriger Praxis. Analysiere den Vertragstext und extrahiere die 6 bis 10 wichtigsten vertraglich relevanten Punkte: Fristen, Pflichten, Haftungsregelungen, Kündigungsklauseln, Vertragsstrafen, Zahlungsbedingungen.
+    const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Bauträgerrecht) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext und extrahiere die 6 bis 10 wichtigsten vertraglich relevanten Punkte: Fristen, Pflichten, Haftungsregelungen, Kündigungsklauseln, Vertragsstrafen, Zahlungsbedingungen.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sonstiges","text":"kurze Paraphrase auf Deutsch, max 25 Wörter"}]`;
     let extractContent;
@@ -817,7 +910,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
         _referenzTitel: matches.map(k => k.title)
       };
     });
-    const classifyPrompt = `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
+    const classifyPrompt = `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","begruendung":"max 20 Wörter"}]
 
@@ -893,7 +986,7 @@ function renderResults(items){
   document.getElementById('resultsArea').innerHTML = `
     <div class="print-header">
       <h1>SMART Contract &amp; Risk Intelligence</h1>
-      <div class="meta">Risikoprüfung · ${escapeHtml(currentFileName)} · erstellt am ${new Date().toLocaleDateString('de-DE')}</div>
+      <div class="meta">Risikoprüfung · ${escapeHtml(currentFileName)} · erstellt am ${new Date().toLocaleDateString('de-DE')} um ${new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
       <hr>
     </div>
     <div class="card">
