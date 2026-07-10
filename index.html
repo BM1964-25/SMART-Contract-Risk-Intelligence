@@ -290,18 +290,13 @@
       <div class="card">
         <h2>Dokument</h2>
         <p class="hint">PDF, Word (.docx) oder Text-Datei hochladen</p>
-        <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Vertragstyp</label>
-        <select id="contractTypeSelect" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13px; margin-bottom:8px;">
-          <option value="bauvertrag">Bauvertrag (VOB/B)</option>
-          <option value="planung">Planungsvertrag (HOAI)</option>
-          <option value="bautraeger">Bauträgervertrag (§ 650u BGB / MaBV)</option>
+        <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Meine Rolle in diesem Vertrag</label>
+        <select id="roleSelect" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13px; margin-bottom:8px;">
+          <option value="baufirma">Baufirma (werde beauftragt)</option>
+          <option value="planer">Architekt / Planungsbüro (werde beauftragt)</option>
           <option value="sonstige">Sonstige / gemischt</option>
         </select>
-        <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Ich prüfe als</label>
-        <select id="perspectiveSelect" style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13px; margin-bottom:8px;">
-          <option value="auftraggeber">Auftraggeber / Käufer</option>
-          <option value="auftragnehmer">Auftragnehmer / Verkäufer</option>
-        </select>
+        <p class="hint" id="roleHint" style="margin-top:-4px;"></p>
         <div class="dropzone" id="dropzone">
           <div class="icon">&#128196;</div>
           <div class="label">Datei hierher ziehen oder klicken</div>
@@ -421,9 +416,28 @@
 let MODEL = "claude-sonnet-5";
 let apiKey = "";
 let currentContractType = "bauvertrag";
-let currentPerspective = "auftraggeber";
-document.getElementById('contractTypeSelect').onchange = (e) => { currentContractType = e.target.value; };
-document.getElementById('perspectiveSelect').onchange = (e) => { currentPerspective = e.target.value; };
+let currentPerspective = "auftragnehmer";
+let currentRoleLabel = "Bauunternehmen (Auftragnehmer)";
+
+const ROLE_MAP = {
+  baufirma:         {contractType:"bauvertrag", perspective:"auftragnehmer", roleLabel:"Bauunternehmen (Auftragnehmer)",
+                      hint:"Vertragstyp: Bauvertrag (VOB/B). Risiken werden aus Sicht des bauausführenden Unternehmens bewertet."},
+  planer:           {contractType:"planung", perspective:"auftragnehmer", roleLabel:"Architekt/Ingenieur (Auftragnehmer)",
+                      hint:"Vertragstyp: Planungsvertrag (HOAI). Risiken werden aus Sicht des Planungsbüros bewertet."},
+  sonstige:         {contractType:"sonstige", perspective:"auftraggeber", roleLabel:"bestellende Partei",
+                      hint:"Vertragstyp nicht festgelegt – die Wissensbasis wird ungefiltert genutzt, breite/neutrale Bewertung."}
+};
+function applyRole(){
+  const sel = document.getElementById('roleSelect');
+  const cfg = ROLE_MAP[sel.value] || ROLE_MAP.sonstige;
+  currentContractType = cfg.contractType;
+  currentPerspective = cfg.perspective;
+  currentRoleLabel = cfg.roleLabel;
+  const hint = document.getElementById('roleHint');
+  if(hint) hint.textContent = cfg.hint;
+}
+document.getElementById('roleSelect').onchange = applyRole;
+applyRole();
 
 function loadApiKey(){
   apiKey = localStorage.getItem('scri-api-key') || "";
@@ -874,12 +888,8 @@ async function runAnalysis(){
     bautraeger: "einen Bauträgervertrag (Grundstücks- und Bauleistungskauf nach § 650u BGB / MaBV)",
     sonstige: "einen Vertrag aus dem Bau-/Immobilienkontext, dessen genauer Typ hier bewusst offen bleibt"
   };
-  const PERSPECTIVE_TEXT = {
-    auftraggeber: "aus Sicht des Auftraggebers bzw. Käufers/Erwerbers – bewerte Risiken, die diese Partei benachteiligen oder finanziell/rechtlich belasten",
-    auftragnehmer: "aus Sicht des Auftragnehmers bzw. Verkäufers/Bauträgers – bewerte Risiken, die diese Partei benachteiligen oder finanziell/rechtlich belasten"
-  };
   const typText = TYP_TEXT[currentContractType] || TYP_TEXT.sonstige;
-  const perspectiveText = PERSPECTIVE_TEXT[currentPerspective] || PERSPECTIVE_TEXT.auftraggeber;
+  const perspectiveText = `aus Sicht des/der ${currentRoleLabel} – bewerte Risiken, die diese Partei benachteiligen oder finanziell/rechtlich belasten`;
 
   try{
     // Stage 1: Extraktion
