@@ -400,7 +400,6 @@
             <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="vob" checked>VOB/B</label>
             <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="bgb">BGB</label>
             <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="planung">Planung</label>
-            <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="bautraeger">Bauträger</label>
             <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="sonstige">Sonstige</label>
           </div>
           <button class="btn small" id="kbSaveBtn">Speichern</button>
@@ -459,58 +458,61 @@ document.getElementById('saveKeyBtn').onclick = () => {
   document.getElementById('keyStatus').textContent = apiKey ? 'Key gespeichert.' : 'Key entfernt.';
 };
 
+// Wissensbasis, gruppiert nach Themenbereich (nicht nach Entstehungsreihenfolge):
+// A) Fristen & Gewährleistung  B) Vergütung & Zahlung  C) Leistungsänderung
+// D) Risiko & Beendigung       E) Formalien
 const DEFAULT_KB = [
-  {id:"kb1", title:"HOAI – Leistungsphasen & Honorar", typ:["planung"],
-   text:"Die HOAI regelt Honorare für Planungsleistungen in 9 Leistungsphasen. Nachträgliche Erweiterungen des Leistungsumfangs ohne schriftliche Vereinbarung führen häufig zu Honorarstreitigkeiten. Kritisch: fehlende Abgrenzung zwischen Grundleistungen und Besonderen Leistungen.",
-   tags:["honorar","leistungsphase","hoai","nachtrag"]},
-  {id:"kb2", title:"VOB/B – Fristen & Mängelrüge", typ:["vob"],
+  // A) Fristen & Gewährleistung
+  {id:"kb1", title:"VOB/B – Gewährleistungsfrist", typ:["vob"],
    text:"Nach VOB/B beträgt die Gewährleistungsfrist regelmäßig 4 Jahre. Fehlt eine klare Fristenregelung im Vertrag, gilt die gesetzliche VOB/B-Regelung – ein häufig übersehenes Risiko.",
    tags:["frist","gewährleistung","mängel","vob"]},
-  {id:"kb2b", title:"BGB-Bauvertrag – Gewährleistungsfrist & Abnahme", typ:["bgb"],
+  {id:"kb2", title:"BGB-Bauvertrag – Gewährleistungsfrist & Abnahme", typ:["bgb"],
    text:"Ohne VOB/B-Vereinbarung gilt die gesetzliche Gewährleistungsfrist von 5 Jahren ab Abnahme (§ 634a BGB). Die Abnahme kehrt die Beweislast für Mängel um (vorher: Auftragnehmer, danach: Auftraggeber) – ein oft unterschätzter Wendepunkt im Vertrag.",
    tags:["frist","gewährleistung","mängel","bgb","abnahme"]},
-  {id:"kb3", title:"Vertragsstrafen", typ:["vob","bgb","planung"],
-   text:"Vertragsstrafenregelungen sind nur wirksam, wenn sie eindeutig formuliert und der Höhe nach angemessen sind (Obergrenze i.d.R. 5%). Wichtig seit BGH-Urteil v. 15.02.2024 (VII ZR 42/22): Bei Einheitspreisverträgen darf sich die 5%-Grenze nicht auf die vorläufige Auftragssumme, sondern muss sich auf die tatsächliche Abrechnungssumme beziehen – sonst ist die Klausel insgesamt unwirksam. Tagessätze von 0,2–0,3% gelten als üblich, 0,5%/Tag ist unwirksam.",
-   tags:["vertragsstrafe","kündigung","haftung","abrechnungssumme"]},
-  {id:"kb4", title:"Kündigungsklauseln", typ:["vob","bgb","planung","bautraeger"],
-   text:"Kündigungsrechte aus wichtigem Grund müssen konkret benannt sein. Pauschale oder einseitig formulierte Kündigungsklauseln zugunsten einer Partei bergen ein erhöhtes Streitrisiko. Nach VOB/B gilt § 8, nach BGB §§ 648, 650a ff. – die Abrechnungsfolgen unterscheiden sich spürbar.",
-   tags:["kündigung","risiko"]},
-  {id:"kb5", title:"Zahlungsbedingungen & Abschlagszahlungen", typ:["vob","bgb","planung"],
-   text:"Abschlagszahlungen sollten sich am tatsächlichen Baufortschritt orientieren. Vorleistungspflichten ohne Sicherheiten (Bürgschaft, Einbehalt) stellen ein erhebliches finanzielles Risiko für den Auftraggeber dar. Nach VOB/B gilt § 16, nach BGB § 632a; bei Verbraucherbauverträgen begrenzt § 650m BGB die Summe der Abschlagszahlungen auf 90% der Vergütung zzgl. 5% Sicherheit.",
-   tags:["zahlung","abschlag","sicherheit"]},
-  {id:"kb6", title:"Nachtragsmanagement", typ:["vob","bgb","planung"],
-   text:"Fehlende oder unklare Regelungen zum Umgang mit Nachträgen (Leistungsänderungen, Mehrmengen) sind eine der häufigsten Ursachen für Kostenüberschreitungen und Streitigkeiten in Bauprojekten.",
-   tags:["nachtrag","kosten","risiko"]},
-  {id:"kb7", title:"Behinderung & Bauzeitverlängerung (VOB/B)", typ:["vob"],
-   text:"Behinderungsanzeigen müssen unverzüglich und schriftlich erfolgen (VOB/B § 6). Versäumt der Auftragnehmer die rechtzeitige Anzeige, verliert er in der Regel den Anspruch auf Fristverlängerung – ein häufig unterschätztes Risiko bei eng kalkulierten Bauzeitplänen.",
-   tags:["behinderung","bauzeit","verzug"]},
-  {id:"kb7b", title:"BGB-Bauvertrag – Anordnungsrecht & Vergütungsanpassung", typ:["bgb"],
-   text:"Seit der Bauvertragsrechtsreform 2018 hat der Besteller ein einseitiges Anordnungsrecht für Änderungswünsche (§ 650b BGB). Der Unternehmer muss ein Angebot erstellen; einigt man sich nicht innerhalb 30 Tagen, kann der Besteller anordnen. Die Vergütung wird nach tatsächlich erforderlichen Kosten zzgl. angemessenem Zuschlag berechnet (§ 650c BGB) – ein häufiger Streitpunkt, wenn dazu nichts im Vertrag steht.",
-   tags:["anordnung","nachtrag","vergütung","bgb"]},
-  {id:"kb8", title:"Sicherheitseinbehalt & Bürgschaft", typ:["vob","bgb"],
-   text:"Sicherheitseinbehalte sind üblich in Höhe von 5-10% der Auftragssumme. Bürgschaften müssen unbedingt, unbefristet und unter Verzicht auf die Einrede der Vorausklage gestellt werden, um werthaltig zu sein – unklare Bürgschaftsklauseln schwächen die Sicherheit erheblich.",
-   tags:["sicherheit","bürgschaft","einbehalt"]},
-  {id:"kb9", title:"AGB-Kontrolle bei Bauverträgen", typ:["vob","bgb","planung","bautraeger","sonstige"],
-   text:"Formularmäßig vorformulierte Vertragsklauseln unterliegen der AGB-Inhaltskontrolle nach §§305 ff. BGB. Einseitig benachteiligende Klauseln (z.B. unangemessene Haftungserweiterungen, überlange Fristen) sind häufig unwirksam, auch wenn sie unterschrieben wurden.",
-   tags:["agb","formularvertrag","klausel"]},
-  {id:"kb10", title:"Prüffähigkeit der Schlussrechnung", typ:["vob","bgb","planung"],
-   text:"Eine Schlussrechnung ist erst prüffähig, wenn sie übersichtlich aufgestellt ist und alle erforderlichen Nachweise enthält (VOB/B § 14, sinngemäß auch bei BGB-Verträgen anerkannt). Fehlt die Prüffähigkeit, beginnt die Zahlungsfrist nicht zu laufen – das kann Zahlungsverzug des Auftraggebers ungewollt ausschließen oder verzögern.",
-   tags:["schlussrechnung","prüffähig","zahlung"]},
-  {id:"kb11", title:"Mängelbeseitigung & Fristsetzung", typ:["vob","bgb","planung","bautraeger"],
+  {id:"kb3", title:"Mängelbeseitigung & Fristsetzung", typ:["vob","bgb","planung"],
    text:"Vor Selbstvornahme oder Kündigung wegen Mängeln ist grundsätzlich eine angemessene Frist zur Nacherfüllung zu setzen (§ 637 BGB bzw. sinngemäß § 4 Abs. 7/§ 13 VOB/B). Fehlt die Fristsetzung oder ist sie zu kurz bemessen, können daraus resultierende Ansprüche unwirksam sein.",
    tags:["mängel","nacherfüllung","selbstvornahme"]},
-  {id:"kb11b", title:"BGB – Verbraucherbauvertrag & Baubeschreibung", typ:["bgb"],
+
+  // B) Vergütung & Zahlung
+  {id:"kb4", title:"Zahlungsbedingungen & Abschlagszahlungen", typ:["vob","bgb","planung"],
+   text:"Abschlagszahlungen sollten sich am tatsächlichen Baufortschritt orientieren. Vorleistungspflichten ohne Sicherheiten (Bürgschaft, Einbehalt) stellen ein erhebliches finanzielles Risiko für den Auftraggeber dar. Nach VOB/B gilt § 16, nach BGB § 632a; bei Verbraucherbauverträgen begrenzt § 650m BGB die Summe der Abschlagszahlungen auf 90% der Vergütung zzgl. 5% Sicherheit.",
+   tags:["zahlung","abschlag","sicherheit"]},
+  {id:"kb5", title:"Prüffähigkeit der Schlussrechnung", typ:["vob","bgb","planung"],
+   text:"Eine Schlussrechnung ist erst prüffähig, wenn sie übersichtlich aufgestellt ist und alle erforderlichen Nachweise enthält (VOB/B § 14, sinngemäß auch bei BGB-Verträgen anerkannt). Fehlt die Prüffähigkeit, beginnt die Zahlungsfrist nicht zu laufen – das kann Zahlungsverzug des Auftraggebers ungewollt ausschließen oder verzögern.",
+   tags:["schlussrechnung","prüffähig","zahlung"]},
+  {id:"kb6", title:"HOAI – Leistungsphasen & Honorar", typ:["planung"],
+   text:"Die HOAI regelt Honorare für Planungsleistungen in 9 Leistungsphasen. Nachträgliche Erweiterungen des Leistungsumfangs ohne schriftliche Vereinbarung führen häufig zu Honorarstreitigkeiten. Kritisch: fehlende Abgrenzung zwischen Grundleistungen und Besonderen Leistungen.",
+   tags:["honorar","leistungsphase","hoai","nachtrag"]},
+
+  // C) Leistungsänderung
+  {id:"kb7", title:"Nachtragsmanagement", typ:["vob","bgb","planung"],
+   text:"Fehlende oder unklare Regelungen zum Umgang mit Nachträgen (Leistungsänderungen, Mehrmengen) sind eine der häufigsten Ursachen für Kostenüberschreitungen und Streitigkeiten in Bauprojekten.",
+   tags:["nachtrag","kosten","risiko"]},
+  {id:"kb8", title:"BGB-Bauvertrag – Anordnungsrecht & Vergütungsanpassung", typ:["bgb"],
+   text:"Seit der Bauvertragsrechtsreform 2018 hat der Besteller ein einseitiges Anordnungsrecht für Änderungswünsche (§ 650b BGB). Der Unternehmer muss ein Angebot erstellen; einigt man sich nicht innerhalb 30 Tagen, kann der Besteller anordnen. Die Vergütung wird nach tatsächlich erforderlichen Kosten zzgl. angemessenem Zuschlag berechnet (§ 650c BGB) – ein häufiger Streitpunkt, wenn dazu nichts im Vertrag steht.",
+   tags:["anordnung","nachtrag","vergütung","bgb"]},
+  {id:"kb9", title:"VOB/B – Behinderungsanzeige & Bauzeitverlängerung", typ:["vob"],
+   text:"Behinderungsanzeigen müssen unverzüglich und schriftlich erfolgen (VOB/B § 6). Versäumt der Auftragnehmer die rechtzeitige Anzeige, verliert er in der Regel den Anspruch auf Fristverlängerung – ein häufig unterschätztes Risiko bei eng kalkulierten Bauzeitplänen.",
+   tags:["behinderung","bauzeit","verzug"]},
+
+  // D) Risiko & Beendigung
+  {id:"kb10", title:"Vertragsstrafen", typ:["vob","bgb","planung"],
+   text:"Vertragsstrafenregelungen sind nur wirksam, wenn sie eindeutig formuliert und der Höhe nach angemessen sind (Obergrenze i.d.R. 5%). Wichtig seit BGH-Urteil v. 15.02.2024 (VII ZR 42/22): Bei Einheitspreisverträgen darf sich die 5%-Grenze nicht auf die vorläufige Auftragssumme, sondern muss sich auf die tatsächliche Abrechnungssumme beziehen – sonst ist die Klausel insgesamt unwirksam. Tagessätze von 0,2–0,3% gelten als üblich, 0,5%/Tag ist unwirksam.",
+   tags:["vertragsstrafe","kündigung","haftung","abrechnungssumme"]},
+  {id:"kb11", title:"Kündigungsklauseln", typ:["vob","bgb","planung"],
+   text:"Kündigungsrechte aus wichtigem Grund müssen konkret benannt sein. Pauschale oder einseitig formulierte Kündigungsklauseln zugunsten einer Partei bergen ein erhöhtes Streitrisiko. Nach VOB/B gilt § 8, nach BGB §§ 648, 650a ff. – die Abrechnungsfolgen unterscheiden sich spürbar.",
+   tags:["kündigung","risiko"]},
+  {id:"kb12", title:"Sicherheitseinbehalt & Bürgschaft", typ:["vob","bgb"],
+   text:"Sicherheitseinbehalte sind üblich in Höhe von 5-10% der Auftragssumme. Bürgschaften müssen unbedingt, unbefristet und unter Verzicht auf die Einrede der Vorausklage gestellt werden, um werthaltig zu sein – unklare Bürgschaftsklauseln schwächen die Sicherheit erheblich.",
+   tags:["sicherheit","bürgschaft","einbehalt"]},
+
+  // E) Formalien
+  {id:"kb13", title:"AGB-Kontrolle bei Bauverträgen", typ:["vob","bgb","planung","sonstige"],
+   text:"Formularmäßig vorformulierte Vertragsklauseln unterliegen der AGB-Inhaltskontrolle nach §§305 ff. BGB. Einseitig benachteiligende Klauseln (z.B. unangemessene Haftungserweiterungen, überlange Fristen) sind häufig unwirksam, auch wenn sie unterschrieben wurden.",
+   tags:["agb","formularvertrag","klausel"]},
+  {id:"kb14", title:"BGB – Verbraucherbauvertrag & Baubeschreibung", typ:["bgb"],
    text:"Bei Verbraucherbauverträgen (§ 650i BGB, Vertragspartner ist Privatperson) gelten Sonderpflichten: verbindliche Baubeschreibung vor Vertragsschluss, 14-tägiges Widerrufsrecht, verbindlicher Fertigstellungstermin. Fehlt die Baubeschreibung oder ist sie unvollständig, drohen Auslegungsnachteile zu Lasten des Unternehmers.",
-   tags:["verbraucherbauvertrag","baubeschreibung","widerruf","bgb"]},
-  {id:"kb12", title:"Bauträgervertrag – Ratenzahlungsplan nach § 3 MaBV", typ:["bautraeger"],
-   text:"Der Bauträger darf Zahlungen nur nach Baufortschritt in max. 7 Raten aus 13 gesetzlich definierten Bauabschnitten verlangen (§ 3 Abs. 2 MaBV). Erste Rate max. 30% der Vertragssumme (bei Grundstückserwerb) bzw. 20% (bei Erbbaurecht), nach Beginn der Erdarbeiten fällig. Ein davon abweichender, für den Erwerber ungünstigerer Ratenplan ist gemäß § 12 MaBV unwirksam – die Nichtigkeit trifft dann nur den Ratenplan, es gilt ersatzweise § 641 BGB (Fälligkeit erst nach Abnahme).",
-   tags:["bautraeger","rate","zahlung","mabv","abschlag"]},
-  {id:"kb13", title:"Bauträgervertrag – Beurkundungspflicht", typ:["bautraeger"],
-   text:"Bauträgerverträge bedürfen der notariellen Beurkundung (§ 311b BGB), da sie eine Verpflichtung zur Grundstücksübertragung enthalten. Fehlt die Beurkundung, ist der Vertrag zunächst formnichtig; die Nichtigkeit wird erst durch Auflassung und Eintragung ins Grundbuch geheilt (§ 311b Abs. 1 S. 2 BGB) – bis dahin bestehen keine gesicherten Ansprüche.",
-   tags:["bautraeger","form","beurkundung","notar"]},
-  {id:"kb14", title:"Bauträgervertrag – Bürgschaft statt Ratenplan", typ:["bautraeger"],
-   text:"Alternativ zum gesetzlichen Ratenplan kann der Bauträger dem Erwerber eine Fertigstellungsbürgschaft stellen (§ 650m Abs. 2 BGB bzw. § 7 MaBV) und dafür abweichende, ggf. höhere Vorauszahlungen vereinbaren. Für den Erwerber wichtig: Diese Bürgschaft sichert primär die Fertigstellung, nicht automatisch die Mängelfreiheit – Bürgschaftsumfang genau prüfen.",
-   tags:["bautraeger","sicherheit","bürgschaft","fertigstellung","mabv"]}
+   tags:["verbraucherbauvertrag","baubeschreibung","widerruf","bgb"]}
 ];
 
 let knowledgeBase = [];
@@ -539,7 +541,7 @@ async function saveKB(){
   catch(e){ console.error('Storage-Fehler', e); }
 }
 
-const TYP_LABELS = {vob:"VOB/B", bgb:"BGB", planung:"Planung", bautraeger:"Bauträger", sonstige:"Sonstige"};
+const TYP_LABELS = {vob:"VOB/B", bgb:"BGB", planung:"Planung", sonstige:"Sonstige"};
 function renderKB(){
   const el = document.getElementById('kbList');
   el.innerHTML = knowledgeBase.map(k => `
@@ -569,7 +571,7 @@ document.getElementById('kbSaveBtn').onclick = async () => {
   const tags = document.getElementById('kbTagsInput').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
   const typ = Array.from(document.querySelectorAll('.kbTypCheck:checked')).map(c => c.value);
   if(!title || !text) return;
-  knowledgeBase.push({id:'kb'+Date.now(), title, text, tags, typ: typ.length ? typ : ['vob','bgb','planung','bautraeger','sonstige']});
+  knowledgeBase.push({id:'kb'+Date.now(), title, text, tags, typ: typ.length ? typ : ['vob','bgb','planung','sonstige']});
   await saveKB();
   renderKB();
   document.getElementById('kbTitleInput').value='';
@@ -899,7 +901,6 @@ async function runAnalysis(){
     vob: "einen Bauvertrag, in den die VOB/B ausdrücklich einbezogen ist (Werkvertrag zwischen Auftraggeber und bauausführendem Unternehmen nach VOB/B)",
     bgb: "einen Bauvertrag ohne VOB/B-Einbeziehung, es gilt reines BGB-Werkvertragsrecht (§§ 631 ff., 650a ff. BGB)",
     planung: "einen Planungsvertrag (HOAI-Vertrag mit Architekt/Ingenieur)",
-    bautraeger: "einen Bauträgervertrag (Grundstücks- und Bauleistungskauf nach § 650u BGB / MaBV)",
     sonstige: "einen Vertrag aus dem Bau-/Immobilienkontext, dessen genaue Vertragsgrundlage hier bewusst offen bleibt"
   };
   const typText = TYP_TEXT[currentContractType] || TYP_TEXT.sonstige;
