@@ -400,6 +400,12 @@
     margin-bottom:14px;
   }
   .disclaimer-card{ background:var(--amber-bg); border-color:var(--amber); }
+  .vt-summary{ cursor:pointer; font-weight:bold; color:var(--navy); font-size:14px; }
+  .vt-text{
+    white-space:pre-wrap; word-break:break-word; font-family:inherit; font-size:12px;
+    line-height:1.5; background:var(--bg); border:1px solid var(--border); border-radius:6px;
+    padding:14px; margin-top:10px; max-height:420px; overflow-y:auto;
+  }
   .disclaimer-text{ font-size:12px; line-height:1.6; color:var(--text); }
   .disclaimer-text b{ color:var(--amber); }
 </style>
@@ -460,6 +466,10 @@
           <input type="file" id="fileInput" accept=".pdf,.docx,.txt">
         </div>
         <div id="fileInfo"></div>
+        <label style="display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text-muted); margin:10px 0; cursor:pointer;">
+          <input type="checkbox" id="saveContractCheckbox" style="margin-top:2px;">
+          <span>Vertragstext mit im Verlauf speichern (erhöht den lokalen Speicherbedarf, Standard: aus)</span>
+        </label>
         <button class="btn" id="analyzeBtn" disabled>Analyse starten</button>
         <button class="btn secondary small" id="testBtn" style="width:100%; margin-top:8px;">API-Verbindung testen</button>
         <div class="status-line" id="statusLine"></div>
@@ -739,8 +749,9 @@ const HELP_CONTENT = [
     <h3>Eingaben & Daten</h3>
     <p><b>Unterstützte Dateiformate:</b> PDF (auch gescannt, dann automatisch per Bilderkennung statt Textauslesung), Word (.docx), Text (.txt).</p>
     <p><b>Größenrahmen:</b> Es werden bis zu ca. 300.000 Zeichen (grob 100–110 Seiten, je nach Zeichendichte) je Vertrag analysiert. Längere Dokumente werden nach dem Erreichen dieses Limits mit einem Hinweis versehen; der überschüssige Teil fließt nicht in die Analyse ein.</p>
-    <p><b>Wird der Vertrag selbst gespeichert? Nein.</b> Das ist ein wichtiger Punkt: Der hochgeladene Vertragstext liegt nur temporär im Arbeitsspeicher deines Browsers, solange die Analyse läuft bzw. das Ergebnis auf dem Bildschirm angezeigt wird. Er wird zu keinem Zeitpunkt lokal gespeichert (nicht im Verlauf, nicht in localStorage) und auch nicht an einen Server dieser App übertragen – lediglich für die Dauer der Analyse an die Anthropic-API gesendet, damit die KI ihn lesen kann. Schließt oder lädst du die Seite neu, ist der Originaltext weg, und ein erneuter Analysedurchlauf würde ein erneutes Hochladen der Datei erfordern.</p>
-    <p><b>Was wird dann im Verlauf gespeichert?</b> Ausschließlich das <b>Analyseergebnis</b>: Dateiname, Datum, die erkannten Risikopunkte samt Bewertung und Maßnahmen, die erkannten Fristen, die Projektzusammenfassung und der Marktvergleich. Das reicht aus, um ein früheres Ergebnis jederzeit wieder anzusehen, als PDF zu exportieren oder als JSON zu sichern – der Originalvertrag selbst müsste bei Bedarf erneut hochgeladen werden.</p>
+    <p><b>Wird der Vertrag selbst gespeichert? Standardmäßig nein, optional ja.</b> Im Normalfall liegt der hochgeladene Vertragstext nur temporär im Arbeitsspeicher deines Browsers, solange die Analyse läuft bzw. das Ergebnis auf dem Bildschirm angezeigt wird. Er wird nicht lokal gespeichert und nicht an einen Server dieser App übertragen – lediglich für die Dauer der Analyse an die Anthropic-API gesendet. Schließt oder lädst du die Seite neu, ist der Originaltext weg.</p>
+    <p>Über die Checkbox <b>„Vertragstext mit im Verlauf speichern"</b> im Bereich „Dokument" (Standard: <b>aus</b>) kannst du das bewusst ändern: Ist sie beim Start der Analyse aktiviert, wird der Vertragstext zusätzlich im Verlaufseintrag abgelegt und lässt sich dort später über „Vertragstext anzeigen" wieder einsehen – praktisch für die erneute Analyse oder den schnellen Abgleich, erhöht aber den lokalen Speicherbedarf spürbar (Verträge können mehrere hunderttausend Zeichen umfassen) und vergrößert die Menge an potenziell sensiblen Daten, die dauerhaft in deinem Browser liegen. Ist der verfügbare Speicherplatz knapp, speichert die App das Analyseergebnis trotzdem, lässt in diesem Fall aber automatisch nur den Vertragstext weg und informiert dich darüber.</p>
+    <p><b>Was wird dann im Verlauf gespeichert?</b> Standardmäßig nur das <b>Analyseergebnis</b>: Dateiname, Datum, die erkannten Risikopunkte samt Bewertung und Maßnahmen, die erkannten Fristen, die Projektzusammenfassung und der Marktvergleich. Das reicht aus, um ein früheres Ergebnis jederzeit wieder anzusehen, als PDF zu exportieren oder als JSON zu sichern. War beim Speichern zusätzlich die Checkbox „Vertragstext mit im Verlauf speichern" aktiviert, wird auch der Vertragstext selbst mit abgelegt und lässt sich über „Vertragstext anzeigen" im Ergebnis wieder aufrufen.</p>
     <p><b>Datenverarbeitung im Übrigen:</b> Wissensbasis und Verlauf werden ausschließlich lokal in deinem Browser gespeichert (localStorage) und nicht automatisch synchronisiert oder irgendwohin hochgeladen. Sie bleiben so lange erhalten, bis du sie löschst oder die Browserdaten leerst.</p>
   `},
   { id:"ergebnisse", title:"Ergebnisse verstehen", body:`
@@ -768,7 +779,7 @@ const HELP_CONTENT = [
   { id:"version", title:"Version & Hinweise", body:`
     <h3>Version & Hinweise</h3>
     <p><b>Rechtlicher Hinweis:</b> Diese Auswertung wird KI-gestützt erstellt und dient ausschließlich als fachliche Orientierung. Sie ersetzt keine rechtliche Prüfung und stellt keine Rechtsberatung dar. Trotz sorgfältig gepflegter Wissensbasis können Fehleinschätzungen, Auslassungen oder nicht berücksichtigte, aktuelle Rechtsprechung auftreten. Für rechtsverbindliche Entscheidungen empfehlen wir die Prüfung durch eine Rechtsanwältin, einen Rechtsanwalt oder eine sonst fachkundige Person. Ebenso liefern der Marktvergleich und die Wissensbasis allgemeine Praxis-Richtwerte, keine für den Einzelfall geprüfte Rechtsberatung.</p>
-    <p><b>Datensparsamkeit im Überblick:</b> Der Originalvertrag wird nirgendwo gespeichert (siehe Kapitel „Eingaben & Daten"). Es gibt keinen Server dieser App – API-Key, Wissensbasis und Verlauf liegen ausschließlich lokal in deinem Browser. Die einzige externe Verbindung ist die direkte, verschlüsselte Anfrage an die Anthropic-API zum Zeitpunkt der Analyse.</p>
+    <p><b>Datensparsamkeit im Überblick:</b> Der Originalvertrag wird nur gespeichert, wenn du das über die Checkbox „Vertragstext mit im Verlauf speichern" ausdrücklich aktivierst (Standard: aus) – siehe Kapitel „Eingaben & Daten". Es gibt keinen Server dieser App – API-Key, Wissensbasis und Verlauf liegen ausschließlich lokal in deinem Browser. Die einzige externe Verbindung ist die direkte, verschlüsselte Anfrage an die Anthropic-API zum Zeitpunkt der Analyse.</p>
     <p><b>Weiterentwicklung:</b> Diese App wird laufend weiterentwickelt – neue Vertragstypen, präzisere Risikobewertung und zusätzliche Auswertungen kommen kontinuierlich hinzu. Rückmeldungen zu falsch erkannten oder fehlenden Punkten helfen dabei, die Wissensbasis gezielt zu verbessern.</p>
   `}
 ];
@@ -1051,6 +1062,7 @@ function loadHistory(){
 function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich){
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
+  const wantsContract = document.getElementById('saveContractCheckbox')?.checked;
   const entry = {
     id: 'h' + Date.now(),
     filename: currentFileName,
@@ -1060,12 +1072,24 @@ function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, ma
     fristenItems: JSON.parse(JSON.stringify(fristenItems || [])),
     fristenFailed: !!fristenFailed,
     projektKontext: projektKontext || '',
-    marktvergleich: marktvergleich || {}
+    marktvergleich: marktvergleich || {},
+    vertragstext: wantsContract ? extractedText : ''
   };
   historyEntries.unshift(entry);
   if(historyEntries.length > 50) historyEntries = historyEntries.slice(0, 50);
-  try{ localStorage.setItem('scri-history', JSON.stringify(historyEntries)); }
-  catch(e){ console.error('History-Speicherfehler', e); }
+  try{
+    localStorage.setItem('scri-history', JSON.stringify(historyEntries));
+  }catch(e){
+    console.error('History-Speicherfehler (vermutlich Speicherlimit erreicht), versuche erneut ohne Vertragstexte', e);
+    try{
+      const slim = historyEntries.map(h => ({...h, vertragstext: ''}));
+      localStorage.setItem('scri-history', JSON.stringify(slim));
+      entry.vertragstext = '';
+      setError('Speicherplatz im Browser war knapp – der Vertragstext wurde diesmal nicht mitgespeichert, das Analyseergebnis aber schon.');
+    }catch(e2){
+      console.error('History-Speicherfehler auch ohne Vertragstexte', e2);
+    }
+  }
   renderHistory();
 }
 function renderHistory(){
@@ -1102,7 +1126,7 @@ window.openHistoryEntry = function(id){
   currentFileName = entry.filename;
   document.getElementById('topActions').style.display = 'flex';
   closeModal();
-  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '', entry.marktvergleich || {});
+  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '', entry.marktvergleich || {}, entry.vertragstext || '');
   document.getElementById('resultsArea').scrollIntoView({behavior:'smooth', block:'start'});
 };
 window.deleteHistoryEntry = function(id){
@@ -1538,7 +1562,7 @@ ${JSON.stringify(critical)}`;
     setPipelineStep(4,'done');
     setStatus(fristenFailed ? 'Analyse abgeschlossen (Fristen-Erkennung übersprungen, siehe Fristen-Tab).' : 'Analyse abgeschlossen.', fristenFailed ? undefined : 'done');
 
-    renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich);
+    renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, document.getElementById('saveContractCheckbox')?.checked ? extractedText : '');
     saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich);
   }catch(err){
     console.error(err);
@@ -1614,7 +1638,7 @@ function buildManagementSummary(items){
   return { top5, axisScores };
 }
 
-function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich){
+function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext){
   fristenItems = fristenItems || [];
   marktvergleich = marktvergleich || {};
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
@@ -1777,6 +1801,14 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
         ${fristHtml}
       </div>
     </div>
+    ${vertragstext ? `
+    <div class="card no-print">
+      <details>
+        <summary class="vt-summary">Vertragstext anzeigen (mit dieser Analyse gespeichert)</summary>
+        <p class="hint" style="margin-top:10px;">Dieser Text wurde optional mit im Verlauf gespeichert. Er dient dem schnellen Abgleich mit dem Analyseergebnis und ersetzt keine sichere Vertragsablage.</p>
+        <pre class="vt-text">${escapeHtml(vertragstext)}</pre>
+      </details>
+    </div>` : ''}
     <div class="card disclaimer-card">
       <div class="disclaimer-text">
         <b>Hinweis:</b> Diese Auswertung wurde KI-gestützt erstellt (Modell: ${escapeHtml(MODEL)}) und dient
