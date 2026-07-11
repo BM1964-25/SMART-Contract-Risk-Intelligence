@@ -239,6 +239,11 @@
     letter-spacing:0.3px; margin:0 0 10px; font-family:inherit;
   }
   .ffolge{ font-size:12px; color:var(--amber); margin-top:4px; font-weight:bold; }
+  .dur-badge{
+    display:inline-block; background:var(--navy); color:#fff; font-size:11px; font-weight:bold;
+    padding:2px 7px; border-radius:10px; margin-right:6px; vertical-align:1px;
+  }
+  .frist-bezug{ color:var(--navy); font-weight:bold; }
   .intro-text{ font-size:13.5px; color:var(--text); line-height:1.55; margin-bottom:14px; }
   .timeline{ display:flex; flex-direction:column; }
   .timeline-item{ display:flex; gap:14px; position:relative; padding-bottom:20px; }
@@ -1328,10 +1333,11 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     setStatus('Extrahiere alle Fristen und Termine …', 'loading');
     const fristenInstruction = `Durchsuche den gesamten Vertragstext systematisch nach JEDER konkreten Frist, jedem Termin und jeder Zeitangabe – unabhängig davon, ob sie im Fließtext, in einer Aufzählung oder in Tabellen-/Listenform steht (z.B. auch reine Datums-Stichpunkte wie "Beginn Stahlbetonarbeiten: 16.10.2023" oder "Fertigstellung: 20.05.2025"). Erfasse ALLE auffindbaren Fristen, nicht nur die wichtigsten – hier hat Vollständigkeit Vorrang vor Kürze.
 Ordne jede Frist einer Kategorie zu: "Vertragsfrist" (Baubeginn, Zwischentermine, Gesamtfertigstellung, Bauzeit), "Pruefungsfrist" (Prüfpflichten mit Frist, z.B. Planprüfung, Bemusterung, Nachtragsprüfung), "Zahlungsfrist" (Abschlagsrechnung, Schlussrechnung, Schlusszahlung), "Reaktionsfrist" (Widerspruch, Anzeige, Stellungnahme, Benennung von Dritten), "Verjaehrungsfrist" (Gewährleistung, Mängelansprüche) oder "Vertragsstrafe" (strafbewehrte Termine).
+Unterscheide bei "datum" zwei Fälle: Feste Kalenderdaten (z.B. "20.05.2025") gibst du direkt so an. Relative Fristen (z.B. "12 Werktage") gibst du als reine Dauer im Feld "datum" an, und trägst den Bezugspunkt/Auslöser separat im Feld "bezug" ein (z.B. "nach Erhalt der Ausführungsplanung" oder "vor der Abnahme") – kurz, max 8 Wörter. Bei festen Kalenderdaten bleibt "bezug" leer.
 Gib im Feld "folge" an, ob mit der Frist eine konkrete wirtschaftliche oder rechtliche Folge bei Versäumung verbunden ist (z.B. "Vertragsstrafe 0,2%/Werktag, Deckel 5%" oder "Sicherheitseinbehalt 100.000€") – lasse das Feld leer, wenn der Vertrag keine Folge nennt.
 Vergib im Feld "prioritaet" eine Einstufung "kritisch|hoch|mittel|niedrig" – kritisch/hoch nur, wenn eine konkrete finanzielle oder Haftungsfolge genannt ist, sonst mittel/niedrig.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-[{"id":"1","bezeichnung":"kurze Bezeichnung, max 8 Wörter","datum":"Datum oder Fristdauer, z.B. 20.05.2025 oder 12 Werktage","kategorie":"Vertragsfrist|Pruefungsfrist|Zahlungsfrist|Reaktionsfrist|Verjaehrungsfrist|Vertragsstrafe","folge":"kurze Folge oder leer","prioritaet":"kritisch|hoch|mittel|niedrig"}]`;
+[{"id":"1","bezeichnung":"kurze Bezeichnung, max 8 Wörter","datum":"Datum oder Fristdauer, z.B. 20.05.2025 oder 12 Werktage","bezug":"Bezugspunkt bei relativen Fristen oder leer","kategorie":"Vertragsfrist|Pruefungsfrist|Zahlungsfrist|Reaktionsfrist|Verjaehrungsfrist|Vertragsstrafe","folge":"kurze Folge oder leer","prioritaet":"kritisch|hoch|mittel|niedrig"}]`;
     let fristenContent;
     if(isScanned && documentImages.length){
       fristenContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
@@ -1427,6 +1433,20 @@ function parseGermanDate(str){
   const date = new Date(Number(y), Number(mo)-1, Number(d));
   return isNaN(date.getTime()) ? null : date;
 }
+function parseDuration(str){
+  if(!str) return null;
+  const m = String(str).match(/(\d+)\s*(Werktage|Arbeitstage|Kalendertage|Tage|Wochen|Monate|Jahre)/i);
+  if(!m) return null;
+  const value = Number(m[1]);
+  const unit = m[2].toLowerCase();
+  let days, shortUnit;
+  if(unit.includes('woche')){ days = value*7; shortUnit='Wo'; }
+  else if(unit.includes('monat')){ days = value*30; shortUnit='Mon'; }
+  else if(unit.includes('jahr')){ days = value*365; shortUnit='J'; }
+  else if(unit.includes('werktag') || unit.includes('arbeitstag')){ days = value*1.4; shortUnit='WT'; }
+  else { days = value; shortUnit='Tg'; }
+  return { days, label: `${value} ${shortUnit}` };
+}
 const FRIST_KAT_LABELS = {
   Vertragsfrist: "Vertragsfristen (Bauzeit)",
   Pruefungsfrist: "Prüfungsfristen",
@@ -1503,14 +1523,17 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext){
     </tr>
   `).join('');
 
-  // Fristen nach Kategorie gruppiert
+  // Fristen nach Kategorie gruppiert, dabei Fristen mit erkannter Dauer nach Dringlichkeit sortiert
   const fristGroupsHtml = FRIST_KAT_ORDER.map(kat => {
-    const group = fristenItems.filter(f => f.kategorie === kat);
+    const group = fristenItems.filter(f => f.kategorie === kat).map(f => ({...f, _dur: parseDuration(f.datum)}));
     if(!group.length) return '';
+    const withDur = group.filter(f => f._dur).sort((a,b) => a._dur.days - b._dur.days);
+    const withoutDur = group.filter(f => !f._dur);
+    const sorted = [...withDur, ...withoutDur];
     return `
       <div class="frist-group">
         <h3 class="frist-group-title">${escapeHtml(FRIST_KAT_LABELS[kat] || kat)}</h3>
-        <ul class="frist-list">${group.map((f,i)=>`<li><div class="fnum">${i+1}</div><div class="ftext"><b>${escapeHtml(f.bezeichnung||'')}</b>${f.datum ? ' — ' + escapeHtml(f.datum) : ''}${f.folge ? `<div class="ffolge">Folge: ${escapeHtml(f.folge)}</div>` : ''}</div></li>`).join('')}</ul>
+        <ul class="frist-list">${sorted.map((f,i)=>`<li><div class="fnum">${i+1}</div><div class="ftext">${f._dur ? `<span class="dur-badge">${escapeHtml(f._dur.label)}</span> ` : ''}<b>${escapeHtml(f.bezeichnung||'')}</b>${f.datum ? ' — ' + escapeHtml(f.datum) : ''}${f.bezug ? ` <b class="frist-bezug">${escapeHtml(f.bezug)}</b>` : ''}${f.folge ? `<div class="ffolge">Folge: ${escapeHtml(f.folge)}</div>` : ''}</div></li>`).join('')}</ul>
       </div>`;
   }).join('');
   const fristListHtml = fristenFailed
