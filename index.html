@@ -214,11 +214,19 @@
   .top5-list{ margin:0; padding:0 0 0 22px; }
   .top5-list li{ margin-bottom:10px; font-size:13.5px; line-height:1.5; }
   .top5-list li .badge{ margin-right:8px; }
-  .axis-grid{ display:flex; flex-direction:column; gap:8px; }
-  .axis-row{ display:flex; align-items:center; gap:12px; font-size:13.5px; }
-  .axis-label{ width:90px; flex-shrink:0; color:var(--text-muted); }
-  .stars{ color:var(--gold); font-size:15px; letter-spacing:2px; }
-  .stars-empty{ color:var(--border); }
+  .axis-grid{ display:flex; flex-direction:column; gap:10px; }
+  .axis-bar-row{ display:flex; align-items:center; gap:12px; font-size:13px; }
+  .axis-label{ width:80px; flex-shrink:0; color:var(--text-muted); }
+  .axis-bar-track{ flex:1; height:10px; background:var(--bg); border-radius:5px; overflow:hidden; }
+  .axis-bar-fill{ height:100%; background:var(--gold); border-radius:5px; }
+  .axis-score{ width:20px; text-align:right; flex-shrink:0; color:var(--text-muted); font-size:12px; }
+  .result-tabs{ display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:18px; }
+  .result-tab{
+    background:none; border:none; padding:11px 16px 10px; font-size:13.5px; font-family:inherit;
+    color:var(--text-muted); cursor:pointer; border-bottom:2.5px solid transparent; margin-bottom:-1px;
+  }
+  .result-tab.active{ color:var(--navy); border-bottom-color:var(--gold); font-weight:bold; }
+  .result-tab:hover{ color:var(--navy); }
   .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
   @media print{
     header, .site-footer, .no-print, .top-actions{ display:none !important; }
@@ -227,6 +235,7 @@
     .print-header{ display:block !important; margin-bottom:20px; }
     .card{ page-break-inside:avoid; }
     tr{ page-break-inside:avoid; }
+    .result-tab-pane{ display:block !important; }
   }
   .print-header{ display:none; }
   .print-header h1{ font-size:20px; color:var(--navy); margin-bottom:4px; }
@@ -1123,15 +1132,17 @@ const PRIO_ORDER = {kritisch:0, hoch:1, mittel:2, niedrig:3};
 const AUSWIRKUNG_ACHSEN = ["Liquidität","Nachtrag","Marge","Termin","Haftung"];
 const RISK_WEIGHT = {kritisch:3, hoch:2, mittel:1, niedrig:0};
 
-function starsForScore(score){
-  if(score >= 7) return 5;
-  if(score >= 5) return 4;
-  if(score >= 3) return 3;
-  if(score >= 1) return 2;
-  return 1;
-}
-function renderStars(n){
-  return '<span class="stars">' + '★'.repeat(n) + '<span class="stars-empty">' + '★'.repeat(5-n) + '</span></span>';
+function renderAxisBars(axisScores){
+  const max = Math.max(...AUSWIRKUNG_ACHSEN.map(a => axisScores[a]||0), 1);
+  return AUSWIRKUNG_ACHSEN.map(a => {
+    const score = axisScores[a] || 0;
+    const pct = Math.max(4, Math.round((score/max)*100));
+    return `<div class="axis-bar-row">
+      <span class="axis-label">${escapeHtml(a)}</span>
+      <div class="axis-bar-track"><div class="axis-bar-fill" style="width:${pct}%"></div></div>
+      <span class="axis-score">${score}</span>
+    </div>`;
+  }).join('');
 }
 function buildManagementSummary(items){
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
@@ -1143,7 +1154,7 @@ function buildManagementSummary(items){
       axisScores[it.auswirkung] += (RISK_WEIGHT[it.risiko] ?? 1);
     }
   });
-  return { top5, axisStars: AUSWIRKUNG_ACHSEN.map(a => ({achse: a, stars: starsForScore(axisScores[a])})) };
+  return { top5, axisScores };
 }
 
 function renderResults(items, fristenItems){
@@ -1164,7 +1175,7 @@ function renderResults(items, fristenItems){
       </ol>
       <p class="hint" style="margin-top:18px;">Geschätzte wirtschaftliche Risikowirkung</p>
       <div class="axis-grid">
-        ${summary.axisStars.map(a => `<div class="axis-row"><span class="axis-label">${escapeHtml(a.achse)}</span>${renderStars(a.stars)}</div>`).join('')}
+        ${renderAxisBars(summary.axisScores)}
       </div>
     </div>`;
 
@@ -1213,31 +1224,42 @@ function renderResults(items, fristenItems){
       <hr>
     </div>
     ${summaryHtml}
-    <div class="card">
-      <h2>${escapeHtml(currentFileName)}</h2>
-      <p class="hint">Ergebnis der Risikoprüfung</p>
-      <div class="summary-row">
-        <div class="summary-card kritisch"><div class="num">${counts.kritisch}</div><div class="lbl">Kritisch</div></div>
-        <div class="summary-card hoch"><div class="num">${counts.hoch}</div><div class="lbl">Hoch</div></div>
-        <div class="summary-card mittel"><div class="num">${counts.mittel}</div><div class="lbl">Mittel</div></div>
-        <div class="summary-card niedrig"><div class="num">${counts.niedrig}</div><div class="lbl">Niedrig</div></div>
-      </div>
-      <div class="table-scroll">
-      <table>
-        <thead><tr><th>Klausel</th><th>Risiko</th><th>Begründung</th><th>Maßnahme</th><th>Referenz</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
+    <div class="result-tabs no-print">
+      <button class="result-tab active" data-pane="pane-risiko">Risikobewertung</button>
+      <button class="result-tab" data-pane="pane-termine">Terminkritische Klauseln</button>
+      <button class="result-tab" data-pane="pane-fristen">Fristen</button>
+    </div>
+    <div class="result-tab-pane" id="pane-risiko">
+      <div class="card">
+        <h2>${escapeHtml(currentFileName)}</h2>
+        <p class="hint">Ergebnis der Risikoprüfung</p>
+        <div class="summary-row">
+          <div class="summary-card kritisch"><div class="num">${counts.kritisch}</div><div class="lbl">Kritisch</div></div>
+          <div class="summary-card hoch"><div class="num">${counts.hoch}</div><div class="lbl">Hoch</div></div>
+          <div class="summary-card mittel"><div class="num">${counts.mittel}</div><div class="lbl">Mittel</div></div>
+          <div class="summary-card niedrig"><div class="num">${counts.niedrig}</div><div class="lbl">Niedrig</div></div>
+        </div>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>Klausel</th><th>Risiko</th><th>Begründung</th><th>Maßnahme</th><th>Referenz</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        </div>
       </div>
     </div>
-    <div class="card">
-      <h2>Terminkritische Klauseln</h2>
-      <p class="hint">Fristen mit konkret erkannter finanzieller oder rechtlicher Folge bei Versäumung, priorisiert</p>
-      ${kritischeTermineHtml}
+    <div class="result-tab-pane" id="pane-termine" style="display:none;">
+      <div class="card">
+        <h2>Terminkritische Klauseln</h2>
+        <p class="hint">Fristen mit konkret erkannter finanzieller oder rechtlicher Folge bei Versäumung, priorisiert</p>
+        ${kritischeTermineHtml}
+      </div>
     </div>
-    <div class="card">
-      <h2>Fristen</h2>
-      <p class="hint">Alle im Vertrag gefundenen Fristen und Termine, nach Kategorie gruppiert</p>
-      ${fristHtml}
+    <div class="result-tab-pane" id="pane-fristen" style="display:none;">
+      <div class="card">
+        <h2>Fristen</h2>
+        <p class="hint">Alle im Vertrag gefundenen Fristen und Termine, nach Kategorie gruppiert</p>
+        ${fristHtml}
+      </div>
     </div>
     <div class="card disclaimer-card">
       <div class="disclaimer-text">
@@ -1250,6 +1272,14 @@ function renderResults(items, fristenItems){
     </div>
   `;
   document.getElementById('topActions').style.display = 'flex';
+  document.querySelectorAll('.result-tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.result-tab-pane').forEach(p => p.style.display = 'none');
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.pane).style.display = 'block';
+    };
+  });
 }
 
 function escapeHtml(str){
