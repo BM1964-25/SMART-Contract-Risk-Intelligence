@@ -975,7 +975,7 @@ async function runAnalysis(){
   btn.disabled = true;
   setError('');
   resetPipeline();
-  const docExcerpt = extractedText.slice(0, 12000);
+  const docExcerpt = extractedText.slice(0, 150000);
 
   const TYP_TEXT = {
     vob: "einen Bauvertrag, in den die VOB/B ausdrücklich einbezogen ist (Werkvertrag zwischen Auftraggeber und bauausführendem Unternehmen nach VOB/B)",
@@ -1025,7 +1025,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     }
     const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …');
     let fristenItems = [];
-    try{ fristenItems = parseJson(stageFristenRaw); }catch(e){ fristenItems = []; }
+    try{ fristenItems = parseJson(stageFristenRaw); }catch(e){ console.error('Fristen-Extraktion: JSON-Parse fehlgeschlagen', e, stageFristenRaw); fristenItems = []; }
     setPipelineStep(2,'done');
 
     // Stage 3: Klassifikation
