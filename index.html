@@ -551,6 +551,36 @@ const HELP_CONTENT = [
 
     <h4>e) Warum Anthropic verwendet wird</h4>
     <p>Anthropic wurde gewählt, weil Claude-Modelle besonders stark bei strukturiertem Arbeiten, Textanalyse, Zusammenfassungen und professionellen Workflows sind. Claude eignet sich gut für längere Dokumente, komplexe Eingaben (wie umfangreiche Bauverträge) und nachvollziehbare, gut begründete Ausgaben. Anthropic legt zudem großen Wert auf Sicherheit, Zuverlässigkeit und verantwortungsvolle KI-Nutzung, und die API ermöglicht eine stabile Integration in professionelle Anwendungen. Über den eigenen API-Key behältst du volle Kontrolle über Nutzung und Abrechnung.</p>
+
+    <h4>f) Welches Modell wofür? (Modellwahl im API-Zugang)</h4>
+    <p>Im Bereich „API-Zugang" kannst du zwischen drei Modellen wählen. Sie unterscheiden sich in Analysetiefe, Geschwindigkeit und Preis:</p>
+    <table class="help-kitable">
+      <thead><tr><th>Modell</th><th>Am besten für</th><th>Kontext</th></tr></thead>
+      <tbody>
+        <tr><td><b>Claude Sonnet 5</b><br>(empfohlen)</td><td>Standardwahl für die meisten Vertragsprüfungen – gutes Verhältnis aus Analysetiefe und Kosten, deckt fast alle Fälle gut ab.</td><td>1 Mio. Token</td></tr>
+        <tr><td><b>Claude Opus 4.8</b><br>(höchste Genauigkeit)</td><td>Besonders komplexe, lange oder wirtschaftlich kritische Verträge (z. B. GU-Verträge mit Open-Book-Mechanismen), wenn maximale Analysetiefe und die zuverlässigste Erkennung von Kumulationseffekten wichtiger ist als der Preis.</td><td>1 Mio. Token</td></tr>
+        <tr><td><b>Claude Haiku 4.5</b><br>(schnell & günstig)</td><td>Schnelle erste Einschätzungen, Testläufe oder kürzere/einfachere Verträge. Bei sehr langen Verträgen (nahe am 300.000-Zeichen-Limit) ist das kleinere Kontextfenster am ehesten der limitierende Faktor.</td><td>200.000 Token</td></tr>
+      </tbody>
+    </table>
+    <p><b>Kosten-Gegenüberstellung</b> (Anthropic-Preise pro Million Token, Stand Juli 2026; die Abrechnung erfolgt direkt über dein eigenes Anthropic-Konto):</p>
+    <table class="help-kitable">
+      <thead><tr><th>Modell</th><th>Input</th><th>Output</th></tr></thead>
+      <tbody>
+        <tr><td>Claude Haiku 4.5</td><td>1 $ / Mio. Token</td><td>5 $ / Mio. Token</td></tr>
+        <tr><td>Claude Sonnet 5</td><td>2 $ / Mio. Token (Einführungspreis bis 31.08.2026, danach 3 $)</td><td>10 $ / Mio. Token (danach 15 $)</td></tr>
+        <tr><td>Claude Opus 4.8</td><td>5 $ / Mio. Token</td><td>25 $ / Mio. Token</td></tr>
+      </tbody>
+    </table>
+    <p>Grobe Schätzung der Kosten <b>pro vollständiger Analyse</b> in dieser App (der Vertragstext wird für Klausel- und Fristen-Extraktion je einmal übertragen, daher steigen die Kosten mit der Vertragslänge):</p>
+    <table class="help-kitable">
+      <thead><tr><th>Vertragslänge</th><th>Haiku 4.5</th><th>Sonnet 5</th><th>Opus 4.8</th></tr></thead>
+      <tbody>
+        <tr><td>kurz (~20 Seiten)</td><td>~0,02–0,05 $</td><td>~0,05–0,12 $</td><td>~0,10–0,25 $</td></tr>
+        <tr><td>mittel (~50 Seiten)</td><td>~0,05–0,10 $</td><td>~0,10–0,25 $</td><td>~0,25–0,50 $</td></tr>
+        <tr><td>lang (~100 Seiten, nahe am Limit)</td><td>~0,10–0,20 $</td><td>~0,20–0,45 $</td><td>~0,45–0,90 $</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:12px; color:var(--text-muted);">Diese Werte sind Schätzungen und können je nach Vertragsinhalt (Anzahl erkannter Klauseln und Fristen) abweichen. Für exakte Kosten siehe die Nutzungsübersicht in der Anthropic Console.</p>
   `},
   { id:"schnellstart", title:"Schnellstart", body:`
     <h3>Schnellstart</h3>
