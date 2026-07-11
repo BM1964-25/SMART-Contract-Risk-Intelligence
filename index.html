@@ -88,6 +88,19 @@
     background-repeat:no-repeat; background-position:right 10px center; background-size:16px;
     padding-right:34px !important; cursor:pointer;
   }
+  .input-icon-btn{
+    position:absolute; top:50%; transform:translateY(-50%);
+    background:none; border:none; padding:4px; cursor:pointer; color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center; border-radius:4px;
+  }
+  .input-icon-btn:hover{ color:var(--navy); background:var(--bg); }
+  .key-status{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-muted); margin-top:10px; }
+  .key-status-dot{ width:8px; height:8px; border-radius:50%; background:var(--border); flex-shrink:0; }
+  .key-status.saved .key-status-dot{ background:var(--navy); }
+  .key-status.saved{ color:var(--text); }
+  .key-status.tested .key-status-dot{ background:var(--green); }
+  .key-status.tested{ color:var(--green); }
+  .wb-caption{ font-size:11px; color:var(--text-muted); margin:4px 2px 0; }
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:8px;
     padding:20px 22px;
@@ -403,14 +416,22 @@
       <div class="card">
         <h2><span class="card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15.5 7.5 2.3 2.3a1 1 0 0 0 1.4 0l1.8-1.8a1 1 0 0 0 0-1.4L18.7 4.3a1 1 0 0 0-1.4 0l-1.8 1.8a1 1 0 0 0 0 1.4Z"/><path d="m9 11 4 4"/><circle cx="6" cy="18" r="3"/><path d="m8.5 15.5 7-7"/></svg></span>API-Zugang</h2>
         <p class="hint">Dein Anthropic-API-Key wird nur lokal in deinem Browser gespeichert, nie an Dritte übertragen</p>
-        <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13px; margin-bottom:8px;">
+        <div style="position:relative; margin-bottom:8px;">
+          <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="width:100%; padding:9px 62px 9px 10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13px;">
+          <button type="button" id="toggleKeyVisBtn" class="input-icon-btn" style="right:32px;" aria-label="API-Key anzeigen">
+            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+          <button type="button" id="clearKeyBtn" class="input-icon-btn" style="right:6px;" aria-label="API-Key löschen">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
         <select id="modelSelect" style="width:100%; padding:13px 12px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13.5px; margin-bottom:8px;">
           <option value="claude-sonnet-5">Claude Sonnet 5 (empfohlen)</option>
           <option value="claude-opus-4-8">Claude Opus 4.8 (höchste Genauigkeit)</option>
           <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (schnell &amp; günstig)</option>
         </select>
         <button class="btn secondary small" id="saveKeyBtn" style="width:100%;">Key speichern</button>
-        <div class="status-line" id="keyStatus"></div>
+        <div class="key-status" id="keyStatus"><span class="key-status-dot"></span><span class="key-status-text"></span></div>
       </div>
 
       <div class="card">
@@ -456,9 +477,11 @@
         <button class="btn secondary small" id="openKbBtn" style="width:100%; justify-content:space-between;">
           <span>Wissensbasis</span><span class="tag" id="kbCountBadge">0</span>
         </button>
+        <p class="wb-caption" id="kbCaption"></p>
         <button class="btn secondary small" id="openHistoryBtn" style="width:100%; justify-content:space-between; margin-top:8px;">
           <span>Verlauf</span><span class="tag" id="historyCountBadge">0</span>
         </button>
+        <p class="wb-caption" id="historyCaption"></p>
         <button class="btn secondary small" id="sidebarHistorySaveBtn" style="width:100%; margin-top:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Verlauf als JSON speichern</button>
         <button class="btn secondary small" id="sidebarHistoryRestoreBtn" style="width:100%; margin-top:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Verlauf wiederherstellen</button>
       </div>
@@ -776,20 +799,42 @@ function applyRole(){
 document.getElementById('roleSelect').onchange = applyRole;
 applyRole();
 
+function updateKeyStatus(state){
+  const el = document.getElementById('keyStatus');
+  el.className = 'key-status' + (state !== 'none' ? ' ' + state : '');
+  const text = el.querySelector('.key-status-text');
+  text.textContent = state === 'tested' ? 'Verbindung erfolgreich getestet.' : state === 'saved' ? 'Key gespeichert.' : 'Kein API-Key hinterlegt.';
+}
 function loadApiKey(){
   apiKey = localStorage.getItem('scri-api-key') || "";
   const savedModel = localStorage.getItem('scri-model');
   if(savedModel) MODEL = savedModel;
   document.getElementById('apiKeyInput').value = apiKey;
   document.getElementById('modelSelect').value = MODEL;
-  document.getElementById('keyStatus').textContent = apiKey ? 'Key gespeichert.' : 'Noch kein API-Key hinterlegt.';
+  updateKeyStatus(apiKey ? 'saved' : 'none');
 }
 document.getElementById('saveKeyBtn').onclick = () => {
   apiKey = document.getElementById('apiKeyInput').value.trim();
   MODEL = document.getElementById('modelSelect').value;
   localStorage.setItem('scri-api-key', apiKey);
   localStorage.setItem('scri-model', MODEL);
-  document.getElementById('keyStatus').textContent = apiKey ? 'Key gespeichert.' : 'Key entfernt.';
+  updateKeyStatus(apiKey ? 'saved' : 'none');
+};
+document.getElementById('clearKeyBtn').onclick = () => {
+  apiKey = '';
+  document.getElementById('apiKeyInput').value = '';
+  localStorage.removeItem('scri-api-key');
+  updateKeyStatus('none');
+};
+document.getElementById('toggleKeyVisBtn').onclick = () => {
+  const input = document.getElementById('apiKeyInput');
+  const btn = document.getElementById('toggleKeyVisBtn');
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  btn.setAttribute('aria-label', showing ? 'API-Key anzeigen' : 'API-Key verbergen');
+  document.getElementById('eyeIcon').innerHTML = showing
+    ? '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>'
+    : '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-6.5 0-10-7-10-7a18.6 18.6 0 0 1 4.22-5.44M9.9 4.24A10.4 10.4 0 0 1 12 4c6.5 0 10 7 10 7a18.6 18.6 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
 };
 
 // Wissensbasis, gruppiert nach Themenbereich (nicht nach Entstehungsreihenfolge):
@@ -915,6 +960,11 @@ function renderKB(){
   `).join('');
   const badge = document.getElementById('kbCountBadge');
   if(badge) badge.textContent = knowledgeBase.length;
+  const caption = document.getElementById('kbCaption');
+  if(caption){
+    const customCount = knowledgeBase.filter(k => !/^kb([1-9]|1[0-4])$/.test(k.id)).length;
+    caption.textContent = customCount > 0 ? `${customCount} eigene${customCount===1?'r Eintrag':' Einträge'}` : '';
+  }
 }
 window.deleteKB = async function(id){
   knowledgeBase = knowledgeBase.filter(k => k.id !== id);
@@ -974,6 +1024,8 @@ function renderHistory(){
   const el = document.getElementById('historyList');
   const badge = document.getElementById('historyCountBadge');
   if(badge) badge.textContent = historyEntries.length;
+  const caption = document.getElementById('historyCaption');
+  if(caption) caption.textContent = historyEntries.length ? `zuletzt: ${new Date(historyEntries[0].date).toLocaleDateString('de-DE')}` : '';
   if(!el) return;
   if(!historyEntries.length){
     el.innerHTML = '<p class="hint">Noch keine Analysen gespeichert.</p>';
@@ -1296,10 +1348,12 @@ document.getElementById('testBtn').onclick = async () => {
   try{
     const raw = await callClaude("Antworte ausschließlich mit dem einzelnen Wort: OK");
     setStatus('Verbindung erfolgreich. Antwort: ' + raw.trim(), 'done');
+    updateKeyStatus(apiKey ? 'tested' : 'none');
   }catch(err){
     console.error(err);
     setError('Verbindungstest fehlgeschlagen: ' + err.message);
     setStatus('');
+    updateKeyStatus(apiKey ? 'saved' : 'none');
   }
 };
 
