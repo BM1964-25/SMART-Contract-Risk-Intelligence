@@ -211,6 +211,14 @@
     letter-spacing:0.3px; margin:0 0 10px; font-family:inherit;
   }
   .ffolge{ font-size:12px; color:var(--amber); margin-top:4px; font-weight:bold; }
+  .top5-list{ margin:0; padding:0 0 0 22px; }
+  .top5-list li{ margin-bottom:10px; font-size:13.5px; line-height:1.5; }
+  .top5-list li .badge{ margin-right:8px; }
+  .axis-grid{ display:flex; flex-direction:column; gap:8px; }
+  .axis-row{ display:flex; align-items:center; gap:12px; font-size:13.5px; }
+  .axis-label{ width:90px; flex-shrink:0; color:var(--text-muted); }
+  .stars{ color:var(--gold); font-size:15px; letter-spacing:2px; }
+  .stars-empty{ color:var(--border); }
   .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
   @media print{
     header, .site-footer, .no-print, .top-actions{ display:none !important; }
@@ -1048,7 +1056,9 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       };
     });
     const classifyPrompt = `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
-Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere strafbewehrte Zwischentermine statt nur ein Endtermin, oder das Zusammenwirken mehrerer Klauseln wie Vollständigkeitsklausel + funktionale Leistungsbeschreibung + fehlende Leistungsbeschreibung im Detail). Solche Kumulationseffekte rechtfertigen häufig eine höhere Einstufung (hoch/kritisch) als die isolierte Betrachtung nahelegen würde.
+Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere strafbewehrte Zwischentermine statt nur ein Endtermin, oder das Zusammenwirken mehrerer Klauseln wie Vollständigkeitsklausel + funktionale Leistungsbeschreibung + fehlende Leistungsbeschreibung im Detail). Solche Kumulationseffekte rechtfertigen häufig eine höhere Einstufung (hoch/kritisch) als die isolierte Betrachtung nahelegen würde. Wenn zwei oder mehr Punkte inhaltlich unmittelbar zusammenhängen (z.B. Leistungsverweigerungsrecht und Anordnungsrecht), benenne diesen Zusammenhang explizit in der Begründung beider Punkte als Kombinationsrisiko.
+Kalibrierung der Risikoverteilung: Verteile die Einstufungen realistisch und nicht zu gleichmäßig. "kritisch" ist die Ausnahme und gehört nur den 2 bis 4 wirklich gravierendsten Punkten im gesamten Vertrag. "hoch" ist eine kleinere bis mittlere Gruppe. Die Mehrheit der Punkte sollte "mittel" oder "niedrig" sein. Vermeide, dass am Ende ungefähr gleich viele Punkte in jeder Stufe landen.
+Sicherheiten-Regel: Bürgschaften ab ca. 10% der Auftragssumme sowie Sicherheitseinbehalte mit hoher absoluter Liquiditätswirkung (z.B. ab ca. 50.000-100.000€) tendieren eher zu "kritisch" statt "hoch", weil die Liquiditätswirkung unabhängig vom Prozentsatz real und sofort spürbar ist – insbesondere bei mittelständischen Auftragnehmern.
 Ordne zusätzlich jedem Punkt im Feld "auswirkung" die primäre wirtschaftliche Auswirkungsebene zu (nur einen Wert wählen, den treffendsten): "Liquidität" (Zahlungsflüsse, Vorleistungspflicht, Einbehalte, Bürgschaften), "Termin" (Bauzeit, Verzug, Fristen), "Haftung" (Gewährleistung, Schadensersatz, Prüf-/Sorgfaltspflichten), "Nachtrag" (Leistungsänderung, Vergütungsanpassung, Anordnungsrecht), "Marge" (Kostenrisiko, Deckungsbeitrag, Pauschalierungsrisiko) oder "Sonstiges".
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","auswirkung":"Liquidität|Termin|Haftung|Nachtrag|Marge|Sonstiges","begruendung":"max 20 Wörter"}]
@@ -1070,6 +1080,7 @@ ${JSON.stringify(itemsWithContext.map(({_referenzTitel, ...rest}) => rest))}`;
     const critical = items.filter(it => it.risiko === 'hoch' || it.risiko === 'kritisch');
     if(critical.length){
       const actionPrompt = `Erstelle für die folgenden hoch/kritisch eingestuften vertraglichen Punkte konkrete, umsetzbare Maßnahmenvorschläge (max 18 Wörter je Punkt).
+Wichtig: Formuliere Maßnahmen als Verhandlungsrahmen, nicht als konkreten Zielwert. Beispiel: "Vertragsstrafe hinsichtlich Höhe, Bezugsgröße und Obergrenze verhandeln" statt "Vertragsstrafe auf 0,1% reduzieren" – der Vertragspartner wird einen konkret vorgegebenen Zielwert selten einfach akzeptieren, ein Verhandlungsrahmen ist realistischer und umsetzbarer.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","massnahme":"..."}]
 
@@ -1109,6 +1120,31 @@ const FRIST_KAT_LABELS = {
 };
 const FRIST_KAT_ORDER = ["Vertragsfrist","Vertragsstrafe","Pruefungsfrist","Zahlungsfrist","Reaktionsfrist","Verjaehrungsfrist"];
 const PRIO_ORDER = {kritisch:0, hoch:1, mittel:2, niedrig:3};
+const AUSWIRKUNG_ACHSEN = ["Liquidität","Nachtrag","Marge","Termin","Haftung"];
+const RISK_WEIGHT = {kritisch:3, hoch:2, mittel:1, niedrig:0};
+
+function starsForScore(score){
+  if(score >= 7) return 5;
+  if(score >= 5) return 4;
+  if(score >= 3) return 3;
+  if(score >= 1) return 2;
+  return 1;
+}
+function renderStars(n){
+  return '<span class="stars">' + '★'.repeat(n) + '<span class="stars-empty">' + '★'.repeat(5-n) + '</span></span>';
+}
+function buildManagementSummary(items){
+  const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
+  const top5 = [...items].sort((a,b) => (order[a.risiko]??2) - (order[b.risiko]??2)).slice(0,5);
+  const axisScores = {};
+  AUSWIRKUNG_ACHSEN.forEach(a => axisScores[a] = 0);
+  items.forEach(it => {
+    if(axisScores[it.auswirkung] !== undefined){
+      axisScores[it.auswirkung] += (RISK_WEIGHT[it.risiko] ?? 1);
+    }
+  });
+  return { top5, axisStars: AUSWIRKUNG_ACHSEN.map(a => ({achse: a, stars: starsForScore(axisScores[a])})) };
+}
 
 function renderResults(items, fristenItems){
   fristenItems = fristenItems || [];
@@ -1117,6 +1153,20 @@ function renderResults(items, fristenItems){
 
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
+
+  const summary = buildManagementSummary(items);
+  const summaryHtml = `
+    <div class="card">
+      <h2>Management Summary</h2>
+      <p class="hint">Die fünf größten Projektrisiken auf einen Blick</p>
+      <ol class="top5-list">
+        ${summary.top5.map(it => `<li><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span> <span>${escapeHtml(it.text)}</span></li>`).join('')}
+      </ol>
+      <p class="hint" style="margin-top:18px;">Geschätzte wirtschaftliche Risikowirkung</p>
+      <div class="axis-grid">
+        ${summary.axisStars.map(a => `<div class="axis-row"><span class="axis-label">${escapeHtml(a.achse)}</span>${renderStars(a.stars)}</div>`).join('')}
+      </div>
+    </div>`;
 
   const rows = items.map(it => `
     <tr>
@@ -1162,6 +1212,7 @@ function renderResults(items, fristenItems){
       <div class="meta">Risikoprüfung · ${escapeHtml(currentFileName)} · erstellt am ${new Date().toLocaleDateString('de-DE')} um ${new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr</div>
       <hr>
     </div>
+    ${summaryHtml}
     <div class="card">
       <h2>${escapeHtml(currentFileName)}</h2>
       <p class="hint">Ergebnis der Risikoprüfung</p>
