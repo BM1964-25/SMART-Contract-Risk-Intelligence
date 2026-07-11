@@ -239,6 +239,7 @@
     letter-spacing:0.3px; margin:0 0 10px; font-family:inherit;
   }
   .ffolge{ font-size:12px; color:var(--amber); margin-top:4px; font-weight:bold; }
+  .intro-text{ font-size:13.5px; color:var(--text); line-height:1.55; margin-bottom:14px; }
   .top5-list{ margin:0; padding:0 0 0 22px; }
   .top5-list li{ margin-bottom:10px; font-size:13.5px; line-height:1.5; }
   .top5-list li .badge{ margin-right:8px; }
@@ -914,7 +915,7 @@ function loadHistory(){
   }
   renderHistory();
 }
-function saveHistoryEntry(items, fristenItems, fristenFailed){
+function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext){
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
   const entry = {
@@ -924,7 +925,8 @@ function saveHistoryEntry(items, fristenItems, fristenFailed){
     counts,
     items: JSON.parse(JSON.stringify(items)),
     fristenItems: JSON.parse(JSON.stringify(fristenItems || [])),
-    fristenFailed: !!fristenFailed
+    fristenFailed: !!fristenFailed,
+    projektKontext: projektKontext || ''
   };
   historyEntries.unshift(entry);
   if(historyEntries.length > 50) historyEntries = historyEntries.slice(0, 50);
@@ -958,7 +960,7 @@ window.openHistoryEntry = function(id){
   currentFileName = entry.filename;
   document.getElementById('topActions').style.display = 'flex';
   closeModal();
-  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed);
+  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '');
   document.getElementById('resultsArea').scrollIntoView({behavior:'smooth', block:'start'});
 };
 window.deleteHistoryEntry = function(id){
@@ -1289,8 +1291,9 @@ async function runAnalysis(){
 Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel), Sicherheiten/Bürgschaften (mit konkreten Prozentsätzen, z.B. Vertragserfüllungs- und Gewährleistungsbürgschaft getrennt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen ausgeschlossen), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten, Open-Book-/Cost-plus-fee-Mechanismen mit AG-Eingriffsrechten, sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.
 Kategorisierung: Ordne jeden Punkt der inhaltlich treffendsten Kategorie zu, nicht der oberflächlichsten. Beispiele: Eine Prüfpflicht mit Haftungsfolge bei übersehenen Fehlern gehört zu "Haftung", nicht zu "Frist", auch wenn eine Frist genannt wird. Bürgschaften und Sicherheitseinbehalte gehören zur eigenen Kategorie "Sicherheit", nicht zu "Sonstiges" oder "Zahlung".
 Wichtig: Bleibe so konkret wie der Vertrag es hergibt. Wenn der Vertrag Prozentsätze, Fristtage, Deckelungsgrenzen, konkrete Kündigungsgründe oder Paragrafen nennt, übernimm diese Zahlen/Bezeichnungen in die Paraphrase statt nur die allgemeine Kategorie zu benennen (z.B. "Vertragsstrafe 0,2%/Tag, Deckel 5% bei Endtermin-Verzug" statt nur "Vertragsstrafe vereinbart").
+Ermittle außerdem kurz das Bauvorhaben (Projektbezeichnung und/oder Adresse, falls im Vertrag genannt) sowie die Vertragsparteien (Firmenname von Auftraggeber und Auftragnehmer, keine natürlichen Personen/Unterzeichner) und fasse dies in einem Satz im Feld "projektkontext" zusammen (max 30 Wörter). Wenn ein Aspekt nicht auffindbar ist, lasse ihn im Satz einfach weg, statt ihn zu erfinden.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]`;
+{"projektkontext":"kurzer Satz zu Bauvorhaben und Vertragsparteien","items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]}`;
     let extractContent;
     if(isScanned && documentImages.length){
       extractContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
@@ -1299,8 +1302,11 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       extractContent = extractInstruction + "\n\nVertragstext:\n" + docExcerpt;
     }
     const stage1Raw = await callClaudeWithRetry(extractContent, 'Extrahiere relevante Klauseln …');
-    let items = parseJson(stage1Raw);
+    const stage1Parsed = parseJson(stage1Raw);
+    let items = Array.isArray(stage1Parsed) ? stage1Parsed : (stage1Parsed.items || []);
+    let projektKontext = Array.isArray(stage1Parsed) ? '' : (stage1Parsed.projektkontext || '');
     setPipelineStep(1,'done');
+
 
     // Stage 2: Fristen-Extraktion (eigenständig, vollständig statt Top-Auswahl)
     setPipelineStep(2,'active');
@@ -1383,8 +1389,8 @@ ${JSON.stringify(critical)}`;
     setPipelineStep(4,'done');
     setStatus(fristenFailed ? 'Analyse abgeschlossen (Fristen-Erkennung übersprungen, siehe Fristen-Tab).' : 'Analyse abgeschlossen.', fristenFailed ? undefined : 'done');
 
-    renderResults(items, fristenItems, fristenFailed);
-    saveHistoryEntry(items, fristenItems, fristenFailed);
+    renderResults(items, fristenItems, fristenFailed, projektKontext);
+    saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext);
   }catch(err){
     console.error(err);
     const stage = document.querySelector('.pipe-step.active');
@@ -1435,7 +1441,7 @@ function buildManagementSummary(items){
   return { top5, axisScores };
 }
 
-function renderResults(items, fristenItems, fristenFailed){
+function renderResults(items, fristenItems, fristenFailed, projektKontext){
   fristenItems = fristenItems || [];
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
   items.sort((a,b) => (order[a.risiko]??2) - (order[b.risiko]??2));
@@ -1443,10 +1449,16 @@ function renderResults(items, fristenItems, fristenFailed){
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
 
+  const CONTRACT_TYPE_LABELS = {vob:"Bauvertrag nach VOB/B", bgb:"Bauvertrag nach BGB", planung:"Planungsvertrag / HOAI", sonstige:"Vertrag"};
+  const introText = (projektKontext && projektKontext.trim())
+    ? projektKontext.trim()
+    : `Diese Auswertung bezieht sich auf die Datei „${currentFileName}" (${CONTRACT_TYPE_LABELS[currentContractType] || 'Vertrag'}).`;
+
   const summary = buildManagementSummary(items);
   const summaryHtml = `
     <div class="card">
       <h2>Management Summary</h2>
+      <p class="intro-text">${escapeHtml(introText)}</p>
       <p class="hint">Die fünf größten Projektrisiken auf einen Blick</p>
       <ol class="top5-list">
         ${summary.top5.map(it => `<li><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span> <span>${escapeHtml(it.text)}</span></li>`).join('')}
