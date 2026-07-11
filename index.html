@@ -101,6 +101,15 @@
   .key-status.tested .key-status-dot{ background:var(--green); }
   .key-status.tested{ color:var(--green); }
   .wb-caption{ font-size:11px; color:var(--text-muted); margin:4px 2px 0; }
+  .recent-history-list{ display:flex; flex-direction:column; gap:4px; margin-top:6px; }
+  .recent-history-item{
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:6px 8px; border-radius:5px; font-size:11.5px; color:var(--text-muted);
+    cursor:pointer; background:var(--bg); border:1px solid transparent;
+  }
+  .recent-history-item:hover{ border-color:var(--border); color:var(--navy); }
+  .recent-history-item .rh-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+  .recent-history-item .rh-date{ flex-shrink:0; font-size:10.5px; color:var(--text-muted); }
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:8px;
     padding:20px 22px;
@@ -481,7 +490,7 @@
         <button class="btn secondary small" id="openHistoryBtn" style="width:100%; justify-content:space-between; margin-top:8px;">
           <span>Verlauf</span><span class="tag" id="historyCountBadge">0</span>
         </button>
-        <p class="wb-caption" id="historyCaption"></p>
+        <div class="recent-history-list" id="recentHistoryList"></div>
         <button class="btn secondary small" id="sidebarHistorySaveBtn" style="width:100%; margin-top:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Verlauf als JSON speichern</button>
         <button class="btn secondary small" id="sidebarHistoryRestoreBtn" style="width:100%; margin-top:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Verlauf wiederherstellen</button>
       </div>
@@ -1031,8 +1040,14 @@ function renderHistory(){
   const el = document.getElementById('historyList');
   const badge = document.getElementById('historyCountBadge');
   if(badge) badge.textContent = historyEntries.length;
-  const caption = document.getElementById('historyCaption');
-  if(caption) caption.textContent = historyEntries.length ? `zuletzt: ${new Date(historyEntries[0].date).toLocaleDateString('de-DE')}` : '';
+  const recentEl = document.getElementById('recentHistoryList');
+  if(recentEl){
+    recentEl.innerHTML = historyEntries.slice(0, 3).map(h => `
+      <div class="recent-history-item" onclick="openHistoryEntry('${h.id}')" title="${escapeHtml(h.filename)}">
+        <span class="rh-name">${escapeHtml(h.filename)}</span>
+        <span class="rh-date">${new Date(h.date).toLocaleDateString('de-DE')}</span>
+      </div>`).join('');
+  }
   if(!el) return;
   if(!historyEntries.length){
     el.innerHTML = '<p class="hint">Noch keine Analysen gespeichert.</p>';
