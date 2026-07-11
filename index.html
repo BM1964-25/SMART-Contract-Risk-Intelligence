@@ -45,7 +45,15 @@
     padding:9px 16px; border-radius:6px; font-size:13.5px; font-family:inherit; cursor:pointer;
   }
   .help-btn:hover{ background:rgba(255,255,255,0.18); }
-  .container{ max-width:1080px; margin:0 auto; padding:28px 24px 80px; }
+  .container{ max-width:1320px; margin:0 auto; padding:28px 24px 80px; }
+  .setup-row{
+    display:grid;
+    grid-template-columns: minmax(220px,0.9fr) minmax(270px,1.35fr) minmax(240px,1.1fr) minmax(220px,0.95fr);
+    gap:20px; align-items:start; margin-bottom:26px;
+  }
+  @media (max-width:1100px){ .setup-row{ grid-template-columns: 1fr 1fr; } }
+  @media (max-width:640px){ .setup-row{ grid-template-columns: 1fr; } }
+  .setup-row > .card{ margin-top:0 !important; }
 
   .site-footer{
     border-top:1px solid var(--border);
@@ -74,8 +82,6 @@
     header h1{ font-size:23px; }
     .help-btn{ align-self:flex-end; }
   }
-  .grid{ display:grid; grid-template-columns: 320px 1fr; gap:24px; align-items:start; }
-  @media (max-width: 860px){ .grid{ grid-template-columns: 1fr; } }
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:8px;
     padding:20px 22px;
@@ -240,7 +246,6 @@
   @media print{
     header, .site-footer, .no-print, .top-actions{ display:none !important; }
     body{ background:#fff; }
-    .grid{ display:block; }
     .print-header{ display:block !important; margin-bottom:20px; }
     .card{ page-break-inside:avoid; }
     tr{ page-break-inside:avoid; }
@@ -343,10 +348,8 @@
 </header>
 
 <div class="container">
-  <div class="grid">
+  <div class="setup-row no-print">
 
-    <!-- LEFT COLUMN -->
-    <div class="no-print">
       <div class="card">
         <h2>API-Zugang</h2>
         <p class="hint">Dein Anthropic-API-Key wird nur lokal in deinem Browser gespeichert, nie an Dritte übertragen</p>
@@ -409,23 +412,19 @@
         <button class="btn secondary small" id="sidebarHistorySaveBtn" style="width:100%; margin-top:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Verlauf als JSON speichern</button>
         <button class="btn secondary small" id="sidebarHistoryRestoreBtn" style="width:100%; margin-top:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Verlauf wiederherstellen</button>
       </div>
-    </div>
 
-    <!-- RIGHT COLUMN -->
-    <div>
-      <div class="top-actions" id="topActions" style="display:none;">
-        <button class="btn secondary small" onclick="window.print()">Als PDF exportieren</button>
-      </div>
-      <div id="resultsArea">
-        <div class="card">
-          <div class="empty">
-            <div class="icon">&#128203;</div>
-            <div>Noch keine Analyse durchgeführt.<br>Lade links ein Dokument hoch und starte die Prüfung.</div>
-          </div>
-        </div>
+  </div>
+
+  <div class="top-actions" id="topActions" style="display:none;">
+    <button class="btn secondary small" onclick="window.print()">Als PDF exportieren</button>
+  </div>
+  <div id="resultsArea">
+    <div class="card">
+      <div class="empty">
+        <div class="icon">&#128203;</div>
+        <div>Noch keine Analyse durchgeführt.<br>Wähle oben eine Vertragsgrundlage, lade ein Dokument hoch und starte die Prüfung.</div>
       </div>
     </div>
-
   </div>
 </div>
 
