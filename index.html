@@ -204,6 +204,13 @@
     display:flex; align-items:center; justify-content:center; margin-top:1px;
   }
   .frist-list .ftext{ flex:1; word-break:break-word; }
+  .frist-group{ margin-bottom:22px; }
+  .frist-group:last-child{ margin-bottom:0; }
+  .frist-group-title{
+    font-size:13px; font-weight:bold; color:var(--navy); text-transform:uppercase;
+    letter-spacing:0.3px; margin:0 0 10px; font-family:inherit;
+  }
+  .ffolge{ font-size:12px; color:var(--amber); margin-top:4px; font-weight:bold; }
   .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
   @media print{
     header, .site-footer, .no-print, .top-actions{ display:none !important; }
@@ -312,9 +319,11 @@
         <div class="pipeline" id="pipeline">
           <div class="pipe-step" data-step="1"><div class="dot">1</div><div>Extraktion relevanter Klauseln</div></div>
           <div class="pipe-line"></div>
-          <div class="pipe-step" data-step="2"><div class="dot">2</div><div>Risiko-Klassifikation</div></div>
+          <div class="pipe-step" data-step="2"><div class="dot">2</div><div>Fristen-Extraktion</div></div>
           <div class="pipe-line"></div>
-          <div class="pipe-step" data-step="3"><div class="dot">3</div><div>Maßnahmenvorschläge</div></div>
+          <div class="pipe-step" data-step="3"><div class="dot">3</div><div>Risiko-Klassifikation</div></div>
+          <div class="pipe-line"></div>
+          <div class="pipe-step" data-step="4"><div class="dot">4</div><div>Maßnahmenvorschläge</div></div>
         </div>
       </div>
 
@@ -618,7 +627,7 @@ function loadHistory(){
   }
   renderHistory();
 }
-function saveHistoryEntry(items){
+function saveHistoryEntry(items, fristenItems){
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
   const entry = {
@@ -626,7 +635,8 @@ function saveHistoryEntry(items){
     filename: currentFileName,
     date: new Date().toISOString(),
     counts,
-    items: JSON.parse(JSON.stringify(items))
+    items: JSON.parse(JSON.stringify(items)),
+    fristenItems: JSON.parse(JSON.stringify(fristenItems || []))
   };
   historyEntries.unshift(entry);
   if(historyEntries.length > 50) historyEntries = historyEntries.slice(0, 50);
@@ -660,7 +670,7 @@ window.openHistoryEntry = function(id){
   currentFileName = entry.filename;
   document.getElementById('topActions').style.display = 'flex';
   closeModal();
-  renderResults(JSON.parse(JSON.stringify(entry.items)));
+  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])));
   document.getElementById('resultsArea').scrollIntoView({behavior:'smooth', block:'start'});
 };
 window.deleteHistoryEntry = function(id){
@@ -891,7 +901,7 @@ function setPipelineStep(step, state){
   el.classList.remove('active','done');
   if(state) el.classList.add(state);
 }
-function resetPipeline(){ [1,2,3].forEach(s => setPipelineStep(s, null)); }
+function resetPipeline(){ [1,2,3,4].forEach(s => setPipelineStep(s, null)); }
 function setStatus(msg, mode){
   const el = document.getElementById('statusLine');
   if(!msg){ el.innerHTML = ''; return; }
@@ -997,8 +1007,29 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     let items = parseJson(stage1Raw);
     setPipelineStep(1,'done');
 
-    // Stage 2: Klassifikation
+    // Stage 2: Fristen-Extraktion (eigenständig, vollständig statt Top-Auswahl)
     setPipelineStep(2,'active');
+    setStatus('Extrahiere alle Fristen und Termine …', 'loading');
+    const fristenInstruction = `Durchsuche den gesamten Vertragstext systematisch nach JEDER konkreten Frist, jedem Termin und jeder Zeitangabe – unabhängig davon, ob sie im Fließtext, in einer Aufzählung oder in Tabellen-/Listenform steht (z.B. auch reine Datums-Stichpunkte wie "Beginn Stahlbetonarbeiten: 16.10.2023" oder "Fertigstellung: 20.05.2025"). Erfasse ALLE auffindbaren Fristen, nicht nur die wichtigsten – hier hat Vollständigkeit Vorrang vor Kürze.
+Ordne jede Frist einer Kategorie zu: "Vertragsfrist" (Baubeginn, Zwischentermine, Gesamtfertigstellung, Bauzeit), "Pruefungsfrist" (Prüfpflichten mit Frist, z.B. Planprüfung, Bemusterung, Nachtragsprüfung), "Zahlungsfrist" (Abschlagsrechnung, Schlussrechnung, Schlusszahlung), "Reaktionsfrist" (Widerspruch, Anzeige, Stellungnahme, Benennung von Dritten), "Verjaehrungsfrist" (Gewährleistung, Mängelansprüche) oder "Vertragsstrafe" (strafbewehrte Termine).
+Gib im Feld "folge" an, ob mit der Frist eine konkrete wirtschaftliche oder rechtliche Folge bei Versäumung verbunden ist (z.B. "Vertragsstrafe 0,2%/Werktag, Deckel 5%" oder "Sicherheitseinbehalt 100.000€") – lasse das Feld leer, wenn der Vertrag keine Folge nennt.
+Vergib im Feld "prioritaet" eine Einstufung "kritisch|hoch|mittel|niedrig" – kritisch/hoch nur, wenn eine konkrete finanzielle oder Haftungsfolge genannt ist, sonst mittel/niedrig.
+Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
+[{"id":"1","bezeichnung":"kurze Bezeichnung, max 8 Wörter","datum":"Datum oder Fristdauer, z.B. 20.05.2025 oder 12 Werktage","kategorie":"Vertragsfrist|Pruefungsfrist|Zahlungsfrist|Reaktionsfrist|Verjaehrungsfrist|Vertragsstrafe","folge":"kurze Folge oder leer","prioritaet":"kritisch|hoch|mittel|niedrig"}]`;
+    let fristenContent;
+    if(isScanned && documentImages.length){
+      fristenContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
+      fristenContent.push({type:"text", text: fristenInstruction + "\n\nDie Bilder zeigen die Seiten des gescannten Vertragsdokuments in der richtigen Reihenfolge."});
+    } else {
+      fristenContent = fristenInstruction + "\n\nVertragstext:\n" + docExcerpt;
+    }
+    const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …');
+    let fristenItems = [];
+    try{ fristenItems = parseJson(stageFristenRaw); }catch(e){ fristenItems = []; }
+    setPipelineStep(2,'done');
+
+    // Stage 3: Klassifikation
+    setPipelineStep(3,'active');
     setStatus('Bewerte Risiken anhand der Wissensbasis …', 'loading');
     const itemsWithContext = items.map(it => {
       const matches = retrieveContextForItem(it, 3);
@@ -1023,10 +1054,10 @@ ${JSON.stringify(itemsWithContext.map(({_referenzTitel, ...rest}) => rest))}`;
       const withCtx = itemsWithContext.find(x => x.id === it.id);
       return {...it, risiko: c.risiko || 'mittel', auswirkung: c.auswirkung || '', begruendung: c.begruendung || '', referenzen: withCtx ? withCtx._referenzTitel : []};
     });
-    setPipelineStep(2,'done');
+    setPipelineStep(3,'done');
 
-    // Stage 3: Maßnahmen
-    setPipelineStep(3,'active');
+    // Stage 4: Maßnahmen
+    setPipelineStep(4,'active');
     setStatus('Erstelle Maßnahmenvorschläge …', 'loading');
     const critical = items.filter(it => it.risiko === 'hoch' || it.risiko === 'kritisch');
     if(critical.length){
@@ -1043,11 +1074,11 @@ ${JSON.stringify(critical)}`;
         return a ? {...it, massnahme: a.massnahme} : it;
       });
     }
-    setPipelineStep(3,'done');
+    setPipelineStep(4,'done');
     setStatus('Analyse abgeschlossen.', 'done');
 
-    renderResults(items);
-    saveHistoryEntry(items);
+    renderResults(items, fristenItems);
+    saveHistoryEntry(items, fristenItems);
   }catch(err){
     console.error(err);
     const stage = document.querySelector('.pipe-step.active');
@@ -1060,14 +1091,24 @@ ${JSON.stringify(critical)}`;
 }
 
 // ---------- results rendering ----------
-function renderResults(items){
+const FRIST_KAT_LABELS = {
+  Vertragsfrist: "Vertragsfristen (Bauzeit)",
+  Pruefungsfrist: "Prüfungsfristen",
+  Zahlungsfrist: "Zahlungsfristen",
+  Reaktionsfrist: "Reaktionsfristen",
+  Verjaehrungsfrist: "Verjährungsfristen",
+  Vertragsstrafe: "Vertragsstrafen-Termine"
+};
+const FRIST_KAT_ORDER = ["Vertragsfrist","Vertragsstrafe","Pruefungsfrist","Zahlungsfrist","Reaktionsfrist","Verjaehrungsfrist"];
+const PRIO_ORDER = {kritisch:0, hoch:1, mittel:2, niedrig:3};
+
+function renderResults(items, fristenItems){
+  fristenItems = fristenItems || [];
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
   items.sort((a,b) => (order[a.risiko]??2) - (order[b.risiko]??2));
 
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
-
-  const fristen = items.filter(it => it.kategorie === 'Frist');
 
   const rows = items.map(it => `
     <tr>
@@ -1079,9 +1120,33 @@ function renderResults(items){
     </tr>
   `).join('');
 
-  const fristHtml = fristen.length
-    ? `<ul class="frist-list">${fristen.map((f,i)=>`<li><div class="fnum">${i+1}</div><div class="ftext">${escapeHtml(f.text)}</div></li>`).join('')}</ul>`
+  // Fristen nach Kategorie gruppiert
+  const fristGroupsHtml = FRIST_KAT_ORDER.map(kat => {
+    const group = fristenItems.filter(f => f.kategorie === kat);
+    if(!group.length) return '';
+    return `
+      <div class="frist-group">
+        <h3 class="frist-group-title">${escapeHtml(FRIST_KAT_LABELS[kat] || kat)}</h3>
+        <ul class="frist-list">${group.map((f,i)=>`<li><div class="fnum">${i+1}</div><div class="ftext"><b>${escapeHtml(f.bezeichnung||'')}</b>${f.datum ? ' — ' + escapeHtml(f.datum) : ''}${f.folge ? `<div class="ffolge">Folge: ${escapeHtml(f.folge)}</div>` : ''}</div></li>`).join('')}</ul>
+      </div>`;
+  }).join('');
+  const fristHtml = fristenItems.length
+    ? fristGroupsHtml
     : `<p class="hint">Keine expliziten Fristen erkannt.</p>`;
+
+  // Terminkritische Klauseln: alle Fristen mit definierter Folge, nach Priorität sortiert
+  const kritischeTermine = fristenItems.filter(f => f.folge && f.folge.trim()).sort((a,b) => (PRIO_ORDER[a.prioritaet]??2) - (PRIO_ORDER[b.prioritaet]??2));
+  const kritischeTermineHtml = kritischeTermine.length
+    ? `<div class="table-scroll"><table>
+        <thead><tr><th>Priorität</th><th>Frist</th><th>Folge</th></tr></thead>
+        <tbody>${kritischeTermine.map(f => `
+          <tr>
+            <td><span class="badge ${f.prioritaet||'mittel'}">${escapeHtml(f.prioritaet||'mittel')}</span></td>
+            <td><b>${escapeHtml(f.bezeichnung||'')}</b>${f.datum ? ' — ' + escapeHtml(f.datum) : ''}</td>
+            <td>${escapeHtml(f.folge)}</td>
+          </tr>`).join('')}</tbody>
+      </table></div>`
+    : `<p class="hint">Keine Fristen mit erkannter finanzieller oder rechtlicher Folge.</p>`;
 
   document.getElementById('resultsArea').innerHTML = `
     <div class="print-header">
@@ -1106,8 +1171,13 @@ function renderResults(items){
       </div>
     </div>
     <div class="card">
+      <h2>Terminkritische Klauseln</h2>
+      <p class="hint">Fristen mit konkret erkannter finanzieller oder rechtlicher Folge bei Versäumung, priorisiert</p>
+      ${kritischeTermineHtml}
+    </div>
+    <div class="card">
       <h2>Fristen</h2>
-      <p class="hint">Automatisch erkannte fristrelevante Punkte</p>
+      <p class="hint">Alle im Vertrag gefundenen Fristen und Termine, nach Kategorie gruppiert</p>
       ${fristHtml}
     </div>
     <div class="card disclaimer-card">
