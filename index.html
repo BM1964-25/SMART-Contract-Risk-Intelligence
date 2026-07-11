@@ -844,7 +844,7 @@ async function callClaude(content){
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 2048,
+        max_tokens: 4096,
         messages: [{role:"user", content: content}]
       })
     });
@@ -870,6 +870,9 @@ async function callClaude(content){
   }
   const textBlock = (data.content||[]).find(c => c.type === 'text');
   if(!textBlock) throw new Error('Keine Textantwort im API-Ergebnis enthalten.');
+  if(data.stop_reason === 'max_tokens'){
+    throw new Error('Antwort wurde wegen Erreichen des Token-Limits abgeschnitten (unvollständiges JSON). Bitte erneut versuchen; bei wiederholtem Auftreten das Dokument kürzen oder Claude informieren.');
+  }
   return textBlock.text;
 }
 function parseJson(raw){
