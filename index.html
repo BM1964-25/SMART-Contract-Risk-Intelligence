@@ -603,35 +603,47 @@
 const HELP_CONTENT = [
   { id:"ueberblick", title:"Überblick", body:`
     <h3>Überblick</h3>
-    <p><b>SMART Contract & Risk Intelligence</b> prüft Bauverträge (VOB/B, BGB-Bauvertrag, Planungsvertrag/HOAI) automatisiert auf rechtliche und wirtschaftliche Risiken. Du lädst einen Vertrag hoch, die App extrahiert relevante Klauseln und Fristen, bewertet das Risiko und schlägt konkrete Maßnahmen vor.</p>
-    <p>Die App läuft vollständig im Browser als einzelne HTML-Datei (BYOK – <i>Bring Your Own Key</i>). Es gibt kein Backend und keinen Server, der deine Vertragsdaten speichert – alles läuft lokal in deinem Browser bzw. direkt zwischen Browser und Anthropic-API.</p>
+    <p><b>SMART Contract & Risk Intelligence</b> prüft Bauverträge (VOB/B, BGB-Bauvertrag, Planungsvertrag/HOAI) automatisiert auf rechtliche und wirtschaftliche Risiken. Zielgruppe sind Baufirmen und Planungsbüros, die einen Vertrag vor Unterschrift oder während der laufenden Abwicklung fachlich einordnen wollen – als schnelle Ersteinschätzung, nicht als Ersatz für eine juristische Prüfung.</p>
+    <p>Die App macht mehr als nur einzelne Klauseln aufzulisten: Sie extrahiert die relevanten Regelungen, erkennt alle Fristen und Termine, bewertet jeden Punkt nach Risikostufe und wirtschaftlicher Auswirkungsebene (Liquidität, Termin, Haftung, Nachtrag, Marge), erstellt konkrete Maßnahmenvorschläge und stellt die wichtigsten Werte einem Marktvergleich gegenüber.</p>
+    <p>Am Ende steht kein reiner Klauselkatalog, sondern eine Management Summary, die die fünf größten Projektrisiken und deren wirtschaftliche Tragweite auf einen Blick zeigt – gedacht für Projektleiter und Geschäftsführung gleichermaßen.</p>
+    <p><b>Was die App bewusst nicht ist:</b> kein Ersatz für anwaltliche Beratung, kein automatischer Vertragsgenerator und keine Garantie auf Vollständigkeit – jede Ausgabe ist eine KI-gestützte fachliche Orientierung, die am Ende von einer Person mit Fachkenntnis geprüft werden sollte, besonders bei wirtschaftlich bedeutsamen Verträgen.</p>
+    <p>Die App läuft vollständig im Browser als einzelne, eigenständige HTML-Datei (BYOK – <i>Bring Your Own Key</i>, d. h. du bringst deinen eigenen Anthropic-API-Key mit). Es gibt kein Backend und keinen Server dieser App – die Kommunikation läuft ausschließlich direkt zwischen deinem Browser und der Anthropic-API.</p>
   `},
   { id:"einrichtung", title:"Einrichtung & Zugang", body:`
     <h3>Einrichtung & Zugang</h3>
 
     <h4>a) Lizenzschlüssel aktivieren</h4>
-    <p>Diese App verwendet aktuell <b>keinen separaten Lizenzschlüssel</b> – sie ist frei und ohne Freischaltung nutzbar. Diese Rubrik ist Teil der einheitlichen Hilfe-Struktur aller BuiltSmart-Apps und wird ergänzt, sobald für dieses Tool ein Lizenzmodell eingeführt wird.</p>
+    <p>Diese App verwendet aktuell <b>keinen separaten Lizenzschlüssel</b> – sie ist frei und ohne Freischaltung nutzbar. Diese Rubrik ist Teil der einheitlichen Hilfe-Struktur aller BuiltSmart-Apps und wird ergänzt, sobald für dieses Tool ein Lizenzmodell eingeführt wird. Solltest du künftig einen Lizenzschlüssel erhalten, wird er einmalig an zentraler Stelle eingegeben und aktiviert die Nutzung der App selbst – unabhängig vom API-Key, siehe Punkt d).</p>
 
     <h4>b) API-Key erstellen</h4>
+    <p>Um die KI-gestützten Funktionen zu nutzen, brauchst du einen eigenen Anthropic-API-Key. So gehst du vor:</p>
     <ol>
-      <li>Öffne die <a href="https://console.anthropic.com" target="_blank" rel="noopener">Anthropic Console</a>.</li>
-      <li>Erstelle ein Konto oder logge dich ein.</li>
-      <li>Öffne im Menü den Bereich <b>„API Keys"</b>.</li>
-      <li>Klicke auf <b>„Create Key"</b>, um einen neuen API-Key zu erstellen.</li>
-      <li>Kopiere den angezeigten Key.</li>
-      <li>Füge ihn in dieser App im Feld <b>„API-Zugang"</b> (linke Seitenleiste) ein und klicke auf „Key speichern".</li>
+      <li>Öffne die <a href="https://console.anthropic.com" target="_blank" rel="noopener">Anthropic Console</a> in einem neuen Tab.</li>
+      <li>Erstelle dort ein Konto oder logge dich mit einem bestehenden Konto ein.</li>
+      <li>Öffne im Menü der Console den Bereich <b>„API Keys"</b>.</li>
+      <li>Klicke auf <b>„Create Key"</b>, um einen neuen API-Key zu erstellen. Vergib optional einen Namen, damit du ihn später wiedererkennst (z. B. „SMART Contract Risk Intelligence").</li>
+      <li>Kopiere den vollständig angezeigten Key sofort in die Zwischenablage.</li>
+      <li>Wechsle zurück in diese App, füge den Key im Feld <b>„API-Zugang"</b> oben ein und klicke auf „Key speichern".</li>
     </ol>
-    <p><b>Wichtig:</b> Der API-Key wird von Anthropic häufig nur <b>einmal vollständig</b> angezeigt. Speichere ihn sicher (z. B. Passwort-Manager) – die App selbst speichert ihn nur lokal in deinem Browser (localStorage), nie an Dritte übertragen.</p>
+    <p><b>Wichtig:</b> Anthropic zeigt den vollständigen API-Key aus Sicherheitsgründen meist nur <b>ein einziges Mal</b> direkt nach dem Erstellen an. Gehst du versehentlich weiter, ohne ihn zu kopieren, musst du einen neuen Key erstellen. Speichere ihn deshalb zusätzlich an einem sicheren Ort (z. B. Passwort-Manager). Die App selbst speichert ihn ausschließlich lokal in deinem Browser (localStorage) – er wird nie an einen Server dieser App oder an Dritte übertragen, sondern nur direkt an die Anthropic-API gesendet, wenn du eine Analyse startest.</p>
+    <p>Über das Auge-Symbol im Eingabefeld kannst du den eingetragenen Key jederzeit ein-/ausblenden, um Tippfehler zu prüfen. Über das Papierkorb-Symbol daneben entfernst du einen gespeicherten Key wieder vollständig aus dem Browser – sinnvoll z. B. auf einem gemeinsam genutzten Rechner.</p>
 
     <h4>c) Warum ein API-Key erforderlich ist</h4>
-    <p>Die App nutzt für die eigentliche Vertragsanalyse KI-Funktionen über die Anthropic-API. Der API-Key verbindet die App mit deinem persönlichen Anthropic-Konto. KI-Anfragen werden dadurch deinem eigenen Konto zugeordnet. Ohne API-Key können die KI-gestützten Funktionen (Extraktion, Fristenerkennung, Risikobewertung, Maßnahmenvorschläge) nicht ausgeführt werden.</p>
+    <p>Die App selbst enthält keine eigene KI – sie nutzt für die eigentliche Vertragsanalyse die KI-Modelle von Anthropic über deren API. Der API-Key ist dabei der Schlüssel, der die App mit deinem persönlichen Anthropic-Konto verbindet. Jede KI-Anfrage, die die App stellt, wird dadurch eindeutig deinem eigenen Konto zugeordnet und darüber abgerechnet. Ohne hinterlegten API-Key kann keine der KI-gestützten Funktionen ausgeführt werden (Extraktion, Fristenerkennung, Risikobewertung, Maßnahmenvorschläge) – Fehlermeldung „Kein API-Key hinterlegt".</p>
 
     <h4>d) Warum auch bei einer bezahlten App-Lizenz ein API-Key nötig ist</h4>
-    <p>App-Nutzung und KI-Nutzung sind grundsätzlich getrennte Dinge: Eine App-Lizenz bezahlt die Nutzung der Software selbst. Die Anthropic-API-Nutzung wird separat über dein eigenes Anthropic-Konto verarbeitet und abgerechnet. Deshalb ist – auch bei einer künftigen bezahlten App-Lizenz – immer ein eigener API-Key erforderlich.</p>
-    <p>Kurz gesagt: <b>Lizenzschlüssel und API-Key erfüllen unterschiedliche Aufgaben:</b> Der Lizenzschlüssel aktiviert die Nutzung dieser App. Er bestätigt, dass du berechtigt bist, die Software zu verwenden. Der API-Key verbindet die App mit deinem Anthropic-Konto. Er ist erforderlich, damit KI-Funktionen ausgeführt werden können. Auch bei einer bezahlten App-Lizenz wird ein eigener API-Key benötigt, weil die Nutzung der KI-Modelle technisch und abrechnungstechnisch getrennt über Anthropic erfolgt.</p>
+    <p>App-Nutzung und KI-Nutzung sind technisch und wirtschaftlich zwei vollständig getrennte Dinge. Eine App-Lizenz – sofern künftig eingeführt – würde ausschließlich die Nutzung der Software selbst bezahlen: den Zugang zur Oberfläche, die Wissensbasis, das Fristenmodul, die Auswertungslogik. Die Nutzung der Anthropic-KI-Modelle dahinter läuft davon unabhängig über dein eigenes Anthropic-Konto und wird dort separat abgerechnet. Deshalb bräuchtest du auch mit einer bezahlten App-Lizenz weiterhin deinen eigenen API-Key – die App-Lizenz würde diesen niemals ersetzen.</p>
+    <p>Zusammengefasst: <b>Lizenzschlüssel und API-Key erfüllen unterschiedliche Aufgaben:</b> Der Lizenzschlüssel aktiviert die Nutzung dieser App. Er bestätigt, dass du berechtigt bist, die Software zu verwenden. Der API-Key verbindet die App mit deinem Anthropic-Konto. Er ist erforderlich, damit KI-Funktionen ausgeführt werden können. Auch bei einer bezahlten App-Lizenz wird ein eigener API-Key benötigt, weil die Nutzung der KI-Modelle technisch und abrechnungstechnisch getrennt über Anthropic erfolgt.</p>
 
     <h4>e) Warum Anthropic verwendet wird</h4>
-    <p>Anthropic wurde gewählt, weil Claude-Modelle besonders stark bei strukturiertem Arbeiten, Textanalyse, Zusammenfassungen und professionellen Workflows sind. Claude eignet sich gut für längere Dokumente, komplexe Eingaben (wie umfangreiche Bauverträge) und nachvollziehbare, gut begründete Ausgaben. Anthropic legt zudem großen Wert auf Sicherheit, Zuverlässigkeit und verantwortungsvolle KI-Nutzung, und die API ermöglicht eine stabile Integration in professionelle Anwendungen. Über den eigenen API-Key behältst du volle Kontrolle über Nutzung und Abrechnung.</p>
+    <p>Anthropic wurde bewusst als KI-Anbieter für diese App gewählt. Die Gründe dafür:</p>
+    <ul>
+      <li>Claude-Modelle sind besonders stark bei strukturiertem Arbeiten, Textanalyse, Zusammenfassungen und professionellen Fachaufgaben – genau das, was eine Vertragsprüfung braucht.</li>
+      <li>Sie eignen sich gut für lange, komplexe Dokumente (Bauverträge mit vielen Paragrafen und Anlagen) und liefern nachvollziehbare, gut begründete Ausgaben statt reiner Stichworte.</li>
+      <li>Anthropic legt großen Wert auf Sicherheit, Zuverlässigkeit und verantwortungsvolle KI-Nutzung – wichtige Kriterien für ein Tool, das mit vertraulichen Vertragsdaten arbeitet.</li>
+      <li>Die API ermöglicht eine stabile, gut dokumentierte Integration in professionelle Anwendungen wie diese.</li>
+      <li>Über den eigenen API-Key behältst du volle Kontrolle über Nutzung und Abrechnung – nichts läuft über ein zentrales Konto Dritter.</li>
+    </ul>
 
     <h4>f) Welches Modell wofür? (Modellwahl im API-Zugang)</h4>
     <p>Im Bereich „API-Zugang" kannst du zwischen drei Modellen wählen. Sie unterscheiden sich in Analysetiefe, Geschwindigkeit und Preis:</p>
@@ -667,23 +679,31 @@ const HELP_CONTENT = [
     <h3>Schnellstart</h3>
     <p>Details zu den ersten beiden Schritten findest du im Kapitel <b>„Einrichtung & Zugang"</b>.</p>
     <ol>
-      <li>Lizenzschlüssel aktivieren (aktuell nicht erforderlich, siehe Einrichtung & Zugang).</li>
-      <li>API-Key eintragen (Anthropic Console → API-Zugang in der App).</li>
-      <li>Vertragsgrundlage und Rolle wählen, Dokument hochladen (PDF, DOCX oder TXT).</li>
-      <li>„Analyse starten" klicken.</li>
-      <li>Ergebnis in der Management Summary und den drei Tabs prüfen, bei Bedarf als PDF exportieren oder im Verlauf speichern.</li>
+      <li><b>Lizenzschlüssel aktivieren</b> – aktuell nicht erforderlich, siehe Einrichtung & Zugang, Punkt a).</li>
+      <li><b>API-Key eintragen</b> – in der Anthropic Console erstellen, im Bereich „API-Zugang" einfügen und speichern (Einrichtung & Zugang, Punkt b).</li>
+      <li><b>Vertragsgrundlage und Rolle wählen</b> – im Bereich „Dokument": VOB/B, BGB, HOAI oder Sonstige.</li>
+      <li><b>Dokument hochladen</b> – per Klick oder Drag & Drop in das grüne Upload-Feld (PDF, DOCX oder TXT).</li>
+      <li><b>„Analyse starten" klicken</b> – die vier Analysestufen laufen automatisch nacheinander, der Fortschritt ist live sichtbar.</li>
+      <li><b>Ergebnis prüfen</b> – zuerst die Management Summary lesen (Top-5-Risiken, wirtschaftliche Auswirkung, ggf. Marktvergleich), dann bei Bedarf in die drei Tabs wechseln.</li>
+      <li><b>Exportieren oder weiterverwenden</b> – als PDF exportieren (Querformat, druckoptimiert) oder automatisch im Verlauf gespeichert, jederzeit über „Weitere Bereiche" wieder abrufbar.</li>
     </ol>
   `},
   { id:"bedienoberflaeche", title:"Bedienoberfläche", body:`
     <h3>Bedienoberfläche</h3>
-    <p><b>Linke Seitenleiste:</b></p>
+    <p><b>Obere Zeile – vier Karten zur Einrichtung und Steuerung:</b></p>
     <ul>
-      <li><b>API-Zugang</b> – API-Key eintragen, Modell wählen (Sonnet 5 / Opus 4.8 / Haiku 4.5), Verbindung testen.</li>
-      <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) und Rolle wählen, Datei hochladen, Analyse starten.</li>
-      <li><b>Analyse-Pipeline</b> – zeigt den Live-Fortschritt der vier Analysestufen.</li>
-      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf inkl. Speichern/Wiederherstellen als JSON.</li>
+      <li><b>API-Zugang</b> – API-Key eintragen (mit Ein-/Ausblenden- und Lösch-Funktion), Modell wählen (Sonnet 5 / Opus 4.8 / Haiku 4.5), Verbindung testen. Ein farbiger Status zeigt den aktuellen Zustand: grau = kein Key, navy = Key gespeichert, grün = Verbindung erfolgreich getestet.</li>
+      <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) wählen, Datei per Klick oder Drag & Drop hochladen, Analyse starten. Nach dem Upload zeigt die App Zeichenzahl und geschätzte Seitenzahl an.</li>
+      <li><b>Analyse-Pipeline</b> – zeigt den Live-Fortschritt der vier Analysestufen mit kurzer Erklärung, was jede Stufe tut.</li>
+      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, den letzten drei Analysen zum direkten Öffnen, sowie Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei.</li>
     </ul>
-    <p><b>Rechter Ergebnisbereich:</b> Management Summary (immer sichtbar) mit den fünf größten Risiken und der Auswirkungs-Grafik, darunter drei Tabs: Risikobewertung, Terminkritische Klauseln, Fristen.</p>
+    <p><b>Ergebnisbereich (erscheint nach der ersten Analyse):</b></p>
+    <ul>
+      <li><b>Management Summary</b> – immer sichtbar, unabhängig vom gewählten Tab: kurze Einordnung von Bauvorhaben/Vertragsparteien, die fünf größten Risiken, Balkendiagramm der wirtschaftlichen Auswirkungsachsen.</li>
+      <li><b>Marktvergleich</b> – erscheint automatisch, wenn vergleichbare Werte im Vertrag gefunden wurden (Gewährleistung, Vertragsstrafe, Zahlungsfrist, VOB/B-Einbeziehung, Sicherheiten).</li>
+      <li><b>Drei Tabs</b> darunter: Risikobewertung (vollständige Tabelle), Terminkritische Klauseln (Fristen mit finanzieller/rechtlicher Folge, priorisiert), Fristen (Zeitstrahl für datierte Termine plus vollständige, nach Kategorie gruppierte Liste aller Fristen).</li>
+    </ul>
+    <p>Oben rechts im Header findest du jederzeit den <b>Hilfe-Button</b>, der dieses Fenster öffnet, ohne deine aktuelle Analyse zu verlieren.</p>
   `},
   { id:"funktionen", title:"Wichtige Funktionen", body:`
     <h3>Wichtige Funktionen</h3>
@@ -692,52 +712,64 @@ const HELP_CONTENT = [
       <tbody>
         <tr><td>Dokument hochladen & Text auslesen</td><td class="no">Nein</td></tr>
         <tr><td>Wissensbasis verwalten (Einträge ansehen/hinzufügen/löschen)</td><td class="no">Nein</td></tr>
-        <tr><td>Verlauf ansehen, als JSON speichern/wiederherstellen</td><td class="no">Nein</td></tr>
+        <tr><td>Verlauf ansehen, öffnen, als JSON speichern/wiederherstellen</td><td class="no">Nein</td></tr>
         <tr><td>Extraktion relevanter Klauseln</td><td class="yes">Ja</td></tr>
-        <tr><td>Fristen-Extraktion</td><td class="yes">Ja</td></tr>
+        <tr><td>Fristen-Extraktion (inkl. Zeitstrahl, Dauer-Erkennung)</td><td class="yes">Ja</td></tr>
         <tr><td>Risiko-Klassifikation (inkl. Kumulationseffekte, Auswirkungsachsen)</td><td class="yes">Ja</td></tr>
         <tr><td>Maßnahmenvorschläge</td><td class="yes">Ja</td></tr>
+        <tr><td>Marktvergleich (Vertragswerte werden von der KI erkannt)</td><td class="yes">Ja</td></tr>
       </tbody>
     </table>
-    <p>Die eigentliche Risikoanalyse ist also vollständig KI-gestützt; Verwaltung und Organisation (Wissensbasis, Verlauf, Dokumentenvorschau) funktionieren auch ohne API-Key.</p>
+    <p>Die eigentliche Risikoanalyse ist also vollständig KI-gestützt; Verwaltung und Organisation (Wissensbasis, Verlauf, Dokumentenvorschau) funktionieren auch ohne API-Key. Die Markt-Richtwerte selbst (z. B. „4 Jahre VOB/B") sind fest in der App hinterlegt und werden nicht von der KI erfunden – nur die tatsächlichen Werte deines Vertrags werden von ihr erkannt und gegenübergestellt.</p>
+    <p>Weitere Funktionen im Überblick: Auge-/Papierkorb-Symbol zur Verwaltung des API-Keys, farbiger Verbindungsstatus, druckoptimierter PDF-Export im Querformat, Schnellzugriff auf die letzten drei Analysen direkt in der Kachel „Weitere Bereiche".</p>
   `},
   { id:"workflow", title:"Typischer Workflow", body:`
     <h3>Typischer Workflow</h3>
     <ol>
-      <li>Vertragsgrundlage und Rolle festlegen – das steuert, welche Wissensbasis-Einträge einbezogen werden und aus wessen Perspektive bewertet wird.</li>
+      <li>Vertragsgrundlage und Rolle festlegen – das steuert, welche Wissensbasis-Einträge einbezogen werden und aus welcher Rechtsgrundlage heraus bewertet wird.</li>
       <li>Vertrag hochladen. Bei sehr langen Dokumenten zeigt die App eine Seitenschätzung und ggf. einen Hinweis, falls das Analyse-Limit überschritten wird.</li>
-      <li>Analyse starten – die vier Stufen laufen automatisch nacheinander.</li>
-      <li>Management Summary zuerst lesen für den Überblick, dann gezielt in die Tabs wechseln.</li>
-      <li>Bei kritischen/hohen Punkten die vorgeschlagenen Maßnahmen als Verhandlungsgrundlage nutzen.</li>
-      <li>Ergebnis als PDF exportieren oder im Verlauf für später speichern.</li>
+      <li>Analyse starten – die vier Stufen (Klausel-Extraktion, Fristen-Extraktion, Risiko-Klassifikation, Maßnahmenvorschläge) laufen automatisch nacheinander.</li>
+      <li>Management Summary zuerst lesen für den Überblick, dann bei Bedarf den Marktvergleich prüfen, anschließend gezielt in die drei Tabs wechseln.</li>
+      <li>Bei kritischen/hohen Punkten die vorgeschlagenen Maßnahmen als Verhandlungsgrundlage nutzen – sie sind bewusst als Verhandlungsrahmen formuliert, nicht als starre Zielvorgabe.</li>
+      <li>Terminkritische Klauseln und den Fristen-Zeitstrahl für die Projektsteuerung im Blick behalten.</li>
+      <li>Ergebnis als PDF exportieren (für Weitergabe/Ablage) oder im Verlauf für später speichern – beides ersetzt kein eigenes, sicheres Ablagesystem für den Originalvertrag, siehe Kapitel „Eingaben & Daten".</li>
     </ol>
   `},
   { id:"eingaben", title:"Eingaben & Daten", body:`
     <h3>Eingaben & Daten</h3>
-    <p><b>Unterstützte Dateiformate:</b> PDF (auch gescannt, dann per Bilderkennung), Word (.docx), Text (.txt).</p>
-    <p><b>Größenrahmen:</b> Es werden bis zu ca. 300.000 Zeichen (ca. 100–110 Seiten) je Vertrag analysiert. Längere Dokumente werden nach dem Auffangen der ersten Seiten mit einem Hinweis versehen; der überschüssige Teil fließt nicht in die Analyse ein.</p>
-    <p><b>Datenverarbeitung:</b> Der Vertragstext wird direkt aus deinem Browser an die Anthropic-API gesendet – es gibt keinen zwischengeschalteten Server dieser App. Wissensbasis und Verlauf werden ausschließlich lokal in deinem Browser gespeichert (localStorage) und nicht automatisch synchronisiert oder hochgeladen.</p>
+    <p><b>Unterstützte Dateiformate:</b> PDF (auch gescannt, dann automatisch per Bilderkennung statt Textauslesung), Word (.docx), Text (.txt).</p>
+    <p><b>Größenrahmen:</b> Es werden bis zu ca. 300.000 Zeichen (grob 100–110 Seiten, je nach Zeichendichte) je Vertrag analysiert. Längere Dokumente werden nach dem Erreichen dieses Limits mit einem Hinweis versehen; der überschüssige Teil fließt nicht in die Analyse ein.</p>
+    <p><b>Wird der Vertrag selbst gespeichert? Nein.</b> Das ist ein wichtiger Punkt: Der hochgeladene Vertragstext liegt nur temporär im Arbeitsspeicher deines Browsers, solange die Analyse läuft bzw. das Ergebnis auf dem Bildschirm angezeigt wird. Er wird zu keinem Zeitpunkt lokal gespeichert (nicht im Verlauf, nicht in localStorage) und auch nicht an einen Server dieser App übertragen – lediglich für die Dauer der Analyse an die Anthropic-API gesendet, damit die KI ihn lesen kann. Schließt oder lädst du die Seite neu, ist der Originaltext weg, und ein erneuter Analysedurchlauf würde ein erneutes Hochladen der Datei erfordern.</p>
+    <p><b>Was wird dann im Verlauf gespeichert?</b> Ausschließlich das <b>Analyseergebnis</b>: Dateiname, Datum, die erkannten Risikopunkte samt Bewertung und Maßnahmen, die erkannten Fristen, die Projektzusammenfassung und der Marktvergleich. Das reicht aus, um ein früheres Ergebnis jederzeit wieder anzusehen, als PDF zu exportieren oder als JSON zu sichern – der Originalvertrag selbst müsste bei Bedarf erneut hochgeladen werden.</p>
+    <p><b>Datenverarbeitung im Übrigen:</b> Wissensbasis und Verlauf werden ausschließlich lokal in deinem Browser gespeichert (localStorage) und nicht automatisch synchronisiert oder irgendwohin hochgeladen. Sie bleiben so lange erhalten, bis du sie löschst oder die Browserdaten leerst.</p>
   `},
   { id:"ergebnisse", title:"Ergebnisse verstehen", body:`
     <h3>Ergebnisse verstehen</h3>
-    <p><b>Risikostufen:</b> kritisch (Ausnahme, 2–4 gravierendste Punkte) · hoch · mittel (Regelfall für die meisten Standardregelungen) · niedrig.</p>
-    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Das Balkendiagramm in der Management Summary zeigt, welche Achse bei diesem Vertrag am stärksten betroffen ist.</p>
+    <p><b>Risikostufen:</b> kritisch (Ausnahme, 2–4 gravierendste Punkte im gesamten Vertrag) · hoch · mittel (Regelfall für die meisten Standardregelungen) · niedrig.</p>
+    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Das Balkendiagramm in der Management Summary zeigt relativ zueinander, welche Achse bei diesem Vertrag am stärksten betroffen ist.</p>
+    <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte (Gewährleistung, Vertragsstrafe, Zahlungsfrist, VOB/B-Einbeziehung, Vertragserfüllungssicherheit) den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – dient der schnellen Einordnung, nicht als Rechtsauskunft.</p>
     <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge (z. B. Vertragsstrafe, Sicherheitseinbehalt) erkannt wurde, priorisiert nach Dringlichkeit.</p>
-    <p><b>Fristen:</b> vollständige, nach Kategorie gruppierte Liste aller im Vertrag gefundenen Termine (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine).</p>
+    <p><b>Fristen:</b> zweigeteilt – oben ein chronologischer Zeitstrahl für alle Fristen mit einem echten Kalenderdatum, darunter die vollständige, nach Kategorie gruppierte Liste aller Fristen (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine). Relative Fristen (z. B. „12 Werktage nach Erhalt der Ausführungsplanung") zeigen zusätzlich eine Dauer-Kennzeichnung und den hervorgehobenen Bezugspunkt.</p>
     <p><b>Referenz:</b> zeigt, welche Wissensbasis-Einträge zur Bewertung eines Punktes herangezogen wurden.</p>
+    <p><b>Ein Beispiel zur Einordnung:</b> Ein Punkt mit Risiko „kritisch" und Auswirkung „Liquidität" könnte etwa eine 10 %-Vertragserfüllungssicherheit ohne Fristbegrenzung sein – die Begründung würde erklären, warum (hohe, sofort spürbare Kapitalbindung), und die vorgeschlagene Maßnahme einen Verhandlungsrahmen nennen (z. B. Befristung und Höhe der Bürgschaft verhandeln), statt einen starren Zielwert vorzugeben.</p>
   `},
   { id:"fehler", title:"Fehler & Lösungen", body:`
     <h3>Fehler & Lösungen</h3>
     <p><b>„Kein API-Key hinterlegt"</b> – API-Key im Bereich „API-Zugang" eintragen und speichern.</p>
-    <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – das Dokument ist sehr umfangreich. Erneut versuchen; bei wiederholtem Auftreten ein kürzeres Dokument testen.</p>
-    <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs und wechselt auf Bilderkennung; das kann etwas länger dauern.</p>
-    <p><b>„Modellantwort war kein gültiges JSON"</b> – tritt selten bei API-Störungen auf. Die App versucht automatisch bis zu zwei weitere Male; hält der Fehler an, kurz später erneut versuchen.</p>
-    <p><b>„API antwortete mit Status 401/403"</b> – API-Key ungültig oder abgelaufen; neuen Key in der Anthropic Console erstellen.</p>
+    <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – das Dokument ist für diesen Analyseschritt sehr umfangreich. Erneut versuchen; bei wiederholtem Auftreten hilft manchmal ein Wechsel auf ein leistungsfähigeres Modell (z. B. Opus 4.8) oder ein kürzeres Dokument.</p>
+    <p><b>„Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden"</b> – die übrige Analyse (Klauseln, Risikobewertung, Maßnahmen) bleibt davon unberührt und vollständig nutzbar; nur das Fristenmodul konnte in diesem Lauf nicht abgeschlossen werden. Ein erneuter Analyselauf kann helfen.</p>
+    <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs ohne durchsuchbaren Text und wechselt auf Bilderkennung; das kann etwas länger dauern als bei normalem Text.</p>
+    <p><b>„Modellantwort war kein gültiges JSON"</b> – tritt selten bei kurzzeitigen API-Störungen auf. Die App versucht automatisch bis zu zwei weitere Male; hält der Fehler an, hilft meist ein erneuter Versuch nach kurzer Wartezeit.</p>
+    <p><b>„API antwortete mit Status 401/403"</b> – der API-Key ist ungültig, abgelaufen oder wurde in der Anthropic Console widerrufen; einen neuen Key erstellen und in der App aktualisieren.</p>
+    <p><b>„Nicht unterstütztes Dateiformat"</b> – nur PDF, DOCX und TXT werden unterstützt; andere Formate (z. B. gescannte Bilder als JPG/PNG, ZIP-Archive) müssen vorher in eines dieser Formate umgewandelt werden.</p>
+    <p><b>Sehr langes Dokument, Hinweis zum Analyse-Limit</b> – die App analysiert bis zu ca. 300.000 Zeichen (~100–110 Seiten). Bei längeren Verträgen wird nach dem Hochladen ein Hinweis angezeigt; der überschüssige Teil des Dokuments fließt dann nicht in die Analyse ein. In dem Fall hilft es, das Dokument vorab zu kürzen (z. B. reine Anlagen/Pläne entfernen) oder gezielt den relevanten Vertragstext separat hochzuladen.</p>
+    <p><b>Ergebnis wirkt unvollständig oder ungenau</b> – ein Wechsel auf ein leistungsfähigeres Modell (Opus 4.8) verbessert häufig die Analysetiefe bei komplexen Verträgen, siehe Kapitel „Einrichtung & Zugang", Punkt f).</p>
   `},
   { id:"version", title:"Version & Hinweise", body:`
     <h3>Version & Hinweise</h3>
-    <p>Diese Auswertung wird KI-gestützt erstellt und dient ausschließlich als fachliche Orientierung. Sie ersetzt keine rechtliche Prüfung und stellt keine Rechtsberatung dar. Für rechtsverbindliche Entscheidungen empfehlen wir die Prüfung durch eine Rechtsanwältin, einen Rechtsanwalt oder eine sonst fachkundige Person.</p>
-    <p>Repository: <code>BM1964-25/SMART-Contract-Risk-Intelligence</code> (GitHub).</p>
+    <p><b>Rechtlicher Hinweis:</b> Diese Auswertung wird KI-gestützt erstellt und dient ausschließlich als fachliche Orientierung. Sie ersetzt keine rechtliche Prüfung und stellt keine Rechtsberatung dar. Trotz sorgfältig gepflegter Wissensbasis können Fehleinschätzungen, Auslassungen oder nicht berücksichtigte, aktuelle Rechtsprechung auftreten. Für rechtsverbindliche Entscheidungen empfehlen wir die Prüfung durch eine Rechtsanwältin, einen Rechtsanwalt oder eine sonst fachkundige Person. Ebenso liefern der Marktvergleich und die Wissensbasis allgemeine Praxis-Richtwerte, keine für den Einzelfall geprüfte Rechtsberatung.</p>
+    <p><b>Datensparsamkeit im Überblick:</b> Der Originalvertrag wird nirgendwo gespeichert (siehe Kapitel „Eingaben & Daten"). Es gibt keinen Server dieser App – API-Key, Wissensbasis und Verlauf liegen ausschließlich lokal in deinem Browser. Die einzige externe Verbindung ist die direkte, verschlüsselte Anfrage an die Anthropic-API zum Zeitpunkt der Analyse.</p>
+    <p><b>Weiterentwicklung:</b> Diese App wird laufend weiterentwickelt – neue Vertragstypen, präzisere Risikobewertung und zusätzliche Auswertungen kommen kontinuierlich hinzu. Rückmeldungen zu falsch erkannten oder fehlenden Punkten helfen dabei, die Wissensbasis gezielt zu verbessern.</p>
   `}
 ];
 function renderHelp(activeId){
