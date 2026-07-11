@@ -327,6 +327,8 @@
         <button class="btn secondary small" id="openHistoryBtn" style="width:100%; justify-content:space-between; margin-top:8px;">
           <span>Verlauf</span><span class="tag" id="historyCountBadge">0</span>
         </button>
+        <button class="btn secondary small" id="sidebarHistorySaveBtn" style="width:100%; margin-top:14px;">Verlauf als JSON speichern</button>
+        <button class="btn secondary small" id="sidebarHistoryRestoreBtn" style="width:100%; margin-top:8px;">Verlauf wiederherstellen</button>
       </div>
     </div>
 
@@ -378,7 +380,7 @@
       <div class="modal-pane" id="paneKb">
         <p class="hint">Fließt als Referenz in die Risikobewertung ein</p>
         <div class="kb-explainer">
-          Für jede erkannte Vertragsklausel sucht die App automatisch die zwei am besten passenden Einträge hier
+          Für jede erkannte Vertragsklausel sucht die App automatisch die bis zu drei am besten passenden Einträge hier
           heraus und gibt sie der KI als Fachkontext mit. Bewertet wird nach <b>Tags</b>: stimmt ein Tag exakt mit
           der Klausel-Kategorie überein (z. B. „Frist"), zählt das stärker als ein Tag, der nur im Fließtext der
           Klausel vorkommt. Je genauer und zahlreicher deine Tags, desto treffsicherer die Zuordnung. Ergänze
@@ -511,7 +513,33 @@ const DEFAULT_KB = [
    tags:["agb","formularvertrag","klausel"]},
   {id:"kb14", title:"BGB – Verbraucherbauvertrag & Baubeschreibung", typ:["bgb"],
    text:"Bei Verbraucherbauverträgen (§ 650i BGB, Vertragspartner ist Privatperson) gelten Sonderpflichten: verbindliche Baubeschreibung vor Vertragsschluss, 14-tägiges Widerrufsrecht, verbindlicher Fertigstellungstermin. Fehlt die Baubeschreibung oder ist sie unvollständig, drohen Auslegungsnachteile zu Lasten des Unternehmers.",
-   tags:["verbraucherbauvertrag","baubeschreibung","widerruf","bgb"]}
+   tags:["verbraucherbauvertrag","baubeschreibung","widerruf","bgb"]},
+
+  // F) Generalunternehmer- & Pauschalvertrag-spezifische Risikomuster
+  {id:"kb15", title:"Dokumentations- und Berichtspflichten des AN", typ:["vob","bgb","sonstige"],
+   text:"GU-Verträge verlangen häufig laufende Berichtspflichten (wöchentliche Bautagesberichte, monatliche Projektberichte mit Soll-Ist-Terminvergleich, Cashflow-Fortschreibung, Nachtragsliste, Fotodokumentation). Das ist erheblicher administrativer Aufwand, der bei der Kalkulation eingepreist werden sollte, und Verstöße können vertragswidriges Verhalten darstellen.",
+   tags:["dokumentation","bautagesbericht","monatsbericht","verwaltungsaufwand"]},
+  {id:"kb16", title:"Leistungsverweigerungsrecht bei Anordnungen ausgeschlossen", typ:["vob","bgb"],
+   text:"Manche Verträge verpflichten den AN, angeordnete Leistungsänderungen auch ohne vorherige Einigung über die Vergütung sofort auszuführen, und schließen ein Leistungsverweigerungs- oder Zurückbehaltungsrecht insoweit ausdrücklich aus. Das verschiebt das wirtschaftliche Risiko der Nachtragsverhandlung fast vollständig auf den AN, der in Vorleistung treten muss, bevor der Preis feststeht – eines der bedeutendsten wirtschaftlichen Risiken in GU-Verträgen und regelmäßig als kritisch einzustufen.",
+   tags:["anordnung","leistungsverweigerung","vorleistung","nachtrag"]},
+  {id:"kb17", title:"Gefahrtragung – Abweichung von VOB/B § 7", typ:["vob","bgb"],
+   text:"Manche Verträge schließen § 7 VOB/B (Gefahrtragung bei höherer Gewalt/Zerstörung) ausdrücklich aus und verweisen stattdessen auf § 644 BGB. Das kann die Risikoverteilung bei Schäden vor Abnahme zu Lasten des AN verschieben, insbesondere in Kombination mit ausgeschlossener fiktiver Abnahme und umfangreichen Abnahmevoraussetzungen – der Gefahrübergang verzögert sich dann zusätzlich.",
+   tags:["gefahrtragung","abnahme","vob","haftung"]},
+  {id:"kb18", title:"Abnahmevoraussetzungen und Ausschluss der fiktiven Abnahme", typ:["vob","bgb"],
+   text:"Verträge, die eine fiktive Abnahme (§ 12 Nr. 5 VOB/B bzw. Abnahmefiktion nach § 640 Abs. 2 BGB) ausdrücklich ausschließen und zusätzlich umfangreiche Unterlagen (Revisionspläne, Bestandspläne, Prüfbescheinigungen) als formale Abnahmevoraussetzung verlangen, verzögern faktisch Gefahrübergang, Vergütungsfälligkeit und Verjährungsbeginn zu Lasten des AN – ein häufig unterschätztes Zusammenspiel mehrerer Klauseln.",
+   tags:["abnahme","fiktion","dokumentation","verjährung"]},
+  {id:"kb19", title:"Sicherheitseinbehalt bei fehlender Dokumentation", typ:["vob","bgb"],
+   text:"Manche Verträge erlauben dem AG einen eigenständigen, oft hohen Sicherheitseinbehalt speziell für den Fall, dass Dokumentationsunterlagen (Revisionspläne, Wartungsunterlagen, Bestandspläne) nicht fristgerecht geliefert werden – unabhängig von den sonstigen Sicherheiten nach § 17 VOB/B. Das ist ein zusätzlicher, oft übersehener Liquiditätshebel des AG, der bei größeren Bausummen erhebliche Beträge erreichen kann.",
+   tags:["sicherheit","dokumentation","einbehalt"]},
+  {id:"kb20", title:"Open-Book-Vergabeprozess mit AG-Eingriffsrechten", typ:["vob","bgb","sonstige"],
+   text:"Bei Open-Book-/Cost-plus-fee-Regelungen in GU-Verträgen erhält der AG häufig weitreichende Mitwirkungs- und Eingriffsrechte in die Nachunternehmervergabe des AN (Einsicht in Angebote und Kalkulation, Vorschlagsrecht für Bieter, Widerspruchsrecht gegen die Vergabeentscheidung, Prinzip der „gläsernen Taschen“). Das geht über eine reine Kostentransparenzpflicht hinaus und beschränkt die unternehmerische Dispositionsfreiheit des AN erheblich – je nach Ausgestaltung eher hohes bis kritisches Risiko, nicht nur eine Transparenzpflicht.",
+   tags:["open-book","nachunternehmer","vergabe","transparenz","cost-plus-fee"]},
+  {id:"kb21", title:"Vollständigkeitsklausel bei funktionaler Leistungsbeschreibung", typ:["vob","bgb"],
+   text:"Kombiniert ein Vertrag eine weite Vollständigkeitsklausel (AN schuldet alles, was zur mangelfreien, funktionsfähigen Herstellung erforderlich ist) mit der Pflicht zur Werkstatt-/Montageplanung, Koordination und Einhaltung der allgemein anerkannten Regeln der Technik bei gleichzeitig nicht vollständig beschriebenen Einzelleistungen, verschiebt sich das Risiko unvollständiger Ausschreibung faktisch auf den AN. Diese Kombination ist eine der häufigsten Ursachen für spätere Nachtragsstreitigkeiten in GU-Verträgen.",
+   tags:["vollständigkeit","werkstattplanung","funktional","nachtrag"]},
+  {id:"kb22", title:"Prüfpflicht der Ausführungsplanung durch den AN", typ:["vob","bgb","planung"],
+   text:"Verpflichtet der Vertrag den AN, vom AG übergebene Ausführungsplanung innerhalb einer kurzen Frist (z.B. 8-12 Werktage) auf Richtigkeit, Vollständigkeit und Widerspruchsfreiheit zu prüfen, haftet der AN in der Regel für später erkennbare, aber übersehene Fehler. Bei eng bemessener Prüffrist und umfangreicher Planung ist dies ein hohes Haftungsrisiko, nicht nur eine organisatorische Pflicht – besonders wenn die Planfreigabe die Verantwortung des AN ausdrücklich unberührt lässt.",
+   tags:["prüfpflicht","ausführungsplanung","haftung","frist"]}
 ];
 
 let knowledgeBase = [];
@@ -642,7 +670,7 @@ window.deleteHistoryEntry = function(id){
 };
 
 // ---------- Verlauf: JSON speichern / wiederherstellen ----------
-document.getElementById('historySaveBtn').onclick = () => {
+function saveHistoryAsJson(){
   const blob = new Blob([JSON.stringify(historyEntries, null, 2)], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -652,10 +680,14 @@ document.getElementById('historySaveBtn').onclick = () => {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-};
-document.getElementById('historyRestoreBtn').onclick = () => {
+}
+function triggerHistoryRestore(){
   document.getElementById('historyRestoreInput').click();
-};
+}
+document.getElementById('historySaveBtn').onclick = saveHistoryAsJson;
+document.getElementById('historyRestoreBtn').onclick = triggerHistoryRestore;
+document.getElementById('sidebarHistorySaveBtn').onclick = saveHistoryAsJson;
+document.getElementById('sidebarHistoryRestoreBtn').onclick = triggerHistoryRestore;
 document.getElementById('historyRestoreInput').onchange = async (e) => {
   const file = e.target.files[0];
   e.target.value = '';
@@ -945,7 +977,8 @@ async function runAnalysis(){
     // Stage 1: Extraktion
     setPipelineStep(1,'active');
     setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …', 'loading');
-    const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Bauträgerrecht) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext und extrahiere die 6 bis 10 wichtigsten vertraglich relevanten Punkte: Fristen, Pflichten, Haftungsregelungen, Kündigungsklauseln, Vertragsstrafen, Zahlungsbedingungen.
+    const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Generalunternehmerverträge) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext und extrahiere die 8 bis 14 wichtigsten vertraglich relevanten Punkte.
+Achte dabei ausdrücklich auch auf folgende, häufig übersehene Bereiche, sofern der Vertrag sie regelt: Dokumentations-/Berichtspflichten (Bautagesberichte, Monatsberichte, laufende Nachweise), Sicherheiten/Bürgschaften (Art, Höhe, Bindungsdauer, auch themenspezifische Einbehalte z.B. bei fehlender Dokumentation), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme, umfangreiche Unterlagenpflichten als Abnahmevoraussetzung), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen ausgeschlossen), Open-Book-/Cost-plus-fee-Mechanismen mit Eingriffsrechten des AG in die Nachunternehmervergabe, sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.
 Wichtig: Bleibe so konkret wie der Vertrag es hergibt. Wenn der Vertrag Prozentsätze, Fristtage, Deckelungsgrenzen, konkrete Kündigungsgründe oder Paragrafen nennt, übernimm diese Zahlen/Bezeichnungen in die Paraphrase statt nur die allgemeine Kategorie zu benennen (z.B. "Vertragsstrafe 0,2%/Tag, Deckel 5% bei Endtermin-Verzug" statt nur "Vertragsstrafe vereinbart").
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]`;
@@ -964,7 +997,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     setPipelineStep(2,'active');
     setStatus('Bewerte Risiken anhand der Wissensbasis …', 'loading');
     const itemsWithContext = items.map(it => {
-      const matches = retrieveContextForItem(it);
+      const matches = retrieveContextForItem(it, 3);
       return {
         ...it,
         kontext: matches.length ? matches.map(k => `${k.title}: ${k.text}`).join(' | ') : 'keine spezifische Referenz in der Wissensbasis gefunden',
@@ -972,6 +1005,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       };
     });
     const classifyPrompt = `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
+Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere strafbewehrte Zwischentermine statt nur ein Endtermin, oder das Zusammenwirken mehrerer Klauseln wie Vollständigkeitsklausel + funktionale Leistungsbeschreibung + fehlende Leistungsbeschreibung im Detail). Solche Kumulationseffekte rechtfertigen häufig eine höhere Einstufung (hoch/kritisch) als die isolierte Betrachtung nahelegen würde.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","begruendung":"max 20 Wörter"}]
 
