@@ -240,6 +240,21 @@
   }
   .ffolge{ font-size:12px; color:var(--amber); margin-top:4px; font-weight:bold; }
   .intro-text{ font-size:13.5px; color:var(--text); line-height:1.55; margin-bottom:14px; }
+  .timeline{ display:flex; flex-direction:column; }
+  .timeline-item{ display:flex; gap:14px; position:relative; padding-bottom:20px; }
+  .timeline-item:last-child{ padding-bottom:0; }
+  .timeline-item:not(:last-child)::before{
+    content:''; position:absolute; left:5px; top:16px; bottom:-4px; width:2px; background:var(--border);
+  }
+  .timeline-dot{
+    width:12px; height:12px; border-radius:50%; background:var(--gold); flex-shrink:0; margin-top:3px;
+    box-shadow:0 0 0 3px var(--card); position:relative; z-index:1;
+  }
+  .timeline-dot.has-folge{ background:var(--amber); }
+  .timeline-content{ flex:1; }
+  .timeline-date{ font-size:11.5px; font-weight:bold; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.4px; }
+  .timeline-label{ font-size:13.5px; color:var(--text); margin-top:2px; }
+  .timeline-folge{ font-size:12px; color:var(--amber); margin-top:3px; font-weight:bold; }
   .top5-list{ margin:0; padding:0 0 0 22px; }
   .top5-list li{ margin-bottom:10px; font-size:13.5px; line-height:1.5; }
   .top5-list li .badge{ margin-right:8px; }
@@ -1403,6 +1418,15 @@ ${JSON.stringify(critical)}`;
 }
 
 // ---------- results rendering ----------
+function parseGermanDate(str){
+  if(!str) return null;
+  const m = String(str).match(/(\d{1,2})\.(\d{1,2})\.(\d{2,4})/);
+  if(!m) return null;
+  let [, d, mo, y] = m;
+  if(y.length === 2) y = '20' + y;
+  const date = new Date(Number(y), Number(mo)-1, Number(d));
+  return isNaN(date.getTime()) ? null : date;
+}
 const FRIST_KAT_LABELS = {
   Vertragsfrist: "Vertragsfristen (Bauzeit)",
   Pruefungsfrist: "Prüfungsfristen",
@@ -1489,9 +1513,28 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext){
         <ul class="frist-list">${group.map((f,i)=>`<li><div class="fnum">${i+1}</div><div class="ftext"><b>${escapeHtml(f.bezeichnung||'')}</b>${f.datum ? ' — ' + escapeHtml(f.datum) : ''}${f.folge ? `<div class="ffolge">Folge: ${escapeHtml(f.folge)}</div>` : ''}</div></li>`).join('')}</ul>
       </div>`;
   }).join('');
-  const fristHtml = fristenFailed
+  const fristListHtml = fristenFailed
     ? `<p class="hint" style="color:var(--amber);">Die Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden (vermutlich zu umfangreich für diesen Analyseschritt). Die übrige Analyse ist davon nicht betroffen. Ein erneuter Analyselauf kann helfen.</p>`
     : (fristenItems.length ? fristGroupsHtml : `<p class="hint">Keine expliziten Fristen erkannt.</p>`);
+
+  // Zeitstrahl: nur Fristen mit einem echten, eindeutig geparsten Kalenderdatum
+  // (relative Fristen wie "12 Werktage nach Erhalt" haben kein festes Datum und gehören nicht auf den Zeitstrahl)
+  const timelineItems = fristenItems
+    .map(f => ({...f, _date: parseGermanDate(f.datum)}))
+    .filter(f => f._date)
+    .sort((a,b) => a._date - b._date);
+  const timelineHtml = timelineItems.length
+    ? `<div class="timeline">${timelineItems.map(f => `
+        <div class="timeline-item">
+          <div class="timeline-dot${f.folge && f.folge.trim() ? ' has-folge' : ''}"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">${escapeHtml(f.datum)}</div>
+            <div class="timeline-label"><b>${escapeHtml(f.bezeichnung||'')}</b></div>
+            ${f.folge ? `<div class="timeline-folge">Folge: ${escapeHtml(f.folge)}</div>` : ''}
+          </div>
+        </div>`).join('')}</div>`
+    : '';
+  const fristHtml = fristListHtml;
 
   // Terminkritische Klauseln: alle Fristen mit definierter Folge, nach Priorität sortiert
   const kritischeTermine = fristenItems.filter(f => f.folge && f.folge.trim()).sort((a,b) => (PRIO_ORDER[a.prioritaet]??2) - (PRIO_ORDER[b.prioritaet]??2));
@@ -1545,6 +1588,12 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext){
       </div>
     </div>
     <div class="result-tab-pane" id="pane-fristen" style="display:none;">
+      ${timelineHtml ? `
+      <div class="card">
+        <h2>Zeitliche Abfolge</h2>
+        <p class="hint">Fristen mit eindeutigem Kalenderdatum, chronologisch sortiert</p>
+        ${timelineHtml}
+      </div>` : ''}
       <div class="card">
         <h2>Fristen</h2>
         <p class="hint">Alle im Vertrag gefundenen Fristen und Termine, nach Kategorie gruppiert</p>
