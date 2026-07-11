@@ -144,6 +144,8 @@
   .pipe-step.active{ color:var(--text); font-weight:bold; }
   .pipe-step.done .dot{ border-color:var(--green); background:var(--green); color:#fff; }
   .pipe-step.done{ color:var(--text); }
+  .pipe-step.warn .dot{ border-color:var(--amber); background:var(--amber); color:#fff; }
+  .pipe-step.warn{ color:var(--text); }
   .pipe-line{ width:1.5px; height:14px; background:var(--border); margin-left:9.5px; }
 
   .kb-item{
@@ -901,7 +903,7 @@ function loadHistory(){
   }
   renderHistory();
 }
-function saveHistoryEntry(items, fristenItems){
+function saveHistoryEntry(items, fristenItems, fristenFailed){
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
   const entry = {
@@ -910,7 +912,8 @@ function saveHistoryEntry(items, fristenItems){
     date: new Date().toISOString(),
     counts,
     items: JSON.parse(JSON.stringify(items)),
-    fristenItems: JSON.parse(JSON.stringify(fristenItems || []))
+    fristenItems: JSON.parse(JSON.stringify(fristenItems || [])),
+    fristenFailed: !!fristenFailed
   };
   historyEntries.unshift(entry);
   if(historyEntries.length > 50) historyEntries = historyEntries.slice(0, 50);
@@ -944,7 +947,7 @@ window.openHistoryEntry = function(id){
   currentFileName = entry.filename;
   document.getElementById('topActions').style.display = 'flex';
   closeModal();
-  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])));
+  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed);
   document.getElementById('resultsArea').scrollIntoView({behavior:'smooth', block:'start'});
 };
 window.deleteHistoryEntry = function(id){
@@ -1116,7 +1119,7 @@ function retrieveContextForItem(item, topN){
 }
 
 // ---------- Claude API ----------
-async function callClaude(content){
+async function callClaude(content, maxTokens){
   if(!apiKey){
     throw new Error('Kein API-Key hinterlegt. Bitte oben im Feld "API-Zugang" deinen Anthropic-API-Key eintragen und speichern.');
   }
@@ -1132,7 +1135,7 @@ async function callClaude(content){
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 8192,
+        max_tokens: maxTokens || 16000,
         messages: [{role:"user", content: content}]
       })
     });
@@ -1179,7 +1182,7 @@ function parseJson(raw){
 function setPipelineStep(step, state){
   const el = document.querySelector(`.pipe-step[data-step="${step}"]`);
   if(!el) return;
-  el.classList.remove('active','done');
+  el.classList.remove('active','done','warn');
   if(state) el.classList.add(state);
 }
 function resetPipeline(){ [1,2,3,4].forEach(s => setPipelineStep(s, null)); }
@@ -1218,12 +1221,12 @@ function setError(msg){
 }
 
 // ---------- analysis ----------
-async function callClaudeWithRetry(content, statusPrefix){
+async function callClaudeWithRetry(content, statusPrefix, maxTokens){
   const maxRetries = 2;
   let lastErr;
   for(let attempt=0; attempt<=maxRetries; attempt++){
     try{
-      return await callClaude(content);
+      return await callClaude(content, maxTokens);
     }catch(err){
       lastErr = err;
       if(attempt < maxRetries){
@@ -1304,10 +1307,18 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     } else {
       fristenContent = fristenInstruction + "\n\nVertragstext:\n" + docExcerpt;
     }
-    const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …');
     let fristenItems = [];
-    try{ fristenItems = parseJson(stageFristenRaw); }catch(e){ console.error('Fristen-Extraktion: JSON-Parse fehlgeschlagen', e, stageFristenRaw); fristenItems = []; }
-    setPipelineStep(2,'done');
+    let fristenFailed = false;
+    try{
+      const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', 20000);
+      fristenItems = parseJson(stageFristenRaw);
+      setPipelineStep(2,'done');
+    }catch(e){
+      console.error('Fristen-Extraktion fehlgeschlagen – Analyse wird ohne Fristen fortgesetzt', e);
+      fristenFailed = true;
+      fristenItems = [];
+      setPipelineStep(2,'warn');
+    }
 
     // Stage 3: Klassifikation
     setPipelineStep(3,'active');
@@ -1359,10 +1370,10 @@ ${JSON.stringify(critical)}`;
       });
     }
     setPipelineStep(4,'done');
-    setStatus('Analyse abgeschlossen.', 'done');
+    setStatus(fristenFailed ? 'Analyse abgeschlossen (Fristen-Erkennung übersprungen, siehe Fristen-Tab).' : 'Analyse abgeschlossen.', fristenFailed ? undefined : 'done');
 
-    renderResults(items, fristenItems);
-    saveHistoryEntry(items, fristenItems);
+    renderResults(items, fristenItems, fristenFailed);
+    saveHistoryEntry(items, fristenItems, fristenFailed);
   }catch(err){
     console.error(err);
     const stage = document.querySelector('.pipe-step.active');
@@ -1413,7 +1424,7 @@ function buildManagementSummary(items){
   return { top5, axisScores };
 }
 
-function renderResults(items, fristenItems){
+function renderResults(items, fristenItems, fristenFailed){
   fristenItems = fristenItems || [];
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
   items.sort((a,b) => (order[a.risiko]??2) - (order[b.risiko]??2));
@@ -1455,9 +1466,9 @@ function renderResults(items, fristenItems){
         <ul class="frist-list">${group.map((f,i)=>`<li><div class="fnum">${i+1}</div><div class="ftext"><b>${escapeHtml(f.bezeichnung||'')}</b>${f.datum ? ' — ' + escapeHtml(f.datum) : ''}${f.folge ? `<div class="ffolge">Folge: ${escapeHtml(f.folge)}</div>` : ''}</div></li>`).join('')}</ul>
       </div>`;
   }).join('');
-  const fristHtml = fristenItems.length
-    ? fristGroupsHtml
-    : `<p class="hint">Keine expliziten Fristen erkannt.</p>`;
+  const fristHtml = fristenFailed
+    ? `<p class="hint" style="color:var(--amber);">Die Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden (vermutlich zu umfangreich für diesen Analyseschritt). Die übrige Analyse ist davon nicht betroffen. Ein erneuter Analyselauf kann helfen.</p>`
+    : (fristenItems.length ? fristGroupsHtml : `<p class="hint">Keine expliziten Fristen erkannt.</p>`);
 
   // Terminkritische Klauseln: alle Fristen mit definierter Folge, nach Priorität sortiert
   const kritischeTermine = fristenItems.filter(f => f.folge && f.folge.trim()).sort((a,b) => (PRIO_ORDER[a.prioritaet]??2) - (PRIO_ORDER[b.prioritaet]??2));
