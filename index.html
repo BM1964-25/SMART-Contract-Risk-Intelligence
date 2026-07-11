@@ -402,8 +402,11 @@
         </div>
       </div>
       <div class="modal-pane" id="paneHistory" style="display:none;">
-        <p class="hint">Bisherige Analysen (lokal in diesem Browser gespeichert)</p>
+        <p class="hint">Bisherige Analysen (lokal in diesem Browser gespeichert, max. 50 Einträge – ältere werden automatisch verdrängt)</p>
         <div id="historyList"></div>
+        <button class="btn secondary small" id="historySaveBtn" style="width:100%; margin-top:12px;">Verlauf als JSON speichern</button>
+        <button class="btn secondary small" id="historyRestoreBtn" style="width:100%; margin-top:8px;">Verlauf wiederherstellen</button>
+        <input type="file" id="historyRestoreInput" accept="application/json,.json" style="display:none;">
       </div>
     </div>
   </div>
@@ -474,8 +477,8 @@ const DEFAULT_KB = [
    text:"Abschlagszahlungen sollten sich am tatsächlichen Baufortschritt orientieren. Vorleistungspflichten ohne Sicherheiten (Bürgschaft, Einbehalt) stellen ein erhebliches finanzielles Risiko für den Auftraggeber dar. Nach VOB/B gilt § 16, nach BGB § 632a; bei Verbraucherbauverträgen begrenzt § 650m BGB die Summe der Abschlagszahlungen auf 90% der Vergütung zzgl. 5% Sicherheit.",
    tags:["zahlung","abschlag","sicherheit"]},
   {id:"kb5", title:"Prüffähigkeit der Schlussrechnung", typ:["vob","bgb","planung"],
-   text:"Eine Schlussrechnung ist erst prüffähig, wenn sie übersichtlich aufgestellt ist und alle erforderlichen Nachweise enthält (VOB/B § 14, sinngemäß auch bei BGB-Verträgen anerkannt). Fehlt die Prüffähigkeit, beginnt die Zahlungsfrist nicht zu laufen – das kann Zahlungsverzug des Auftraggebers ungewollt ausschließen oder verzögern.",
-   tags:["schlussrechnung","prüffähig","zahlung"]},
+   text:"Eine Schlussrechnung ist erst prüffähig, wenn sie übersichtlich aufgestellt ist und alle erforderlichen Nachweise enthält (VOB/B § 14, sinngemäß auch bei BGB-Verträgen anerkannt). Fehlt die Prüffähigkeit, beginnt die Zahlungsfrist nicht zu laufen. In der Praxis enthalten Verträge häufig eine 30-Tage-Fiktion: Erhebt der Auftraggeber nicht innerhalb von 30 Tagen nach Zugang begründete Einwendungen gegen die Prüffähigkeit, gilt die Rechnung als prüffähig – das ist keine Ausnahme von der Prüfpflicht, sondern eine Frist, nach der sie automatisch als erfüllt gilt.",
+   tags:["schlussrechnung","prüffähig","zahlung","fiktion"]},
   {id:"kb6", title:"HOAI – Leistungsphasen & Honorar", typ:["planung"],
    text:"Die HOAI regelt Honorare für Planungsleistungen in 9 Leistungsphasen. Nachträgliche Erweiterungen des Leistungsumfangs ohne schriftliche Vereinbarung führen häufig zu Honorarstreitigkeiten. Kritisch: fehlende Abgrenzung zwischen Grundleistungen und Besonderen Leistungen.",
    tags:["honorar","leistungsphase","hoai","nachtrag"]},
@@ -493,8 +496,8 @@ const DEFAULT_KB = [
 
   // D) Risiko & Beendigung
   {id:"kb10", title:"Vertragsstrafen", typ:["vob","bgb","planung"],
-   text:"Vertragsstrafenregelungen sind nur wirksam, wenn sie eindeutig formuliert und der Höhe nach angemessen sind (Obergrenze i.d.R. 5%). Wichtig seit BGH-Urteil v. 15.02.2024 (VII ZR 42/22): Bei Einheitspreisverträgen darf sich die 5%-Grenze nicht auf die vorläufige Auftragssumme, sondern muss sich auf die tatsächliche Abrechnungssumme beziehen – sonst ist die Klausel insgesamt unwirksam. Tagessätze von 0,2–0,3% gelten als üblich, 0,5%/Tag ist unwirksam.",
-   tags:["vertragsstrafe","kündigung","haftung","abrechnungssumme"]},
+   text:"Vertragsstrafenregelungen sind nur wirksam, wenn sie eindeutig formuliert und der Höhe nach angemessen sind (Obergrenze i.d.R. 5%). Wichtig seit BGH-Urteil v. 15.02.2024 (VII ZR 42/22): Bei Einheitspreisverträgen darf sich die 5%-Grenze nicht auf die vorläufige Auftragssumme, sondern muss sich auf die tatsächliche Abrechnungssumme beziehen – sonst ist die Klausel insgesamt unwirksam. Tagessätze von 0,2–0,3% gelten als üblich, 0,5%/Tag ist unwirksam. In der Praxis differenzieren gute Verträge weiter: eigener (niedrigerer) Deckel für reine Zwischentermin-Verzüge bei eingehaltenem Endtermin (z.B. 3%) gegenüber dem Gesamtdeckel bei Endtermin-Verzug (z.B. 5%), sowie eine Anrechnungsregel, wonach bereits verwirkte Strafen für Zwischentermine auf spätere Vertragsstrafen angerechnet werden, um Doppelbelastung zu vermeiden.",
+   tags:["vertragsstrafe","kündigung","haftung","abrechnungssumme","zwischentermin"]},
   {id:"kb11", title:"Kündigungsklauseln", typ:["vob","bgb","planung"],
    text:"Kündigungsrechte aus wichtigem Grund müssen konkret benannt sein. Pauschale oder einseitig formulierte Kündigungsklauseln zugunsten einer Partei bergen ein erhöhtes Streitrisiko. Nach VOB/B gilt § 8, nach BGB §§ 648, 650a ff. – die Abrechnungsfolgen unterscheiden sich spürbar.",
    tags:["kündigung","risiko"]},
@@ -598,7 +601,7 @@ function saveHistoryEntry(items){
     items: JSON.parse(JSON.stringify(items))
   };
   historyEntries.unshift(entry);
-  if(historyEntries.length > 20) historyEntries = historyEntries.slice(0, 20);
+  if(historyEntries.length > 50) historyEntries = historyEntries.slice(0, 50);
   try{ localStorage.setItem('scri-history', JSON.stringify(historyEntries)); }
   catch(e){ console.error('History-Speicherfehler', e); }
   renderHistory();
@@ -636,6 +639,42 @@ window.deleteHistoryEntry = function(id){
   historyEntries = historyEntries.filter(h => h.id !== id);
   try{ localStorage.setItem('scri-history', JSON.stringify(historyEntries)); }catch(e){}
   renderHistory();
+};
+
+// ---------- Verlauf: JSON speichern / wiederherstellen ----------
+document.getElementById('historySaveBtn').onclick = () => {
+  const blob = new Blob([JSON.stringify(historyEntries, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'scri-verlauf-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+};
+document.getElementById('historyRestoreBtn').onclick = () => {
+  document.getElementById('historyRestoreInput').click();
+};
+document.getElementById('historyRestoreInput').onchange = async (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const imported = JSON.parse(text);
+    if(!Array.isArray(imported)) throw new Error('Datei enthält keine gültige Verlaufsliste.');
+    const byId = new Map();
+    [...imported, ...historyEntries].forEach(entry => {
+      if(entry && entry.id) byId.set(entry.id, entry);
+    });
+    historyEntries = Array.from(byId.values()).sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 200);
+    localStorage.setItem('scri-history', JSON.stringify(historyEntries));
+    renderHistory();
+    setStatus(`Verlauf wiederhergestellt: ${imported.length} Einträge aus der Datei eingelesen.`, 'done');
+  }catch(err){
+    setError('Wiederherstellung fehlgeschlagen: ' + err.message);
+  }
 };
 
 // ---------- file handling ----------
@@ -907,8 +946,9 @@ async function runAnalysis(){
     setPipelineStep(1,'active');
     setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …', 'loading');
     const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Bauträgerrecht) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext und extrahiere die 6 bis 10 wichtigsten vertraglich relevanten Punkte: Fristen, Pflichten, Haftungsregelungen, Kündigungsklauseln, Vertragsstrafen, Zahlungsbedingungen.
+Wichtig: Bleibe so konkret wie der Vertrag es hergibt. Wenn der Vertrag Prozentsätze, Fristtage, Deckelungsgrenzen, konkrete Kündigungsgründe oder Paragrafen nennt, übernimm diese Zahlen/Bezeichnungen in die Paraphrase statt nur die allgemeine Kategorie zu benennen (z.B. "Vertragsstrafe 0,2%/Tag, Deckel 5% bei Endtermin-Verzug" statt nur "Vertragsstrafe vereinbart").
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sonstiges","text":"kurze Paraphrase auf Deutsch, max 25 Wörter"}]`;
+[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]`;
     let extractContent;
     if(isScanned && documentImages.length){
       extractContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
