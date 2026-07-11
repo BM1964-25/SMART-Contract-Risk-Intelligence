@@ -882,8 +882,14 @@ const DEFAULT_KB = [
    text:"Kündigungsrechte aus wichtigem Grund müssen konkret benannt sein. Pauschale oder einseitig formulierte Kündigungsklauseln zugunsten einer Partei bergen ein erhöhtes Streitrisiko. Nach VOB/B gilt § 8, nach BGB §§ 648, 650a ff. – die Abrechnungsfolgen unterscheiden sich spürbar.",
    tags:["kündigung","risiko"]},
   {id:"kb12", title:"Sicherheitseinbehalt & Bürgschaft", typ:["vob","bgb"],
-   text:"Sicherheitseinbehalte sind üblich in Höhe von 5-10% der Auftragssumme. Bürgschaften müssen unbedingt, unbefristet und unter Verzicht auf die Einrede der Vorausklage gestellt werden, um werthaltig zu sein – unklare Bürgschaftsklauseln schwächen die Sicherheit erheblich.",
-   tags:["sicherheit","bürgschaft","einbehalt"]},
+   text:"Bauverträge verlangen häufig zwei getrennte Sicherheiten: eine Vertragserfüllungssicherheit (üblich 5-10% der Auftragssumme, sichert die vertragsgemäße Ausführung bis Abnahme) und eine separate Gewährleistungs-/Mängelsicherheit (üblich ca. 5% der Abrechnungssumme, für die Dauer der Verjährungsfrist nach Abnahme). Beide sollten als eigenständige, wirtschaftlich bedeutsame Risikopunkte erfasst werden, nicht als ein einzelner Punkt. Bürgschaften müssen unbedingt, unbefristet und unter Verzicht auf die Einrede der Vorausklage gestellt werden, um werthaltig zu sein. Häufig hat der AN ein Wahlrecht zwischen Bürgschaft und Bareinbehalt/Hinterlegung – das bindet bei Einbehalt zusätzlich Liquidität.",
+   tags:["sicherheit","bürgschaft","einbehalt","vertragserfüllung","gewährleistungssicherheit"]},
+  {id:"kb12b", title:"Betriebshaftpflichtversicherung", typ:["vob","bgb"],
+   text:"Bauverträge verpflichten den AN praktisch immer zum Abschluss und Nachweis einer Betriebshaftpflichtversicherung mit Mindestdeckungssummen (häufig 3-15 Mio. € je nach Projektgröße), meist mit Nachweispflicht vor Baubeginn und Fortbestehenspflicht bis zur Abnahme. Fehlt der Nachweis oder erlischt die Versicherung während der Bauzeit, drohen Kündigungsrechte des AG und im Schadensfall persönliche Haftung ohne Versicherungsdeckung – ein wirtschaftlich bedeutsamer, oft nur am Rande wahrgenommener Punkt.",
+   tags:["versicherung","haftpflicht","deckungssumme","nachweispflicht"]},
+  {id:"kb12c", title:"Bauleistungsversicherung", typ:["vob","bgb"],
+   text:"Die Bauleistungsversicherung deckt Schäden am Bauwerk selbst während der Bauzeit (z.B. durch Sturm, Vandalismus, Ausführungsfehler) ab und wird meist vom AG abgeschlossen, wobei sich der AN häufig anteilig an den Kosten beteiligen muss. Fehlt eine klare Regelung dazu oder ist unklar, wer im Schadensfall welchen Anteil trägt, entsteht ein reales, oft übersehenes Kostenrisiko für den AN.",
+   tags:["versicherung","bauleistungsversicherung","schaden"]},
 
   // E) Formalien
   {id:"kb13", title:"AGB-Kontrolle bei Bauverträgen", typ:["vob","bgb","planung","sonstige"],
@@ -913,7 +919,7 @@ const DEFAULT_KB = [
    text:"Bei Open-Book-/Cost-plus-fee-Regelungen in GU-Verträgen erhält der AG häufig weitreichende Mitwirkungs- und Eingriffsrechte in die Nachunternehmervergabe des AN (Einsicht in Angebote und Kalkulation, Vorschlagsrecht für Bieter, Widerspruchsrecht gegen die Vergabeentscheidung, Prinzip der „gläsernen Taschen“). Das geht über eine reine Kostentransparenzpflicht hinaus und beschränkt die unternehmerische Dispositionsfreiheit des AN erheblich – je nach Ausgestaltung eher hohes bis kritisches Risiko, nicht nur eine Transparenzpflicht.",
    tags:["open-book","nachunternehmer","vergabe","transparenz","cost-plus-fee"]},
   {id:"kb21", title:"Vollständigkeitsklausel bei funktionaler Leistungsbeschreibung", typ:["vob","bgb"],
-   text:"Kombiniert ein Vertrag eine weite Vollständigkeitsklausel (AN schuldet alles, was zur mangelfreien, funktionsfähigen Herstellung erforderlich ist) mit der Pflicht zur Werkstatt-/Montageplanung, Koordination und Einhaltung der allgemein anerkannten Regeln der Technik bei gleichzeitig nicht vollständig beschriebenen Einzelleistungen, verschiebt sich das Risiko unvollständiger Ausschreibung faktisch auf den AN. Diese Kombination ist eine der häufigsten Ursachen für spätere Nachtragsstreitigkeiten in GU-Verträgen.",
+   text:"Kombiniert ein Vertrag eine weite Vollständigkeitsklausel (AN schuldet alles, was zur mangelfreien, funktionsfähigen Herstellung erforderlich ist) mit der Pflicht zur Werkstatt-/Montageplanung, Koordination und Einhaltung der allgemein anerkannten Regeln der Technik bei gleichzeitig nicht vollständig beschriebenen Einzelleistungen, verschiebt sich das Risiko unvollständiger Ausschreibung faktisch auf den AN. Diese Kombination ist eine der häufigsten Ursachen für spätere Nachtragsstreitigkeiten. Wichtig für die Einstufung: Bei einem GU-Vertrag mit sehr weitgehender funktionaler Leistungsbeschreibung (Bausoll wird über Ziel/Zweck statt Einzelpositionen definiert) ist dies eher kritisch. Bei einem klassischen Einheitspreisvertrag, bei dem der AN zwar Nebenleistungen und Vertragsunterlagen prüfen muss, aber ohne eine derart weitgehende funktionale Beschreibung, ist eher hoch die zutreffendere Einstufung.",
    tags:["vollständigkeit","werkstattplanung","funktional","nachtrag"]},
   {id:"kb22", title:"Prüfpflicht der Ausführungsplanung durch den AN", typ:["vob","bgb","planung"],
    text:"Verpflichtet der Vertrag den AN, vom AG übergebene Ausführungsplanung innerhalb einer kurzen Frist (z.B. 8-12 Werktage) auf Richtigkeit, Vollständigkeit und Widerspruchsfreiheit zu prüfen, haftet der AN in der Regel für später erkennbare, aber übersehene Fehler. Bei eng bemessener Prüffrist und umfangreicher Planung ist dies ein hohes Haftungsrisiko, nicht nur eine organisatorische Pflicht – besonders wenn die Planfreigabe die Verantwortung des AN ausdrücklich unberührt lässt.",
@@ -1001,7 +1007,7 @@ function loadHistory(){
   }
   renderHistory();
 }
-function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext){
+function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich){
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
   const entry = {
@@ -1012,7 +1018,8 @@ function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext){
     items: JSON.parse(JSON.stringify(items)),
     fristenItems: JSON.parse(JSON.stringify(fristenItems || [])),
     fristenFailed: !!fristenFailed,
-    projektKontext: projektKontext || ''
+    projektKontext: projektKontext || '',
+    marktvergleich: marktvergleich || {}
   };
   historyEntries.unshift(entry);
   if(historyEntries.length > 50) historyEntries = historyEntries.slice(0, 50);
@@ -1048,7 +1055,7 @@ window.openHistoryEntry = function(id){
   currentFileName = entry.filename;
   document.getElementById('topActions').style.display = 'flex';
   closeModal();
-  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '');
+  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '', entry.marktvergleich || {});
   document.getElementById('resultsArea').scrollIntoView({behavior:'smooth', block:'start'});
 };
 window.deleteHistoryEntry = function(id){
@@ -1378,12 +1385,14 @@ async function runAnalysis(){
     setPipelineStep(1,'active');
     setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …', 'loading');
     const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Generalunternehmerverträge) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext vollständig und extrahiere die wesentlichen vertraglich relevanten Punkte – bei umfangreichen Verträgen (GU-Vertrag, viele Paragrafen) typischerweise 12 bis 20 Punkte, bei kürzeren Verträgen entsprechend weniger.
-Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel), Sicherheiten/Bürgschaften (mit konkreten Prozentsätzen, z.B. Vertragserfüllungs- und Gewährleistungsbürgschaft getrennt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen ausgeschlossen), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten, Open-Book-/Cost-plus-fee-Mechanismen mit AG-Eingriffsrechten, sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.
+Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel), Sicherheiten (Vertragserfüllungssicherheit UND Gewährleistungs-/Mängelsicherheit als ZWEI getrennte Punkte mit jeweils eigenem Prozentsatz, falls beide vorhanden – nicht zusammenfassen), Versicherungen (Betriebshaftpflichtversicherung mit Mindestdeckungssumme, Bauleistungsversicherung und wer sie trägt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen ausgeschlossen), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten, Open-Book-/Cost-plus-fee-Mechanismen mit AG-Eingriffsrechten, Festpreis-/Gleitklausel-Regelung (insbesondere wenn eine Gleitklausel für Lohn-/Material-/Stoffkosten ausgeschlossen ist – das ist ein Margenrisiko), sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.
 Kategorisierung: Ordne jeden Punkt der inhaltlich treffendsten Kategorie zu, nicht der oberflächlichsten. Beispiele: Eine Prüfpflicht mit Haftungsfolge bei übersehenen Fehlern gehört zu "Haftung", nicht zu "Frist", auch wenn eine Frist genannt wird. Bürgschaften und Sicherheitseinbehalte gehören zur eigenen Kategorie "Sicherheit", nicht zu "Sonstiges" oder "Zahlung".
 Wichtig: Bleibe so konkret wie der Vertrag es hergibt. Wenn der Vertrag Prozentsätze, Fristtage, Deckelungsgrenzen, konkrete Kündigungsgründe oder Paragrafen nennt, übernimm diese Zahlen/Bezeichnungen in die Paraphrase statt nur die allgemeine Kategorie zu benennen (z.B. "Vertragsstrafe 0,2%/Tag, Deckel 5% bei Endtermin-Verzug" statt nur "Vertragsstrafe vereinbart").
+Präzision statt Verallgemeinerung: Formuliere den genauen Anwendungsbereich einer Klausel nicht weiter, als der Vertragstext es hergibt. Wenn eine Regelung z.B. nur für "weitere Leistungen im Zusammenhang mit dem Bauvorhaben" gilt, schreibe das so – nicht verkürzt als "gilt auch für Folgeaufträge" o.ä., da das den Anwendungsbereich fälschlich verbreitert.
 Ermittle außerdem kurz das Bauvorhaben (Projektbezeichnung und/oder Adresse, falls im Vertrag genannt) sowie die Vertragsparteien (Firmenname von Auftraggeber und Auftragnehmer, keine natürlichen Personen/Unterzeichner) und fasse dies in einem Satz im Feld "projektkontext" zusammen (max 30 Wörter). Wenn ein Aspekt nicht auffindbar ist, lasse ihn im Satz einfach weg, statt ihn zu erfinden.
+Ermittle zusätzlich, sofern im Vertrag auffindbar, die tatsächlichen Vertragswerte für einen Marktvergleich im Feld "marktvergleich" (jeweils als kurzer String, max 10 Wörter; wenn eine Angabe im Vertrag fehlt, lasse den Wert leer statt zu raten): "gewaehrleistung" (Dauer der Gewährleistungs-/Verjährungsfrist), "vertragsstrafe" (Satz und Deckel), "zahlung" (Frist bis zur Schlusszahlung), "vobb" ("einbezogen" oder "ausgeschlossen"), "buergschaft" (Höhe der Vertragserfüllungssicherheit in %).
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-{"projektkontext":"kurzer Satz zu Bauvorhaben und Vertragsparteien","items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]}`;
+{"projektkontext":"kurzer Satz zu Bauvorhaben und Vertragsparteien","marktvergleich":{"gewaehrleistung":"","vertragsstrafe":"","zahlung":"","vobb":"","buergschaft":""},"items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]}`;
     let extractContent;
     if(isScanned && documentImages.length){
       extractContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
@@ -1395,6 +1404,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     const stage1Parsed = parseJson(stage1Raw);
     let items = Array.isArray(stage1Parsed) ? stage1Parsed : (stage1Parsed.items || []);
     let projektKontext = Array.isArray(stage1Parsed) ? '' : (stage1Parsed.projektkontext || '');
+    let marktvergleich = Array.isArray(stage1Parsed) ? {} : (stage1Parsed.marktvergleich || {});
     setPipelineStep(1,'done');
 
 
@@ -1443,7 +1453,8 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
 Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere strafbewehrte Zwischentermine statt nur ein Endtermin, oder das Zusammenwirken mehrerer Klauseln wie Vollständigkeitsklausel + funktionale Leistungsbeschreibung + fehlende Leistungsbeschreibung im Detail). Solche Kumulationseffekte rechtfertigen häufig eine höhere Einstufung (hoch/kritisch) als die isolierte Betrachtung nahelegen würde. Wenn zwei oder mehr Punkte inhaltlich unmittelbar zusammenhängen (z.B. Leistungsverweigerungsrecht und Anordnungsrecht), benenne diesen Zusammenhang explizit in der Begründung beider Punkte als Kombinationsrisiko.
 Kalibrierung der Risikoverteilung: Verteile die Einstufungen realistisch und nicht zu gleichmäßig. "kritisch" ist die Ausnahme und gehört nur den 2 bis 4 wirklich gravierendsten Punkten im gesamten Vertrag. "hoch" ist eine kleinere bis mittlere Gruppe. Die Mehrheit der Punkte sollte "mittel" oder "niedrig" sein. Vermeide, dass am Ende ungefähr gleich viele Punkte in jeder Stufe landen.
 Sicherheiten-Regel: Bürgschaften ab ca. 10% der Auftragssumme sowie Sicherheitseinbehalte mit hoher absoluter Liquiditätswirkung (z.B. ab ca. 50.000-100.000€) tendieren eher zu "kritisch" statt "hoch", weil die Liquiditätswirkung unabhängig vom Prozentsatz real und sofort spürbar ist – insbesondere bei mittelständischen Auftragnehmern.
-Ordne zusätzlich jedem Punkt im Feld "auswirkung" die primäre wirtschaftliche Auswirkungsebene zu (nur einen Wert wählen, den treffendsten): "Liquidität" (Zahlungsflüsse, Vorleistungspflicht, Einbehalte, Bürgschaften), "Termin" (Bauzeit, Verzug, Fristen), "Haftung" (Gewährleistung, Schadensersatz, Prüf-/Sorgfaltspflichten), "Nachtrag" (Leistungsänderung, Vergütungsanpassung, Anordnungsrecht), "Marge" (Kostenrisiko, Deckungsbeitrag, Pauschalierungsrisiko) oder "Sonstiges".
+Margen-Regel: Ein vereinbarter Festpreis OHNE Gleitklausel für Lohn-, Material-, Geräte- oder Stoffkosten überträgt Preissteigerungsrisiken vollständig auf den AN. Ordne einen solchen Punkt der Auswirkung "Marge" zu und bewerte ihn mindestens als "mittel", bei längerer Bauzeit oder volatilen Materialpreisen als "hoch" – nicht als reines Formalie ohne wirtschaftliche Bedeutung.
+Ordne zusätzlich jedem Punkt im Feld "auswirkung" die primäre wirtschaftliche Auswirkungsebene zu (nur einen Wert wählen, den treffendsten): "Liquidität" (Zahlungsflüsse, Vorleistungspflicht, Einbehalte, Bürgschaften), "Termin" (Bauzeit, Verzug, Fristen), "Haftung" (Gewährleistung, Schadensersatz, Prüf-/Sorgfaltspflichten), "Nachtrag" (Leistungsänderung, Vergütungsanpassung, Anordnungsrecht), "Marge" (Kostenrisiko, Deckungsbeitrag, Pauschalierungsrisiko, Festpreis-/Gleitklauselrisiko) oder "Sonstiges".
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","auswirkung":"Liquidität|Termin|Haftung|Nachtrag|Marge|Sonstiges","begruendung":"max 20 Wörter"}]
 
@@ -1480,8 +1491,8 @@ ${JSON.stringify(critical)}`;
     setPipelineStep(4,'done');
     setStatus(fristenFailed ? 'Analyse abgeschlossen (Fristen-Erkennung übersprungen, siehe Fristen-Tab).' : 'Analyse abgeschlossen.', fristenFailed ? undefined : 'done');
 
-    renderResults(items, fristenItems, fristenFailed, projektKontext);
-    saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext);
+    renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich);
+    saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich);
   }catch(err){
     console.error(err);
     const stage = document.querySelector('.pipe-step.active');
@@ -1556,8 +1567,9 @@ function buildManagementSummary(items){
   return { top5, axisScores };
 }
 
-function renderResults(items, fristenItems, fristenFailed, projektKontext){
+function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich){
   fristenItems = fristenItems || [];
+  marktvergleich = marktvergleich || {};
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
   items.sort((a,b) => (order[a.risiko]??2) - (order[b.risiko]??2));
 
@@ -1583,6 +1595,29 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext){
         ${renderAxisBars(summary.axisScores)}
       </div>
     </div>`;
+
+  const MARKT_BENCHMARKS = [
+    {key:"gewaehrleistung", label:"Gewährleistung", markt:"4 Jahre (VOB/B) bzw. 5 Jahre (BGB)"},
+    {key:"vertragsstrafe", label:"Vertragsstrafe", markt:"0,1–0,2 %/Tag, Deckel ca. 5 %"},
+    {key:"zahlung", label:"Zahlung (bis Schlusszahlung)", markt:"14–30 Tage"},
+    {key:"vobb", label:"VOB/B einbezogen", markt:"Üblich bei B2B-Bauverträgen"},
+    {key:"buergschaft", label:"Vertragserfüllungssicherheit", markt:"ca. 5 % der Auftragssumme"}
+  ];
+  const marktRows = MARKT_BENCHMARKS.filter(b => marktvergleich[b.key] && String(marktvergleich[b.key]).trim());
+  const marktvergleichHtml = marktRows.length ? `
+    <div class="card">
+      <h2>Marktvergleich</h2>
+      <p class="hint">Vertragswerte im Vergleich zu marktüblichen Richtwerten – dient der Einordnung, nicht als Rechtsauskunft</p>
+      <div class="table-scroll"><table>
+        <thead><tr><th>Klausel</th><th>Marktüblich</th><th>Dieser Vertrag</th></tr></thead>
+        <tbody>${marktRows.map(b => `
+          <tr>
+            <td><b>${escapeHtml(b.label)}</b></td>
+            <td>${escapeHtml(b.markt)}</td>
+            <td>${escapeHtml(marktvergleich[b.key])}</td>
+          </tr>`).join('')}</tbody>
+      </table></div>
+    </div>` : '';
 
   const rows = items.map(it => `
     <tr>
@@ -1651,6 +1686,7 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext){
       <hr>
     </div>
     ${summaryHtml}
+    ${marktvergleichHtml}
     <div class="result-tabs no-print">
       <button class="result-tab active" data-pane="pane-risiko">Risikobewertung</button>
       <button class="result-tab" data-pane="pane-termine">Terminkritische Klauseln</button>
