@@ -844,7 +844,7 @@ async function callClaude(content){
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 4096,
+        max_tokens: 8192,
         messages: [{role:"user", content: content}]
       })
     });
@@ -980,11 +980,12 @@ async function runAnalysis(){
     // Stage 1: Extraktion
     setPipelineStep(1,'active');
     setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …', 'loading');
-    const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Generalunternehmerverträge) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext und extrahiere die 8 bis 14 wichtigsten vertraglich relevanten Punkte.
-Achte dabei ausdrücklich auch auf folgende, häufig übersehene Bereiche, sofern der Vertrag sie regelt: Dokumentations-/Berichtspflichten (Bautagesberichte, Monatsberichte, laufende Nachweise), Sicherheiten/Bürgschaften (Art, Höhe, Bindungsdauer, auch themenspezifische Einbehalte z.B. bei fehlender Dokumentation), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme, umfangreiche Unterlagenpflichten als Abnahmevoraussetzung), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen ausgeschlossen), Open-Book-/Cost-plus-fee-Mechanismen mit Eingriffsrechten des AG in die Nachunternehmervergabe, sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.
+    const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Generalunternehmerverträge) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext vollständig und extrahiere die wesentlichen vertraglich relevanten Punkte – bei umfangreichen Verträgen (GU-Vertrag, viele Paragrafen) typischerweise 12 bis 20 Punkte, bei kürzeren Verträgen entsprechend weniger.
+Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel), Sicherheiten/Bürgschaften (mit konkreten Prozentsätzen, z.B. Vertragserfüllungs- und Gewährleistungsbürgschaft getrennt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen ausgeschlossen), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten, Open-Book-/Cost-plus-fee-Mechanismen mit AG-Eingriffsrechten, sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.
+Kategorisierung: Ordne jeden Punkt der inhaltlich treffendsten Kategorie zu, nicht der oberflächlichsten. Beispiele: Eine Prüfpflicht mit Haftungsfolge bei übersehenen Fehlern gehört zu "Haftung", nicht zu "Frist", auch wenn eine Frist genannt wird. Bürgschaften und Sicherheitseinbehalte gehören zur eigenen Kategorie "Sicherheit", nicht zu "Sonstiges" oder "Zahlung".
 Wichtig: Bleibe so konkret wie der Vertrag es hergibt. Wenn der Vertrag Prozentsätze, Fristtage, Deckelungsgrenzen, konkrete Kündigungsgründe oder Paragrafen nennt, übernimm diese Zahlen/Bezeichnungen in die Paraphrase statt nur die allgemeine Kategorie zu benennen (z.B. "Vertragsstrafe 0,2%/Tag, Deckel 5% bei Endtermin-Verzug" statt nur "Vertragsstrafe vereinbart").
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]`;
+[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]`;
     let extractContent;
     if(isScanned && documentImages.length){
       extractContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
@@ -1009,8 +1010,9 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     });
     const classifyPrompt = `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
 Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere strafbewehrte Zwischentermine statt nur ein Endtermin, oder das Zusammenwirken mehrerer Klauseln wie Vollständigkeitsklausel + funktionale Leistungsbeschreibung + fehlende Leistungsbeschreibung im Detail). Solche Kumulationseffekte rechtfertigen häufig eine höhere Einstufung (hoch/kritisch) als die isolierte Betrachtung nahelegen würde.
+Ordne zusätzlich jedem Punkt im Feld "auswirkung" die primäre wirtschaftliche Auswirkungsebene zu (nur einen Wert wählen, den treffendsten): "Liquidität" (Zahlungsflüsse, Vorleistungspflicht, Einbehalte, Bürgschaften), "Termin" (Bauzeit, Verzug, Fristen), "Haftung" (Gewährleistung, Schadensersatz, Prüf-/Sorgfaltspflichten), "Nachtrag" (Leistungsänderung, Vergütungsanpassung, Anordnungsrecht), "Marge" (Kostenrisiko, Deckungsbeitrag, Pauschalierungsrisiko) oder "Sonstiges".
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-[{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","begruendung":"max 20 Wörter"}]
+[{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","auswirkung":"Liquidität|Termin|Haftung|Nachtrag|Marge|Sonstiges","begruendung":"max 20 Wörter"}]
 
 Punkte mit jeweiligem Kontext:
 ${JSON.stringify(itemsWithContext.map(({_referenzTitel, ...rest}) => rest))}`;
@@ -1019,7 +1021,7 @@ ${JSON.stringify(itemsWithContext.map(({_referenzTitel, ...rest}) => rest))}`;
     items = items.map(it => {
       const c = classifications.find(x => x.id === it.id) || {};
       const withCtx = itemsWithContext.find(x => x.id === it.id);
-      return {...it, risiko: c.risiko || 'mittel', begruendung: c.begruendung || '', referenzen: withCtx ? withCtx._referenzTitel : []};
+      return {...it, risiko: c.risiko || 'mittel', auswirkung: c.auswirkung || '', begruendung: c.begruendung || '', referenzen: withCtx ? withCtx._referenzTitel : []};
     });
     setPipelineStep(2,'done');
 
@@ -1069,7 +1071,7 @@ function renderResults(items){
 
   const rows = items.map(it => `
     <tr>
-      <td><div>${escapeHtml(it.text)}</div><div class="cat">${escapeHtml(it.kategorie)}</div></td>
+      <td><div>${escapeHtml(it.text)}</div><div class="cat">${escapeHtml(it.kategorie)}${it.auswirkung ? ' · ' + escapeHtml(it.auswirkung) : ''}</div></td>
       <td><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span></td>
       <td>${escapeHtml(it.begruendung||'')}</td>
       <td>${it.massnahme ? escapeHtml(it.massnahme) : '<span style="color:var(--text-muted)">—</span>'}</td>
