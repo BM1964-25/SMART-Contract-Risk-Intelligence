@@ -48,12 +48,12 @@
   .container{ max-width:1320px; margin:0 auto; padding:28px 24px 80px; }
   .setup-row{
     display:grid;
-    grid-template-columns: minmax(220px,0.9fr) minmax(270px,1.35fr) minmax(240px,1.1fr) minmax(220px,0.95fr);
-    gap:20px; align-items:start; margin-bottom:26px;
+    grid-template-columns: minmax(220px,1fr) minmax(270px,1.4fr) minmax(220px,1fr) minmax(220px,1fr);
+    gap:20px; align-items:stretch; margin-bottom:26px;
   }
   @media (max-width:1100px){ .setup-row{ grid-template-columns: 1fr 1fr; } }
   @media (max-width:640px){ .setup-row{ grid-template-columns: 1fr; } }
-  .setup-row > .card{ margin-top:0 !important; }
+  .setup-row > .card{ margin-top:0 !important; display:flex; flex-direction:column; }
 
   .site-footer{
     border-top:1px solid var(--border);
