@@ -151,19 +151,20 @@
   .btn-check.show{ opacity:1; transform:translateY(-50%) scale(1); }
 
   .pipeline{ display:flex; flex-direction:column; gap:0; margin:6px 0 4px; }
-  .pipe-step{ display:flex; align-items:center; gap:12px; padding:8px 0; font-size:13.5px; color:var(--text-muted); }
+  .pipe-step{ display:flex; align-items:flex-start; gap:12px; padding:8px 0; font-size:13.5px; color:var(--text-muted); }
   .pipe-step .dot{
     width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border);
     display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;
-    color:var(--text-muted);
+    color:var(--text-muted); margin-top:1px;
   }
+  .pipe-step-desc{ font-size:11.5px; color:var(--text-muted); margin-top:2px; line-height:1.4; font-weight:normal; }
   .pipe-step.active .dot{ border-color:var(--gold); background:var(--gold); color:#fff; }
   .pipe-step.active{ color:var(--text); font-weight:bold; }
   .pipe-step.done .dot{ border-color:var(--green); background:var(--green); color:#fff; }
   .pipe-step.done{ color:var(--text); }
   .pipe-step.warn .dot{ border-color:var(--amber); background:var(--amber); color:#fff; }
   .pipe-step.warn{ color:var(--text); }
-  .pipe-line{ width:1.5px; height:14px; background:var(--border); margin-left:9.5px; }
+  .pipe-line{ width:1.5px; height:20px; background:var(--border); margin-left:9.5px; }
 
   .kb-item{
     border:1px solid var(--border); border-radius:6px; padding:10px 12px; margin-bottom:8px;
@@ -439,13 +440,13 @@
         <h2><span class="card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="m3 6 1 1 2-2"/><path d="m3 12 1 1 2-2"/><path d="m3 18 1 1 2-2"/></svg></span>Analyse-Pipeline</h2>
         <p class="hint">Mehrstufiger Ablauf je Prüfung</p>
         <div class="pipeline" id="pipeline">
-          <div class="pipe-step" data-step="1"><div class="dot">1</div><div>Extraktion relevanter Klauseln</div></div>
+          <div class="pipe-step" data-step="1"><div class="dot">1</div><div><div class="pipe-step-title">Extraktion relevanter Klauseln</div><div class="pipe-step-desc">KI liest den Vertrag und identifiziert die wichtigsten Risikopunkte.</div></div></div>
           <div class="pipe-line"></div>
-          <div class="pipe-step" data-step="2"><div class="dot">2</div><div>Fristen-Extraktion</div></div>
+          <div class="pipe-step" data-step="2"><div class="dot">2</div><div><div class="pipe-step-title">Fristen-Extraktion</div><div class="pipe-step-desc">Alle Termine und Fristen werden vollständig und unabhängig erfasst.</div></div></div>
           <div class="pipe-line"></div>
-          <div class="pipe-step" data-step="3"><div class="dot">3</div><div>Risiko-Klassifikation</div></div>
+          <div class="pipe-step" data-step="3"><div class="dot">3</div><div><div class="pipe-step-title">Risiko-Klassifikation</div><div class="pipe-step-desc">Jeder Punkt wird bewertet und der Wissensbasis gegenübergestellt.</div></div></div>
           <div class="pipe-line"></div>
-          <div class="pipe-step" data-step="4"><div class="dot">4</div><div>Maßnahmenvorschläge</div></div>
+          <div class="pipe-step" data-step="4"><div class="dot">4</div><div><div class="pipe-step-title">Maßnahmenvorschläge</div><div class="pipe-step-desc">Für kritische/hohe Punkte werden konkrete Empfehlungen erstellt.</div></div></div>
         </div>
       </div>
 
@@ -1430,7 +1431,8 @@ ${JSON.stringify(critical)}`;
   }catch(err){
     console.error(err);
     const stage = document.querySelector('.pipe-step.active');
-    const stageLabel = stage ? stage.textContent.trim() : 'unbekannt';
+    const titleEl = stage ? stage.querySelector('.pipe-step-title') : null;
+    const stageLabel = titleEl ? titleEl.textContent.trim() : (stage ? stage.textContent.trim() : 'unbekannt');
     setError(`Analyse fehlgeschlagen in Stufe "${stageLabel}": ${err.message}`);
     setStatus('');
   }finally{
