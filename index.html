@@ -95,11 +95,30 @@
   }
   .input-icon-btn:hover{ color:var(--navy); background:var(--bg); }
   .key-status{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--text-muted); margin-top:10px; }
-  .key-status-dot{ width:8px; height:8px; border-radius:50%; background:var(--border); flex-shrink:0; }
+  .key-status-dot{ width:8px; height:8px; border-radius:50%; background:var(--red); flex-shrink:0; }
   .key-status.saved .key-status-dot{ background:var(--navy); }
   .key-status.saved{ color:var(--text); }
   .key-status.tested .key-status-dot{ background:var(--green); }
   .key-status.tested{ color:var(--green); }
+  .model-guide{
+    margin-top:12px; border-top:1px solid var(--border); padding-top:10px;
+    display:flex; flex-direction:column; gap:5px;
+  }
+  .model-guide-title{
+    font-size:10.5px; color:var(--text-muted); text-transform:uppercase;
+    letter-spacing:.35px; font-weight:bold;
+  }
+  .model-option{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    border:1px solid var(--border); border-radius:6px; background:var(--bg);
+    padding:5px 7px; font-size:10.8px; line-height:1.25;
+  }
+  .model-option strong{
+    color:var(--navy); font-size:11.3px; white-space:nowrap;
+  }
+  .model-option span{ color:var(--text-muted); text-align:right; }
+  .model-cost-note{ margin:2px 1px 0; font-size:10px; line-height:1.3; color:var(--text-muted); }
+  .model-help-note{ margin:1px 1px 0; font-size:10px; line-height:1.3; color:var(--navy); }
   .wb-caption{ font-size:11px; color:var(--text-muted); margin:4px 2px 0; }
   .recent-history-list{ display:flex; flex-direction:column; gap:4px; margin-top:6px; }
   .recent-history-item{
@@ -298,14 +317,31 @@
   .axis-bar-track{ flex:1; height:10px; background:var(--bg); border-radius:5px; overflow:hidden; }
   .axis-bar-fill{ height:100%; background:var(--gold); border-radius:5px; }
   .axis-score{ width:20px; text-align:right; flex-shrink:0; color:var(--text-muted); font-size:12px; }
-  .result-tabs{ display:flex; gap:4px; border-bottom:1px solid var(--border); margin-bottom:18px; }
+  .result-tabs{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:0 0 12px; }
   .result-tab{
-    background:none; border:none; padding:11px 16px 10px; font-size:13.5px; font-family:inherit;
-    color:var(--text-muted); cursor:pointer; border-bottom:2.5px solid transparent; margin-bottom:-1px;
+    text-align:left; background:#fff; border:1px solid var(--border); border-top:3px solid transparent;
+    border-radius:8px; padding:12px 13px; font-family:inherit; color:var(--text);
+    cursor:pointer; box-shadow:0 2px 8px rgba(15,42,74,0.05);
+    transition:background .15s,border-color .15s,box-shadow .15s,transform .15s;
   }
-  .result-tab.active{ color:var(--navy); border-bottom-color:var(--gold); font-weight:bold; }
-  .result-tab:hover{ color:var(--navy); }
+  .result-tab:hover{ border-color:var(--gold); transform:translateY(-1px); }
+  .result-tab.active{ border-color:var(--gold); border-top-color:var(--gold); background:#fffaf0; box-shadow:0 6px 16px rgba(15,42,74,0.08); }
+  .result-tab-head{ display:flex; align-items:center; gap:8px; font-size:13px; font-weight:bold; color:var(--navy); }
+  .result-tab-num{
+    width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    background:var(--navy); color:#fff; font-size:11px; flex-shrink:0;
+  }
+  .result-tab-metric{ display:block; margin-top:7px; font-size:11.5px; font-weight:bold; color:var(--text); }
+  .result-tab-desc{ display:block; margin-top:3px; font-size:11px; line-height:1.35; color:var(--text-muted); }
+  .result-tab-info{
+    margin:0 0 18px; border:1px solid var(--border); border-left:4px solid var(--gold);
+    border-radius:8px; background:#fff; padding:11px 13px; font-size:12.5px;
+    line-height:1.45; color:var(--text-muted);
+  }
+  .result-tab-info strong{ color:var(--navy); }
+  @media (max-width:900px){ .result-tabs{ grid-template-columns:1fr; } }
   .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
+  .top-actions .btn{ white-space:nowrap; }
   @media print{
     header, .site-footer, .no-print, .top-actions{ display:none !important; }
     body{ background:#fff; }
@@ -447,6 +483,20 @@
         </select>
         <button class="btn secondary small" id="saveKeyBtn" style="width:100%;">Key speichern</button>
         <div class="key-status" id="keyStatus"><span class="key-status-dot"></span><span class="key-status-text"></span></div>
+        <div class="model-guide" aria-label="Modellübersicht">
+          <div class="model-guide-title">Modellwahl kurz erklärt</div>
+          <div class="model-option">
+            <strong>Sonnet 5</strong><span>Standard · ausgewogen</span>
+          </div>
+          <div class="model-option">
+            <strong>Opus 4.8</strong><span>Premium · teuer</span>
+          </div>
+          <div class="model-option">
+            <strong>Haiku 4.5</strong><span>schnell · günstig</span>
+          </div>
+          <div class="model-cost-note">Kosten über Anthropic; abhängig von Länge, Analyseumfang und Modell.</div>
+          <div class="model-help-note">Ausführliche Modell- und Kostenhinweise findest du in der Hilfe.</div>
+        </div>
       </div>
 
       <div class="card">
@@ -509,6 +559,7 @@
 
   <div class="top-actions" id="topActions" style="display:none;">
     <button class="btn secondary small" onclick="window.print()">Als PDF exportieren</button>
+    <button class="btn secondary small" id="htmlExportBtn" type="button">Passwortgeschützten HTML-Bericht exportieren</button>
   </div>
   <div id="resultsArea">
     <div class="card">
@@ -657,6 +708,7 @@ const HELP_CONTENT = [
 
     <h4>f) Welches Modell wofür? (Modellwahl im API-Zugang)</h4>
     <p>Im Bereich „API-Zugang" kannst du zwischen drei Modellen wählen. Sie unterscheiden sich in Analysetiefe, Geschwindigkeit und Preis:</p>
+    <p><b>Praktische Empfehlung:</b> Starte in der Regel mit <b>Claude Sonnet 5</b>. Dieses Modell ist für die meisten Vertragsanalysen der beste Kompromiss aus fachlicher Tiefe, Geschwindigkeit und Kosten. Wechsle nur dann bewusst auf Opus oder Haiku, wenn der konkrete Anwendungsfall dafür spricht.</p>
     <table class="help-kitable">
       <thead><tr><th>Modell</th><th>Am besten für</th><th>Kontext</th></tr></thead>
       <tbody>
@@ -665,6 +717,13 @@ const HELP_CONTENT = [
         <tr><td><b>Claude Haiku 4.5</b><br>(schnell & günstig)</td><td>Schnelle erste Einschätzungen, Testläufe oder kürzere/einfachere Verträge. Bei sehr langen Verträgen (nahe am 300.000-Zeichen-Limit) ist das kleinere Kontextfenster am ehesten der limitierende Faktor.</td><td>200.000 Token</td></tr>
       </tbody>
     </table>
+    <p><b>Wann welches Modell?</b></p>
+    <ul>
+      <li><b>Sonnet 5:</b> Standard für normale Bauverträge, VOB/B-Verträge, BGB-Bauverträge und Planungsverträge. Gute Wahl, wenn du ein belastbares Ergebnis ohne unnötig hohe Modellkosten möchtest.</li>
+      <li><b>Opus 4.8:</b> Für besonders wichtige Entscheidungen, sehr komplexe GU-/NU-Verträge, Open-Book-/Cost-plus-Regelungen, ungewöhnliche Haftungs- oder Sicherheitenkonstruktionen und Fälle, in denen ein übersehener Punkt teuer werden kann.</li>
+      <li><b>Haiku 4.5:</b> Für kurze Vorprüfungen, Testläufe, Demo-Dokumente oder wenn du zunächst schnell sehen willst, ob sich eine tiefergehende Analyse lohnt.</li>
+    </ul>
+    <p><b>Kostenlogik:</b> Die App rechnet nicht selbst ab. Jede Analyse wird direkt über dein eigenes Anthropic-Konto abgerechnet. Kosten entstehen, weil der Vertragstext und die erzeugten Antworten als Token verarbeitet werden. Lange Verträge, viele erkannte Klauseln und ausführliche Maßnahmenvorschläge erhöhen die Tokenmenge.</p>
     <p><b>Kosten-Gegenüberstellung</b> (Anthropic-Preise pro Million Token, Stand Juli 2026; die Abrechnung erfolgt direkt über dein eigenes Anthropic-Konto):</p>
     <table class="help-kitable">
       <thead><tr><th>Modell</th><th>Input</th><th>Output</th></tr></thead>
@@ -683,7 +742,8 @@ const HELP_CONTENT = [
         <tr><td>lang (~100 Seiten, nahe am Limit)</td><td>~0,10–0,20 $</td><td>~0,20–0,45 $</td><td>~0,45–0,90 $</td></tr>
       </tbody>
     </table>
-    <p style="font-size:12px; color:var(--text-muted);">Diese Werte sind Schätzungen und können je nach Vertragsinhalt (Anzahl erkannter Klauseln und Fristen) abweichen. Für exakte Kosten siehe die Nutzungsübersicht in der Anthropic Console.</p>
+    <p style="font-size:12px; color:var(--text-muted);">Diese Werte sind Schätzungen und können je nach Vertragsinhalt (Anzahl erkannter Klauseln und Fristen), Antwortlänge und Modellpreisen abweichen. Prüfe für verbindliche Beträge immer die Nutzungsübersicht und aktuellen Preise in der Anthropic Console.</p>
+    <p><b>Faustregel:</b> Für den produktiven Alltag Sonnet 5 verwenden, für besonders kritische Verträge Opus 4.8 wählen, für schnelle Tests oder kurze Vorprüfungen Haiku 4.5 nutzen.</p>
   `},
   { id:"schnellstart", title:"Schnellstart", body:`
     <h3>Schnellstart</h3>
@@ -828,6 +888,7 @@ let apiKey = "";
 let currentContractType = "vob";
 let currentPerspective = "auftragnehmer";
 let currentRoleLabel = "Auftragnehmer";
+let latestReportSnapshot = null;
 
 const ROLE_MAP = {
   vob:      {contractType:"vob", perspective:"auftragnehmer", roleLabel:"Auftragnehmer (Bauunternehmen)",
@@ -855,7 +916,7 @@ function updateKeyStatus(state){
   const el = document.getElementById('keyStatus');
   el.className = 'key-status' + (state !== 'none' ? ' ' + state : '');
   const text = el.querySelector('.key-status-text');
-  text.textContent = state === 'tested' ? 'Verbindung erfolgreich getestet.' : state === 'saved' ? 'Key gespeichert.' : 'Kein API-Key hinterlegt.';
+  text.textContent = state === 'tested' ? 'Key gespeichert, Verbindung besteht.' : state === 'saved' ? 'Key gespeichert, Verbindung nicht getestet.' : 'Kein API-Key hinterlegt.';
 }
 function loadApiKey(){
   apiKey = localStorage.getItem('scri-api-key') || "";
@@ -1174,6 +1235,274 @@ document.getElementById('historyRestoreInput').onchange = async (e) => {
     setError('Wiederherstellung fehlgeschlagen: ' + err.message);
   }
 };
+
+// ---------- passwortgeschuetzter HTML-Bericht ----------
+function bytesToBase64(bytes){
+  let binary = '';
+  const chunkSize = 0x8000;
+  for(let i = 0; i < bytes.length; i += chunkSize){
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+function safeReportFilename(name){
+  const base = (name || 'analyse')
+    .replace(/\.[^.]+$/, '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 70) || 'analyse';
+  return `scri-bericht-${new Date().toISOString().slice(0,10)}-${base}.html`;
+}
+function buildPlainHtmlReport(){
+  const resultClone = document.getElementById('resultsArea').cloneNode(true);
+  resultClone.querySelectorAll('.result-tabs, .result-tab-info').forEach(el => el.classList.remove('no-print'));
+  resultClone.querySelectorAll('.result-tab-pane').forEach((el, index) => {
+    el.style.display = index === 0 ? 'block' : 'none';
+    el.style.marginTop = '18px';
+  });
+  const sectionTitles = {
+    "pane-risiko": ["1", "Risikobewertung", "Alle erkannten Risikopunkte mit Einstufung, Begründung, Maßnahme und Referenz."],
+    "pane-termine": ["2", "Terminkritische Klauseln", "Fristen und Termine mit erkannter rechtlicher oder finanzieller Folge."],
+    "pane-fristen": ["3", "Fristen & Termine", "Chronologische Abfolge und vollständige Fristenliste nach Kategorien."]
+  };
+  Object.entries(sectionTitles).forEach(([id, data]) => {
+    const pane = resultClone.querySelector(`#${id}`);
+    if(!pane) return;
+    pane.insertAdjacentHTML('afterbegin', `
+      <div class="report-section-header">
+        <span class="report-section-num">${data[0]}</span>
+        <div><h2>${escapeHtml(data[1])}</h2><p>${escapeHtml(data[2])}</p></div>
+      </div>
+    `);
+  });
+  resultClone.querySelectorAll('details').forEach(el => el.open = true);
+  const appStyle = document.querySelector('style')?.textContent || '';
+  const reportDate = new Date().toLocaleDateString('de-DE') + ' · ' + new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) + ' Uhr';
+  const reportScript = [
+    'document.querySelectorAll(".result-tab").forEach(tab => {',
+    '  tab.addEventListener("click", () => {',
+    '    document.querySelectorAll(".result-tab").forEach(t => t.classList.remove("active"));',
+    '    document.querySelectorAll(".result-tab-pane").forEach(p => p.style.display = "none");',
+    '    tab.classList.add("active");',
+    '    const pane = document.getElementById(tab.dataset.pane);',
+    '    if(pane) pane.style.display = "block";',
+    '    const info = document.getElementById("resultTabInfo");',
+    '    if(info) info.innerHTML = tab.dataset.info || "";',
+    '  });',
+    '});'
+  ].join('\n');
+  return `<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMART Contract & Risk Intelligence Bericht</title>
+<style>
+${appStyle}
+body{height:auto;overflow:auto;}
+header,.site-footer,.top-actions,.no-print{display:none!important;}
+.container{max-width:1180px;padding:32px 24px 56px;}
+.print-header{display:block!important;margin-bottom:20px;}
+.card{box-shadow:none;}
+.report-actionbar{
+  position:sticky; top:0; z-index:20; display:flex; justify-content:space-between; align-items:center; gap:16px;
+  margin:-32px -24px 24px; padding:14px 24px; background:rgba(246,245,241,.96);
+  border-bottom:1px solid var(--border); backdrop-filter:blur(8px);
+}
+.report-actionbar-title{font-weight:bold;color:var(--navy);font-size:14px;}
+.report-actionbar-meta{font-size:12px;color:var(--text-muted);margin-top:2px;}
+.report-actionbar-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.report-actionbar button{
+  border:1px solid var(--border); border-radius:6px; background:#fff; color:var(--navy);
+  font:inherit; font-size:12.5px; font-weight:bold; padding:8px 12px; cursor:pointer;
+}
+.report-actionbar button.primary{background:var(--navy);border-color:var(--navy);color:#fff;}
+.report-section-header{
+  display:flex; gap:12px; align-items:flex-start; margin:24px 0 12px; padding:14px 16px;
+  border:1px solid var(--border); border-left:4px solid var(--gold); border-radius:8px; background:#fff;
+}
+.report-section-num{
+  width:26px; height:26px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  background:var(--navy); color:#fff; font-size:12px; font-weight:bold; flex-shrink:0;
+}
+.report-section-header h2{font-family:Arial,"Segoe UI",sans-serif;font-size:17px;font-weight:bold;color:var(--navy);margin:0;}
+.report-section-header p{font-size:12.5px;color:var(--text-muted);margin:3px 0 0;line-height:1.45;}
+@media (max-width:800px){
+  .report-actionbar{position:static;align-items:flex-start;flex-direction:column;}
+  .report-actionbar-actions{justify-content:flex-start;}
+}
+@media print{
+  .report-actionbar{display:none!important;}
+  .result-tabs,.result-tab-info{display:none!important;}
+  .result-tab-pane{display:block!important;margin-top:18px!important;}
+  .report-section-header{break-inside:avoid;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="report-actionbar">
+  <div>
+    <div class="report-actionbar-title">SMART Contract &amp; Risk Intelligence Bericht</div>
+    <div class="report-actionbar-meta">${escapeHtml(currentFileName)} · erstellt ${escapeHtml(reportDate)}</div>
+  </div>
+  <div class="report-actionbar-actions">
+    <button type="button" onclick="window.print()">Drucken</button>
+    <button type="button" class="primary" onclick="window.print()" title="Im Druckdialog als PDF speichern">PDF speichern</button>
+  </div>
+</div>
+${resultClone.innerHTML}
+</div>
+${'<' + 'script>'}
+${reportScript}
+${'<' + '/script>'}
+</body>
+</html>`;
+}
+async function deriveReportKey(password, salt){
+  const material = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2', salt, iterations:250000, hash:'SHA-256'},
+    material,
+    {name:'AES-GCM', length:256},
+    false,
+    ['encrypt']
+  );
+}
+function buildEncryptedReportShell(payload){
+  const data = JSON.stringify(payload);
+  const unlockScript = [
+    'const PAYLOAD = ' + data + ';',
+    'function b64ToBytes(value){',
+    '  const binary = atob(value);',
+    '  const bytes = new Uint8Array(binary.length);',
+    '  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);',
+    '  return bytes;',
+    '}',
+    'async function unlock(){',
+    '  const password = document.getElementById("reportPassword").value;',
+    '  const msg = document.getElementById("msg");',
+    '  if(!password){ msg.textContent = "Bitte Passwort eingeben."; return; }',
+    '  msg.textContent = "Bericht wird entschlüsselt ...";',
+    '  try{',
+    '    const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);',
+    '    const key = await crypto.subtle.deriveKey(',
+    '      {name:"PBKDF2", salt:b64ToBytes(PAYLOAD.salt), iterations:PAYLOAD.iterations, hash:"SHA-256"},',
+    '      material,',
+    '      {name:"AES-GCM", length:256},',
+    '      false,',
+    '      ["decrypt"]',
+    '    );',
+    '    const plain = await crypto.subtle.decrypt({name:"AES-GCM", iv:b64ToBytes(PAYLOAD.iv)}, key, b64ToBytes(PAYLOAD.ciphertext));',
+    '    const html = new TextDecoder().decode(plain);',
+    '    document.open();',
+    '    document.write(html);',
+    '    document.close();',
+    '  }catch(err){',
+    '    msg.textContent = "Passwort falsch oder Datei beschädigt.";',
+    '  }',
+    '}',
+    'document.getElementById("unlockBtn").addEventListener("click", unlock);',
+    'document.getElementById("reportPassword").addEventListener("keydown", e => { if(e.key === "Enter") unlock(); });'
+  ].join('\n');
+  return [
+    '<!DOCTYPE html>',
+    '<html lang="de">',
+    '<head>',
+    '<meta charset="UTF-8">',
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
+    '<title>Geschützter SCRI-Bericht</title>',
+    '<style>',
+    ':root{--navy:#0f2a4a;--gold:#c9a227;--bg:#f6f5f1;--card:#fff;--border:#e0ddd3;--text:#20262e;--muted:#5c6570;--red:#8b1e1e;}',
+    '*{box-sizing:border-box}',
+    'body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:Arial,"Segoe UI",sans-serif;display:grid;place-items:center;padding:24px}',
+    '.unlock-card{width:min(520px,100%);background:var(--card);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:10px;padding:28px;box-shadow:0 14px 36px rgba(15,42,74,.12)}',
+    'h1{margin:0;color:var(--navy);font-size:24px;line-height:1.2}',
+    'p{color:var(--muted);line-height:1.55}',
+    'label{display:block;font-size:13px;font-weight:bold;color:var(--navy);margin:18px 0 6px}',
+    'input{width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:7px;font:inherit}',
+    'button{width:100%;margin-top:14px;border:0;border-radius:7px;background:var(--navy);color:#fff;font:inherit;font-weight:bold;padding:12px 14px;cursor:pointer}',
+    'button:hover{background:#1c3f66}',
+    '.msg{min-height:20px;margin-top:12px;font-size:13px;color:var(--red)}',
+    '.meta{font-size:12px;color:var(--muted);margin-top:18px}',
+    '</style>',
+    '</head>',
+    '<body>',
+    '<main class="unlock-card">',
+    '  <h1>SMART Contract & Risk Intelligence Bericht</h1>',
+    '  <p>Dieser HTML-Bericht ist verschlüsselt. Zur Anzeige ist das separat übermittelte Passwort erforderlich. Die Entschlüsselung erfolgt lokal im Browser.</p>',
+    '  <label for="reportPassword">Passwort</label>',
+    '  <input id="reportPassword" type="password" autocomplete="current-password" autofocus>',
+    '  <button id="unlockBtn" type="button">Bericht öffnen</button>',
+    '  <div class="msg" id="msg"></div>',
+    '  <div class="meta">Der Bericht wird erst nach erfolgreicher Passworteingabe angezeigt. Inhalte und Passwort werden nicht an einen Server dieser Berichtdatei übertragen.</div>',
+    '</main>',
+    '<' + 'script>',
+    unlockScript,
+    '<' + '/script>',
+    '</body>',
+    '</html>'
+  ].join('\n');
+}
+async function exportEncryptedHtmlReport(){
+  if(!latestReportSnapshot){
+    alert('Bitte zuerst eine Analyse durchführen oder einen Eintrag aus dem Verlauf öffnen.');
+    return;
+  }
+  if(!window.crypto || !crypto.subtle){
+    alert('Dein Browser unterstützt die benötigte Verschlüsselung nicht.');
+    return;
+  }
+  const password = prompt('Passwort für diesen HTML-Bericht festlegen:');
+  if(password === null) return;
+  if(password.length < 10){
+    alert('Bitte ein stärkeres Passwort mit mindestens 10 Zeichen verwenden.');
+    return;
+  }
+  const confirmation = prompt('Passwort zur Kontrolle erneut eingeben:');
+  if(confirmation === null) return;
+  if(password !== confirmation){
+    alert('Die Passwörter stimmen nicht überein.');
+    return;
+  }
+  const plainReport = buildPlainHtmlReport();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveReportKey(password, salt);
+  const encrypted = await crypto.subtle.encrypt(
+    {name:'AES-GCM', iv},
+    key,
+    new TextEncoder().encode(plainReport)
+  );
+  const shell = buildEncryptedReportShell({
+    version:1,
+    algorithm:'AES-GCM',
+    kdf:'PBKDF2-SHA-256',
+    iterations:250000,
+    salt:bytesToBase64(salt),
+    iv:bytesToBase64(iv),
+    ciphertext:bytesToBase64(new Uint8Array(encrypted))
+  });
+  const blob = new Blob([shell], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = safeReportFilename(latestReportSnapshot.filename);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  alert('Passwortgeschützter HTML-Bericht wurde erstellt. Das Passwort wird nicht gespeichert und sollte separat übermittelt werden.');
+}
+document.getElementById('htmlExportBtn').onclick = exportEncryptedHtmlReport;
 
 // ---------- file handling ----------
 const dropzone = document.getElementById('dropzone');
@@ -1749,6 +2078,11 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
           </tr>`).join('')}</tbody>
       </table></div>`
     : `<p class="hint">Keine Fristen mit erkannter finanzieller oder rechtlicher Folge.</p>`;
+  const tabInfos = {
+    "pane-risiko": "<strong>Risikobewertung:</strong> Zeigt alle erkannten vertraglichen Risikopunkte mit Einstufung, Begründung, empfohlener Maßnahme und fachlicher Referenz.",
+    "pane-termine": "<strong>Terminkritische Klauseln:</strong> Fokussiert auf Fristen und Termine mit konkreter finanzieller oder rechtlicher Folge bei Versäumung.",
+    "pane-fristen": "<strong>Fristen & Termine:</strong> Enthält die zeitliche Abfolge mit eindeutigem Datum sowie alle erkannten Fristen nach Kategorien gruppiert."
+  };
 
   document.getElementById('resultsArea').innerHTML = `
     <div class="print-header">
@@ -1759,10 +2093,23 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
     ${summaryHtml}
     ${marktvergleichHtml}
     <div class="result-tabs no-print">
-      <button class="result-tab active" data-pane="pane-risiko">Risikobewertung</button>
-      <button class="result-tab" data-pane="pane-termine">Terminkritische Klauseln</button>
-      <button class="result-tab" data-pane="pane-fristen">Fristen</button>
+      <button class="result-tab active" data-pane="pane-risiko" data-info="${escapeHtml(tabInfos["pane-risiko"])}">
+        <span class="result-tab-head"><span class="result-tab-num">1</span>Risikobewertung</span>
+        <span class="result-tab-metric">${counts.kritisch} kritisch · ${counts.hoch} hoch · ${items.length} gesamt</span>
+        <span class="result-tab-desc">Bewertung, Begründung, Maßnahme und Referenz.</span>
+      </button>
+      <button class="result-tab" data-pane="pane-termine" data-info="${escapeHtml(tabInfos["pane-termine"])}">
+        <span class="result-tab-head"><span class="result-tab-num">2</span>Terminkritische Klauseln</span>
+        <span class="result-tab-metric">${kritischeTermine.length} mit erkannter Folge</span>
+        <span class="result-tab-desc">Nur Fristen mit rechtlicher oder finanzieller Wirkung.</span>
+      </button>
+      <button class="result-tab" data-pane="pane-fristen" data-info="${escapeHtml(tabInfos["pane-fristen"])}">
+        <span class="result-tab-head"><span class="result-tab-num">3</span>Fristen &amp; Termine</span>
+        <span class="result-tab-metric">${fristenItems.length} Fristen · ${timelineItems.length} datiert</span>
+        <span class="result-tab-desc">Chronologie und vollständige Fristenliste.</span>
+      </button>
     </div>
+    <div class="result-tab-info no-print" id="resultTabInfo">${tabInfos["pane-risiko"]}</div>
     <div class="result-tab-pane" id="pane-risiko">
       <div class="card">
         <h2>${escapeHtml(currentFileName)}</h2>
@@ -1820,15 +2167,22 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
     </div>
   `;
   document.getElementById('topActions').style.display = 'flex';
+  latestReportSnapshot = {
+    filename: currentFileName,
+    createdAt: new Date().toISOString()
+  };
   document.querySelectorAll('.result-tab').forEach(tab => {
     tab.onclick = () => {
       document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.result-tab-pane').forEach(p => p.style.display = 'none');
       tab.classList.add('active');
       document.getElementById(tab.dataset.pane).style.display = 'block';
+      const info = document.getElementById('resultTabInfo');
+      if(info) info.innerHTML = tab.dataset.info || '';
     };
   });
 }
+window.exportEncryptedHtmlReport = exportEncryptedHtmlReport;
 
 function escapeHtml(str){
   return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
