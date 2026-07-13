@@ -372,20 +372,25 @@
   .top5-list{ margin:0; padding:0 0 0 22px; }
   .top5-list li{ margin-bottom:10px; font-size:13.5px; line-height:1.5; }
   .top5-list li .badge{ margin-right:8px; }
+  .summary-section-title{
+    margin:22px 0 10px; padding:8px 10px; border-left:4px solid var(--gold);
+    background:#fffaf0; color:var(--navy); font-size:14px; font-weight:bold; border-radius:6px;
+  }
+  .summary-section-subtitle{ margin:-4px 0 12px; color:var(--text-muted); font-size:12.5px; line-height:1.45; }
   .risk-profile-grid{
     display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:18px 0 4px;
   }
   .risk-profile-card{
-    border:1px solid var(--border); border-radius:8px; padding:14px;
-    display:grid; grid-template-columns:112px 1fr; gap:14px; align-items:center; background:#fffdf8;
+    border:1px solid var(--border); border-radius:8px; padding:13px;
+    display:grid; grid-template-columns:118px 1fr; gap:13px; align-items:center; background:#fffdf8;
   }
-  .risk-profile-card.summary{ display:block; border-top:3px solid var(--gold); }
+  .risk-profile-card.summary{ display:flex; flex-direction:column; gap:9px; align-items:stretch; }
   .donut-chart{
-    width:104px; height:104px; border-radius:50%; position:relative; flex-shrink:0;
+    width:112px; height:112px; border-radius:50%; position:relative; flex-shrink:0;
     background:conic-gradient(var(--border) 0 360deg);
   }
   .donut-chart::after{
-    content:''; position:absolute; inset:22px; border-radius:50%; background:var(--card);
+    content:''; position:absolute; inset:24px; border-radius:50%; background:var(--card);
     box-shadow:inset 0 0 0 1px rgba(15,42,74,0.05);
   }
   .donut-total{
@@ -393,8 +398,8 @@
     z-index:1; color:var(--navy); font-weight:bold; font-size:20px; line-height:1;
   }
   .donut-total span{ margin-top:4px; color:var(--text-muted); font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:0.4px; }
-  .risk-profile-title{ font-weight:bold; color:var(--navy); font-size:13.5px; margin-bottom:8px; }
-  .risk-profile-note{ color:var(--text-muted); font-size:11.5px; line-height:1.45; margin:-2px 0 9px; }
+  .risk-profile-title{ font-weight:bold; color:var(--navy); font-size:14px; margin-bottom:7px; }
+  .risk-profile-note{ color:var(--text-muted); font-size:11.5px; line-height:1.38; margin:-2px 0 8px; }
   .risk-profile-legend{ display:flex; flex-direction:column; gap:5px; }
   .legend-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-muted); }
   .legend-name{ display:flex; align-items:center; gap:7px; min-width:0; }
@@ -405,10 +410,15 @@
     color:var(--navy); margin:2px 0 8px;
   }
   .summary-dot{ width:13px; height:13px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 3px rgba(201,162,39,0.18); }
-  .summary-meta{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+  .summary-meta{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:0; }
   .summary-meta-item{ background:#fff; border:1px solid var(--border); border-radius:6px; padding:7px; }
   .summary-meta-value{ display:block; color:var(--navy); font-size:16px; font-weight:bold; line-height:1; }
   .summary-meta-label{ display:block; color:var(--text-muted); font-size:10.5px; margin-top:4px; }
+  .summary-explain{
+    border:1px solid var(--border); border-left:4px solid var(--gold); background:#fff;
+    border-radius:6px; padding:8px 9px; color:var(--text-muted); font-size:11.5px; line-height:1.4;
+  }
+  .summary-explain b{ color:var(--navy); }
   @media (max-width:1040px){
     .risk-profile-grid{ grid-template-columns:1fr; }
     .risk-profile-card{ grid-template-columns:96px 1fr; }
@@ -2898,6 +2908,13 @@ function renderDonutCard(title, entries, totalLabel, note = ''){
       </div>
     </div>`;
 }
+function getImpactIndexAssessment(value){
+  const score = Number(value) || 0;
+  if(score >= 90) return 'sehr hoher wirtschaftlicher Druck';
+  if(score >= 60) return 'erhöhter wirtschaftlicher Druck';
+  if(score >= 30) return 'moderater wirtschaftlicher Druck';
+  return 'geringer wirtschaftlicher Druck';
+}
 function getOverallRiskAssessment(summary){
   const counts = summary.riskCounts || {};
   const totalRisks = Object.values(counts).reduce((sum, value) => sum + (Number(value) || 0), 0);
@@ -2943,6 +2960,8 @@ function renderOverallRiskCard(summary){
   const strongestAxis = AUSWIRKUNG_ACHSEN
     .map(axis => ({axis, score:summary.axisScores[axis] || 0}))
     .sort((a,b) => b.score - a.score)[0] || {axis:'-', score:0};
+  const impactTotal = AUSWIRKUNG_ACHSEN.reduce((sum, axis) => sum + (Number(summary.axisScores[axis]) || 0), 0);
+  const impactLabel = getImpactIndexAssessment(impactTotal);
   return `
     <div class="risk-profile-card summary">
       <div class="risk-profile-title">Management-Einschätzung</div>
@@ -2958,6 +2977,10 @@ function renderOverallRiskCard(summary){
           <span class="summary-meta-label">stärkste Wirkung</span>
         </div>
       </div>
+      <div class="summary-explain">
+        <b>Einordnung:</b> Risikoindex ${assessment.weightedRisk} beschreibt die Schwere der erkannten Risikopunkte.
+        Wirkungsindex ${Math.round(impactTotal)} bedeutet ${escapeHtml(impactLabel)}. Das ist ein Priorisierungssignal, kein pauschales Urteil über die Vertragsqualität.
+      </div>
     </div>`;
 }
 function renderRiskProfileCharts(summary){
@@ -2971,10 +2994,12 @@ function renderRiskProfileCharts(summary){
     value:summary.axisScores[key] || 0,
     color:AXIS_DONUT_COLORS[key] || '#5c6570'
   }));
+  const impactTotal = axisEntries.reduce((sum, entry) => sum + (Number(entry.value) || 0), 0);
+  const impactLabel = getImpactIndexAssessment(impactTotal);
   return `
     <div class="risk-profile-grid">
-      ${renderDonutCard('Geschätzte Risikoverteilung', riskEntries, 'Risiken', 'Anzahl erkannter Risikopunkte nach Schweregrad. Entscheidend ist die Mischung der Stufen.')}
-      ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Index', 'Gewichteter Wirkungsindex nach Risikoauswirkung. Höher bedeutet stärkeren wirtschaftlichen Druck, nicht automatisch einen schlechteren Vertrag.')}
+      ${renderDonutCard('Geschätzte Risikoverteilung', riskEntries, 'Risiken', 'Erkannte Risikopunkte nach Schweregrad. Entscheidend ist die Mischung der Stufen.')}
+      ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Index', `Wirkungsindex ${Math.round(impactTotal)}: ${impactLabel}. Höher bedeutet mehr wirtschaftlichen Druck, nicht automatisch einen schlechteren Vertrag.`)}
       ${renderOverallRiskCard(summary)}
     </div>`;
 }
@@ -3045,15 +3070,15 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
     <div class="card">
       <h2>Management Summary</h2>
       <p class="intro-text">${escapeHtml(introText)}</p>
-      <p class="hint">Die fünf größten Projektrisiken auf einen Blick</p>
+      <div class="summary-section-title">Die fünf größten Projektrisiken auf einen Blick</div>
       <ol class="top5-list">
         ${summary.top5.map(it => `<li><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span> <span>${escapeHtml(it.text)}</span></li>`).join('')}
       </ol>
-      <p class="hint" style="margin-top:18px;">Risikoprofil auf einen Blick</p>
+      <div class="summary-section-title">Risikoprofil auf einen Blick</div>
       ${renderRiskProfileCharts(summary)}
       ${projectInsightHtml}
-      <p class="hint" style="margin-top:18px;">Geschätzte wirtschaftliche Risikowirkung nach Dimension</p>
-      <p class="hint">Gleiche Datenbasis wie „Geschätzte wirtschaftliche Wirkung“, hier als Rangfolge dargestellt. Höhere Werte zeigen stärkere relative Betroffenheit.</p>
+      <div class="summary-section-title">Geschätzte wirtschaftliche Risikowirkung nach Dimension</div>
+      <p class="summary-section-subtitle">Gleiche Datenbasis wie „Geschätzte wirtschaftliche Wirkung“, hier als Rangfolge dargestellt. Höhere Werte zeigen stärkere relative Betroffenheit und wirtschaftlichen Druck, nicht automatisch einen schlechteren Vertrag.</p>
       <div class="axis-grid">
         ${renderAxisBars(summary.axisScores)}
       </div>
