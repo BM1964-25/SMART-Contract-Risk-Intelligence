@@ -995,7 +995,7 @@ const HELP_CONTENT = [
     <p><b>Management-Einschätzung und Risikoindex:</b> Die Ampel übersetzt Anzahl und Schwere der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Der Risikoindex ist ein gewichteter Orientierungswert aus den Risikostufen; er ist keine Schulnote und keine Rechtsbewertung. Ein hoher Wert bedeutet erhöhten Prüf- und Verhandlungsbedarf, nicht automatisch einen schlechten Vertrag.</p>
     <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Der Wirkungsindex ist ein gewichteter Orientierungswert: höher bedeutet stärkeren wirtschaftlichen Druck, nicht automatisch einen „schlechten Vertrag". Donut und Balkendiagramm nutzen dieselbe Datenbasis; der Donut zeigt den Überblick, die Balken zeigen die Rangfolge der wirtschaftlichen Schwerpunkte. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
     <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – je nach Vertragsgrundlage unterschiedlich. Bei Bauverträgen werden z. B. Gewährleistung, Vertragsstrafe, Zahlungsziel, Skonto, VOB/B-Einbeziehung, Vertragserfüllungssicherheit, Mängelsicherheit, kumulierte Einbehalte, Abnahme, Nachträge und Schlussdokumentation getrennt betrachtet; bei Planungsverträgen/HOAI stehen Honorar-/Leistungsumfang, stufenweise Beauftragung, Kostensteuerung, Nutzungsrechte, BIM-/Projektplattformpflichten, Freigaben und Zahlungs-/Prüffristen im Vordergrund.</p>
-    <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge (z. B. Vertragsstrafe, Sicherheitseinbehalt) erkannt wurde, priorisiert nach Dringlichkeit.</p>
+    <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge erkannt wurde, priorisiert nach Schwere, Unmittelbarkeit und Steuerbarkeit. „Kritisch" ist Fristen mit harter unmittelbarer Sanktion vorbehalten, z. B. Vertragsstrafe, konkretem Schadensersatzmechanismus, hohem Einbehalt, Rechtsverlust oder blockierter Abnahme/Schlusszahlung. „Hoch" bedeutet relevante Folge, aber grundsätzlich steuerbar, z. B. Nachtrags-, Anzeige-, Schlussrechnungs- oder Abnahmefristen. „Mittel" sind wichtige Steuerungsfristen ohne unmittelbaren Rechtsverlust; „niedrig" reine Ordnungstermine oder Zieltermine ohne erkennbare Sanktion.</p>
     <p><b>Fristen:</b> zweigeteilt – oben ein chronologischer Zeitstrahl für alle Fristen mit einem echten Kalenderdatum, darunter die vollständige, nach Kategorie gruppierte Liste aller Fristen (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine). Relative Fristen (z. B. „12 Werktage nach Erhalt der Ausführungsplanung") zeigen zusätzlich eine Dauer-Kennzeichnung und den hervorgehobenen Bezugspunkt.</p>
     <p><b>Referenz:</b> zeigt, welche Wissensbasis-Einträge zur Bewertung eines Punktes herangezogen wurden.</p>
     <p><b>Ein Beispiel zur Einordnung:</b> Ein Punkt mit Risiko „kritisch" und Auswirkung „Liquidität" könnte etwa eine 10 %-Vertragserfüllungssicherheit ohne Fristbegrenzung sein – die Begründung würde erklären, warum (hohe, sofort spürbare Kapitalbindung), und die vorgeschlagene Maßnahme einen Verhandlungsrahmen nennen (z. B. Befristung und Höhe der Bürgschaft verhandeln), statt einen starren Zielwert vorzugeben.</p>
@@ -2572,7 +2572,7 @@ Wichtig: Verknüpfe Folgen auch dann, wenn sie in einem anderen Paragrafen stehe
 Ordne jede Frist einer Kategorie zu: "Vertragsfrist" (Baubeginn, Zwischentermine, Gesamtfertigstellung, Bauzeit), "Pruefungsfrist" (Prüfpflichten mit Frist, z.B. Planprüfung, Bemusterung, Nachtragsprüfung), "Zahlungsfrist" (Abschlagsrechnung, Schlussrechnung, Schlusszahlung), "Reaktionsfrist" (Widerspruch, Anzeige, Stellungnahme, Benennung von Dritten), "Verjaehrungsfrist" (Gewährleistung, Mängelansprüche) oder "Vertragsstrafe" (strafbewehrte Termine).
 Unterscheide bei "datum" zwei Fälle: Feste Kalenderdaten (z.B. "20.05.2025") gibst du direkt so an. Relative Fristen (z.B. "12 Werktage") gibst du als reine Dauer im Feld "datum" an, und trägst den Bezugspunkt/Auslöser separat im Feld "bezug" ein (z.B. "nach Erhalt der Ausführungsplanung" oder "vor der Abnahme") – kurz, max 8 Wörter. Bei festen Kalenderdaten bleibt "bezug" leer.
 Gib im Feld "folge" an, ob mit der Frist eine konkrete wirtschaftliche oder rechtliche Folge bei Versäumung verbunden ist – auch bei paragrafenübergreifender Verknüpfung. Beispiele: "Vertragsstrafe 0,1%/Werktag, Deckel 3% + Schadensersatz", "100.000€ Dokumentationseinbehalt", "Verzögerung Abnahme/Schlusszahlung/Verjährungsbeginn", "Verlust oder Streit von Nachtragsansprüchen", "verzögerte Schlusszahlung". Lasse das Feld nur leer, wenn im gesamten Vertrag keine Folge auffindbar ist.
-Vergib im Feld "prioritaet" eine Einstufung "kritisch|hoch|mittel|niedrig" – kritisch/hoch, wenn Vertragsstrafe, Schadensersatz, Einbehalt, Abnahmeverzug, Schlusszahlungsverzug, Verjährungsbeginn, Gewährleistung oder Nachtragsverlust betroffen sind.
+Vergib im Feld "prioritaet" eine Einstufung "kritisch|hoch|mittel|niedrig" nach Schwere, Unmittelbarkeit und Steuerbarkeit. "kritisch" nur bei harter unmittelbarer Sanktion oder Rechtsfolge: Vertragsstrafe mit Endtermin/Schadensersatzmechanismus, konkreter hoher Einbehalt, blockierte Abnahme oder Schlusszahlung, Verlust von Ansprüchen/Rechten, Kündigungsfolge oder sehr kurze kaum steuerbare Frist mit erheblicher Wirkung. "hoch" bei relevanter finanzieller/rechtlicher Folge, die aber grundsätzlich steuerbar ist, z.B. Nachtragsangebot/Stellungnahme binnen 2 Wochen, Fertigstellungsanzeige vor Abnahme, Schlussrechnung binnen 6 Wochen, Abnahme-/Prüffristen mit Verzögerungsrisiko. "mittel" bei wichtigen Steuerungsfristen ohne unmittelbaren Rechtsverlust. "niedrig" bei Ordnungsterminen, Zielterminen oder Fristen ohne klare Sanktion.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","bezeichnung":"kurze Bezeichnung, max 8 Wörter","datum":"Datum oder Fristdauer, z.B. 20.05.2025 oder 12 Werktage","bezug":"Bezugspunkt bei relativen Fristen oder leer","kategorie":"Vertragsfrist|Pruefungsfrist|Zahlungsfrist|Reaktionsfrist|Verjaehrungsfrist|Vertragsstrafe","folge":"kurze Folge oder leer","prioritaet":"kritisch|hoch|mittel|niedrig"}]`;
     let fristenItems = [];
@@ -2700,25 +2700,30 @@ function parseDuration(str){
 function inferCriticalDeadline(f){
   const text = [f.bezeichnung, f.datum, f.bezug, f.kategorie, f.folge].filter(Boolean).join(' ').toLowerCase();
   if(/gesamtfertigstellung|fertigstellung|31\.12\.2019/.test(text)){
-    return {folge:'Vertragsstrafe, Schadensersatz und Beschleunigungspflicht möglich', prioritaet:'kritisch'};
+    const hardConsequence = /(vertragsstrafe|schadensersatz|beschleunigung|verzug|rechtsverlust|kündigung|kuendigung)/.test(text);
+    return {folge:'Vertragsstrafe, Schadensersatz und Beschleunigungspflicht möglich', prioritaet:hardConsequence ? 'kritisch' : 'hoch'};
   }
   if(/vertragsstrafe|0,1|0\.1|werktag|3\s*%/.test(text)){
-    return {folge:'Vertragsstrafe bis max. 3% der Auftragssumme', prioritaet:'hoch'};
+    const hasExtraConsequence = /(schadensersatz|beschleunigung|endtermin|gesamtfertigstellung|keine anrechnung|mehrere|kumul)/.test(text);
+    return {folge:'Vertragsstrafe bis max. 3% der Auftragssumme', prioritaet:hasExtraConsequence ? 'kritisch' : 'hoch'};
   }
   if(/schlussdokumentation|dokumentationsfrist|dokumentationseinbehalt|100\.?000|100\s*000/.test(text)){
-    return {folge:'100.000€ Dokumentationseinbehalt bis vollständiger Dokumentation', prioritaet:'kritisch'};
+    const blocksPayment = /(einbehalt|100\.?000|100\s*000|schlusszahlung|abnahme|block)/.test(text);
+    return {folge:'Dokumentation kann Zahlung oder Abnahme beeinflussen', prioritaet:blocksPayment ? 'kritisch' : 'hoch'};
   }
   if(/fertigstellungsanzeige|7\s*wochen/.test(text)){
-    return {folge:'Verzögerung des Abnahmeverfahrens möglich', prioritaet:'kritisch'};
+    return {folge:'Verzögerung des Abnahmeverfahrens möglich', prioritaet:'hoch'};
   }
   if(/abnahme|abnahmebegehung|mangelprotokoll|wiederholungsbegehung/.test(text)){
-    return {folge:'Auswirkung auf Schlusszahlung, Gewährleistung und Verjährung', prioritaet:'hoch'};
+    const blocksPayment = /(schlusszahlung|einbehalt|verjährungsbeginn|verjaehrungsbeginn|fiktive abnahme ausgeschlossen|block)/.test(text);
+    return {folge:'Auswirkung auf Schlusszahlung, Gewährleistung und Verjährung', prioritaet:blocksPayment ? 'hoch' : 'mittel'};
   }
   if(/schlussrechnung|6\s*wochen/.test(text)){
     return {folge:'Verzögerte Schlusszahlung möglich', prioritaet:'hoch'};
   }
   if(/nachtrag|nachtragsangebot|stellungnahme|2\s*wochen/.test(text)){
-    return {folge:'Verlust oder Streit von Nachtragsansprüchen möglich', prioritaet:'hoch'};
+    const claimLoss = /(verlust|ausschluss|verfall|präklusion|praeklusion|anspruch)/.test(text);
+    return {folge:'Verlust oder Streit von Nachtragsansprüchen möglich', prioritaet:claimLoss ? 'kritisch' : 'hoch'};
   }
   return null;
 }
