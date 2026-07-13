@@ -320,11 +320,15 @@
   .upload-notice summary::after{ content:' anzeigen'; }
   .upload-notice details[open] summary::after{ content:' ausblenden'; }
   .upload-notice-detail{ margin-top:6px; color:var(--text); }
+  .basis-check-actions{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
   .upload-notice button{
     margin-top:7px; border:1px solid var(--border); background:#fff; color:var(--navy);
     border-radius:5px; padding:5px 8px; font-family:inherit; font-size:11.5px; font-weight:bold; cursor:pointer;
   }
+  .upload-notice .basis-check-actions button{ margin-top:0; }
+  .upload-notice button.primary-choice{ background:var(--navy); border-color:var(--navy); color:#fff; }
   .upload-notice button:hover{ border-color:var(--gold); background:var(--gold-light); }
+  .upload-notice button.primary-choice:hover{ background:var(--navy-light); border-color:var(--navy-light); }
   .frist-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
   .frist-list li{
     display:flex; align-items:flex-start; gap:12px;
@@ -953,6 +957,7 @@ const HELP_CONTENT = [
     <ol>
       <li>Vertragsgrundlage und Rolle festlegen – das steuert, welche Wissensbasis-Einträge einbezogen werden und aus welcher Rechtsgrundlage heraus bewertet wird.</li>
       <li>Vertrag hochladen. Bei sehr langen Textdokumenten zeigt die App eine Seitenschätzung und ggf. einen Hinweis, falls das Zeichenlimit überschritten wird. Bei Scan-PDFs werden alle Seiten als Bilder vorbereitet und später paketweise analysiert. Beim Laden einer neuen Datei wird der aktuelle Arbeitsbereich für diese neue Prüfung vorbereitet; gespeicherte Verläufe bleiben erhalten.</li>
+      <li>Vertragsgrundlage prüfen. Wenn Dateiname oder ausgelesener Text nicht plausibel zur gewählten Grundlage passen, zeigt die App eine Bestätigungstafel. Die Analyse startet erst, wenn die aktuelle Auswahl bewusst bestätigt oder auf VOB/B, BGB oder HOAI umgestellt wurde. Bei Bauverträgen wird besonders abgefragt, ob die VOB/B ausdrücklich einbezogen ist oder ob BGB-Werkvertragsrecht gelten soll.</li>
       <li>Analyse starten – die vier Stufen (Klausel- und Vertragsstruktur, Fristen & Folgen, Risiko-Klassifikation, Maßnahmenvorschläge) laufen automatisch nacheinander. Bei Scan-PDFs kann dieser Vorgang wegen der Bilderkennung deutlich länger dauern.</li>
       <li>Management Summary zuerst lesen für den Überblick, dann bei Bedarf den Marktvergleich prüfen, anschließend gezielt in die drei Tabs wechseln.</li>
       <li>Bei kritischen/hohen Punkten die vorgeschlagenen Maßnahmen als Verhandlungsgrundlage nutzen – sie sind bewusst als Verhandlungsrahmen formuliert, nicht als starre Zielvorgabe.</li>
@@ -1075,7 +1080,10 @@ function applyRole(refreshUploadNotice = true){
   if(hint) hint.textContent = cfg.hint;
   if(refreshUploadNotice) updateUploadNotices();
 }
-document.getElementById('roleSelect').onchange = applyRole;
+document.getElementById('roleSelect').onchange = () => {
+  contractBasisConfirmed = false;
+  applyRole();
+};
 applyRole(false);
 
 const MARKET_BENCHMARKS_BY_TYPE = {
@@ -1363,6 +1371,8 @@ let currentFileName = "";
 let isScanned = false;
 let documentImages = [];
 let scannedPageCount = 0;
+let contractBasisConfirmed = false;
+let currentBasisIssue = null;
 const SCAN_BATCH_SIZE = 8;
 
 // ---------- storage ----------
@@ -1846,12 +1856,19 @@ function emptyResultsHtml(){
 }
 function setAnalysisRunning(running){
   isAnalysisRunning = running;
-  const analyzeBtn = document.getElementById('analyzeBtn');
   const abortBtn = document.getElementById('abortAnalysisBtn');
   const newBtn = document.getElementById('newAnalysisBtn');
-  if(analyzeBtn) analyzeBtn.disabled = running || (!extractedText.trim() && !documentImages.length);
+  updateAnalyzeButtonState();
   if(abortBtn) abortBtn.style.display = running ? 'block' : 'none';
   if(newBtn) newBtn.disabled = running;
+}
+function hasAnalyzableDocument(){
+  return extractedText.trim().length >= 20 || documentImages.length > 0;
+}
+function updateAnalyzeButtonState(){
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  if(!analyzeBtn) return;
+  analyzeBtn.disabled = isAnalysisRunning || !hasAnalyzableDocument() || (!!currentBasisIssue && !contractBasisConfirmed);
 }
 function looksLikePlanningContract(text){
   const hay = normalizeDedupeText(text).slice(0, 120000);
@@ -1921,6 +1938,83 @@ function looksLikeBgbConstructionContract(text){
 function getPlausibilitySource(){
   return [currentFileName, extractedText].filter(Boolean).join(' ');
 }
+function getContractBasisIssue(source){
+  const normalized = normalizeDedupeText(source);
+  if(!normalized) return null;
+  const looksConstruction = looksLikeConstructionContract(source);
+  const looksPlanning = looksLikePlanningContract(source);
+  const looksVob = looksLikeVobContract(source);
+  const looksBgb = looksLikeBgbConstructionContract(source);
+  const sourceLabel = isScanned && !extractedText.trim() ? 'Dateiname bzw. Scan-Kontext' : 'Dateiname und ausgelesener Text';
+
+  if(currentContractType === 'planung' && looksConstruction){
+    return {
+      kind:'construction-vs-planning',
+      title:'Vertragsgrundlage prüfen',
+      text:`${sourceLabel} enthalten Hinweise auf einen Bauvertrag. Aktuell ist jedoch „Planungsvertrag / HOAI“ ausgewählt. Bitte bestätigen Sie die Auswahl oder stellen Sie auf die passende Bauvertragsgrundlage um, bevor die Analyse startet.`,
+      actions:[
+        {label:'Auswahl beibehalten', action:'confirm', primary:false},
+        {label:'Auf Bauvertrag nach VOB/B umstellen', action:'vob', primary:!looksBgb},
+        {label:'Auf Bauvertrag nach BGB umstellen', action:'bgb', primary:looksBgb}
+      ]
+    };
+  }
+  if(currentContractType !== 'planung' && looksPlanning && !looksConstruction){
+    return {
+      kind:'planning-vs-construction',
+      title:'Vertragsgrundlage prüfen',
+      text:`${sourceLabel} enthalten Hinweise auf einen Planungs-/HOAI-Vertrag. Aktuell ist eine Bauvertragsgrundlage ausgewählt. Bitte bestätigen Sie die Auswahl oder stellen Sie auf Planungsvertrag / HOAI um, bevor die Analyse startet.`,
+      actions:[
+        {label:'Auswahl beibehalten', action:'confirm', primary:false},
+        {label:'Auf Planungsvertrag / HOAI umstellen', action:'planung', primary:true}
+      ]
+    };
+  }
+  if(currentContractType === 'vob' && looksBgb){
+    return {
+      kind:'bgb-vs-vob',
+      title:'VOB/B-Einbeziehung prüfen',
+      text:'Die Datei enthält Hinweise auf einen BGB-Bauvertrag oder reines BGB-Werkvertragsrecht, aber keine eindeutige VOB/B-Einbeziehung. Ist die VOB/B ausdrücklich und wirksam als Vertragsbestandteil vereinbart?',
+      actions:[
+        {label:'Ja, VOB/B ist vereinbart', action:'confirm', primary:false},
+        {label:'Nein, auf BGB umstellen', action:'bgb', primary:true}
+      ]
+    };
+  }
+  if(currentContractType === 'bgb' && looksVob){
+    return {
+      kind:'vob-vs-bgb',
+      title:'VOB/B-Einbeziehung prüfen',
+      text:'Die Datei enthält deutliche Hinweise auf eine VOB/B-Einbeziehung. Ist die VOB/B ausdrücklich und wirksam als Vertragsbestandteil vereinbart?',
+      actions:[
+        {label:'Ja, auf VOB/B umstellen', action:'vob', primary:true},
+        {label:'Nein, BGB beibehalten', action:'confirm', primary:false}
+      ]
+    };
+  }
+  if((currentContractType === 'vob' || currentContractType === 'bgb') && looksConstruction && !looksVob && !looksBgb){
+    return {
+      kind:'construction-basis-unclear',
+      title:'Bauvertragsgrundlage bestätigen',
+      text:'Die Datei weist auf einen Bauvertrag hin. Für die Analyse ist entscheidend, ob die VOB/B ausdrücklich als Vertragsbestandteil vereinbart ist oder ob BGB/Werkvertragsrecht gilt.',
+      actions:[
+        {label:'VOB/B ist ausdrücklich vereinbart', action:'vob', primary:currentContractType === 'vob'},
+        {label:'BGB/Werkvertragsrecht gilt', action:'bgb', primary:currentContractType === 'bgb'},
+        {label:'Aktuelle Auswahl beibehalten', action:'confirm', primary:false}
+      ]
+    };
+  }
+  return null;
+}
+function renderBasisIssue(issue){
+  return `
+    <div class="upload-notice warn basis-check">
+      <b>${escapeHtml(issue.title)}:</b> ${escapeHtml(issue.text)}
+      <div class="basis-check-actions">
+        ${issue.actions.map(action => `<button type="button" class="${action.primary ? 'primary-choice' : ''}" onclick="handleBasisIssueAction('${action.action}')">${escapeHtml(action.label)}</button>`).join('')}
+      </div>
+    </div>`;
+}
 function updateUploadNotices(){
   const el = document.getElementById('uploadNotices');
   if(!el) return;
@@ -1940,52 +2034,36 @@ function updateUploadNotices(){
         </details>
       </div>`);
   }
-  if(hasPlausibilitySource && currentContractType !== 'planung' && looksLikePlanningContract(plausibilitySource)){
-    notices.push(`
-      <div class="upload-notice warn">
-        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält mehrere Hinweise auf einen Planungs-/HOAI-Vertrag. Die aktuell gewählte Vertragsgrundlage ist jedoch nicht „Planungsvertrag / HOAI“. Bitte prüfen, ob die Vertragsgrundlage angepasst werden sollte, damit Marktvergleich, Fristenlogik und Risikogewichtung fachlich passen.
-        <br><button type="button" onclick="switchToPlanningContract()">Auf Planungsvertrag / HOAI umstellen</button>
-      </div>`);
-  }
-  if(hasPlausibilitySource && currentContractType === 'planung' && looksLikeConstructionContract(plausibilitySource)){
-    const suggestedButton = looksLikeBgbConstructionContract(plausibilitySource)
-      ? '<br><button type="button" onclick="switchToBgbContract()">Auf Bauvertrag nach BGB umstellen</button>'
-      : '<br><button type="button" onclick="switchToVobContract()">Auf Bauvertrag nach VOB/B umstellen</button>';
-    notices.push(`
-      <div class="upload-notice warn">
-        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Vertrag enthält Hinweise auf einen Bauvertrag, etwa Dateiname, Bauleistung, Abnahme, VOB/B, Vertragsstrafe, Sicherheiten, Bauzeit oder Schlussrechnung. Die aktuell gewählte Vertragsgrundlage ist jedoch „Planungsvertrag / HOAI“. Bitte prüfen, ob „Bauvertrag nach VOB/B“ oder „Bauvertrag nach BGB“ passender ist.
-        ${suggestedButton}
-      </div>`);
-  }
-  if(hasPlausibilitySource && currentContractType === 'vob' && looksLikeBgbConstructionContract(plausibilitySource)){
-    notices.push(`
-      <div class="upload-notice warn">
-        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält Hinweise auf einen BGB-Bauvertrag oder reines BGB-Werkvertragsrecht, aber keine eindeutige VOB/B-Einbeziehung. Die aktuell gewählte Vertragsgrundlage ist „Bauvertrag nach VOB/B“. Bitte prüfen, ob „Bauvertrag nach BGB“ passender ist.
-        <br><button type="button" onclick="switchToBgbContract()">Auf Bauvertrag nach BGB umstellen</button>
-      </div>`);
-  }
-  if(hasPlausibilitySource && currentContractType === 'bgb' && looksLikeVobContract(plausibilitySource)){
-    notices.push(`
-      <div class="upload-notice warn">
-        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält deutliche Hinweise auf eine VOB/B-Einbeziehung. Die aktuell gewählte Vertragsgrundlage ist „Bauvertrag nach BGB“. Bitte prüfen, ob „Bauvertrag nach VOB/B“ passender ist.
-        <br><button type="button" onclick="switchToVobContract()">Auf Bauvertrag nach VOB/B umstellen</button>
-      </div>`);
+  currentBasisIssue = hasPlausibilitySource ? getContractBasisIssue(plausibilitySource) : null;
+  if(currentBasisIssue && !contractBasisConfirmed){
+    notices.push(renderBasisIssue(currentBasisIssue));
   }
   el.innerHTML = notices.join('');
+  updateAnalyzeButtonState();
 }
+window.handleBasisIssueAction = function(action){
+  if(action === 'planung') return switchToPlanningContract();
+  if(action === 'vob') return switchToVobContract();
+  if(action === 'bgb') return switchToBgbContract();
+  contractBasisConfirmed = true;
+  updateUploadNotices();
+};
 window.switchToPlanningContract = function(){
   const sel = document.getElementById('roleSelect');
   if(sel) sel.value = 'planung';
+  contractBasisConfirmed = true;
   applyRole();
 };
 window.switchToVobContract = function(){
   const sel = document.getElementById('roleSelect');
   if(sel) sel.value = 'vob';
+  contractBasisConfirmed = true;
   applyRole();
 };
 window.switchToBgbContract = function(){
   const sel = document.getElementById('roleSelect');
   if(sel) sel.value = 'bgb';
+  contractBasisConfirmed = true;
   applyRole();
 };
 function resetWorkspace(){
@@ -1997,11 +2075,13 @@ function resetWorkspace(){
   documentImages = [];
   scannedPageCount = 0;
   isScanned = false;
+  contractBasisConfirmed = false;
+  currentBasisIssue = null;
   latestReportSnapshot = null;
   fileInput.value = "";
   document.getElementById('fileInfo').innerHTML = "";
   document.getElementById('uploadNotices').innerHTML = "";
-  document.getElementById('analyzeBtn').disabled = true;
+  updateAnalyzeButtonState();
   document.getElementById('abortAnalysisBtn').style.display = 'none';
   document.getElementById('topActions').style.display = 'none';
   document.getElementById('resultsArea').innerHTML = emptyResultsHtml();
@@ -2038,6 +2118,8 @@ async function handleFile(file){
   isScanned = false;
   documentImages = [];
   scannedPageCount = 0;
+  contractBasisConfirmed = false;
+  currentBasisIssue = null;
   document.getElementById('uploadNotices').innerHTML = "";
   const ext = file.name.split('.').pop().toLowerCase();
   try{
@@ -2053,7 +2135,7 @@ async function handleFile(file){
           <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
           <span class="meta">Scan · ${result.totalPages} Seite${result.totalPages===1?'':'n'} · alle Seiten vorbereitet</span></div>`;
         updateUploadNotices();
-        document.getElementById('analyzeBtn').disabled = documentImages.length === 0;
+        updateAnalyzeButtonState();
         setStatus(documentImages.length ? `Gescanntes Dokument erkannt. ${documentImages.length} von ${result.totalPages} Seiten bereit zur vollständigen Analyse.` : 'Konnte keine Seiten rendern.', documentImages.length ? 'done' : undefined);
         return;
       }
@@ -2072,7 +2154,7 @@ async function handleFile(file){
       <span class="meta">${Math.round(charCount/1000)} Tsd. Zeichen · ca. ${estPages} Seiten</span></div>
       ${overLimit ? `<p class="hint" style="color:var(--amber);">Sehr langes Dokument – nur die ersten ca. ${Math.round(DOC_CHAR_LIMIT/2800)} Seiten werden analysiert, der Rest wird nicht berücksichtigt.</p>` : ''}`;
     updateUploadNotices();
-    document.getElementById('analyzeBtn').disabled = extractedText.trim().length < 20;
+    updateAnalyzeButtonState();
     setStatus(extractedText.trim().length < 20 ? 'Kein auswertbarer Text gefunden.' : 'Bereit zur Analyse.', extractedText.trim().length < 20 ? undefined : 'done');
   }catch(err){
     console.error(err);
