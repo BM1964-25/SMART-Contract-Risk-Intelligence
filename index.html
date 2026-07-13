@@ -134,14 +134,14 @@
   .recent-history-item:hover{ border-color:var(--border); color:var(--navy); }
   .recent-history-item .rh-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
   .recent-history-item .rh-date{ flex-shrink:0; font-size:10.5px; color:var(--text-muted); }
-  .backup-section{
+  .backup-section, .workspace-section{
     margin-top:14px; padding-top:13px; border-top:1px solid var(--border);
   }
-  .backup-title{
+  .backup-title, .workspace-title{
     font-size:11px; color:var(--text-muted); text-transform:uppercase;
     letter-spacing:.35px; font-weight:bold; margin-bottom:4px;
   }
-  .backup-hint{ font-size:11.5px; line-height:1.4; color:var(--text-muted); margin:0 0 9px; }
+  .backup-hint, .workspace-hint{ font-size:11.5px; line-height:1.4; color:var(--text-muted); margin:0 0 9px; }
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:8px;
     padding:20px 22px;
@@ -289,11 +289,10 @@
     font-size:12.8px; color:var(--text-muted); margin-top:14px; min-height:18px;
     display:flex; align-items:center; gap:7px; padding-top:10px; border-top:1px solid var(--border);
   }
-  .card-title-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
-  .card-title-row h2{ margin-bottom:0; }
   .reset-workspace-btn{
-    border:1px solid var(--border); background:#fff; color:var(--text-muted); border-radius:5px;
-    padding:6px 8px; font-size:11.5px; font-weight:bold; cursor:pointer; white-space:nowrap;
+    width:100%; display:flex; align-items:center; justify-content:center; gap:7px;
+    border:1px solid var(--border); background:#fff; color:var(--navy); border-radius:5px;
+    padding:8px 10px; font-size:12px; font-weight:bold; cursor:pointer;
   }
   .reset-workspace-btn:hover{ color:var(--navy); border-color:var(--gold); background:var(--gold-light); }
   .error-box{
@@ -351,14 +350,14 @@
   .axis-score{ width:20px; text-align:right; flex-shrink:0; color:var(--text-muted); font-size:12px; }
   .result-tabs{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:18px 0 12px; }
   .result-tab{
-    text-align:left; background:#fff; border:1px solid var(--border); border-top:3px solid transparent;
+    text-align:center; background:#fff; border:1px solid var(--border); border-top:3px solid transparent;
     border-radius:8px; padding:12px 13px; font-family:inherit; color:var(--text);
     cursor:pointer; box-shadow:0 2px 8px rgba(15,42,74,0.05);
     transition:background .15s,border-color .15s,box-shadow .15s,transform .15s;
   }
   .result-tab:hover{ border-color:var(--gold); transform:translateY(-1px); }
   .result-tab.active{ border-color:var(--gold); border-top-color:var(--gold); background:#fffaf0; box-shadow:0 6px 16px rgba(15,42,74,0.08); }
-  .result-tab-head{ display:flex; align-items:center; gap:8px; font-size:13px; font-weight:bold; color:var(--navy); }
+  .result-tab-head{ display:flex; align-items:center; justify-content:center; gap:8px; font-size:13px; font-weight:bold; color:var(--navy); }
   .result-tab-num{
     width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
     background:var(--navy); color:#fff; font-size:11px; flex-shrink:0;
@@ -558,10 +557,7 @@
       </div>
 
       <div class="card">
-        <div class="card-title-row">
-          <h2><span class="card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span>Dokument</h2>
-          <button class="reset-workspace-btn" id="newAnalysisBtn" type="button">Arbeitsbereich zurücksetzen</button>
-        </div>
+        <h2><span class="card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span>Dokument</h2>
         <p class="hint">PDF, Word (.docx) oder Text-Datei hochladen</p>
         <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Vertragsgrundlage</label>
         <select id="roleSelect" style="width:100%; padding:13px 12px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13.5px; margin-bottom:8px;">
@@ -617,6 +613,14 @@
           <p class="backup-hint">Verlauf lokal sichern oder aus einer JSON-Datei wiederherstellen.</p>
           <button class="btn secondary small" id="sidebarHistorySaveBtn" style="width:100%;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Verlauf als JSON speichern</button>
           <button class="btn secondary small" id="sidebarHistoryRestoreBtn" style="width:100%; margin-top:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Verlauf wiederherstellen</button>
+        </div>
+        <div class="workspace-section">
+          <div class="workspace-title">Arbeitsbereich</div>
+          <p class="workspace-hint">Aktuelle Datei, Analyseergebnis und Status leeren. Verlauf und Wissensbasis bleiben erhalten.</p>
+          <button class="reset-workspace-btn" id="newAnalysisBtn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Arbeitsbereich zurücksetzen
+          </button>
         </div>
       </div>
 
@@ -828,9 +832,9 @@ const HELP_CONTENT = [
     <p><b>Obere Zeile – vier Karten zur Einrichtung und Steuerung:</b></p>
     <ul>
       <li><b>API-Zugang</b> – API-Key eintragen (mit Ein-/Ausblenden- und Lösch-Funktion), Modell wählen (Sonnet 5 / Opus 4.8 / Haiku 4.5), Verbindung testen. Ein farbiger Status zeigt den aktuellen Zustand: grau = kein Key, navy = Key gespeichert, grün = Verbindung erfolgreich getestet.</li>
-      <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) wählen, Datei per Klick oder Drag & Drop hochladen, Analyse starten oder den Arbeitsbereich über „Arbeitsbereich zurücksetzen" leeren. Nach dem Upload zeigt die App Zeichenzahl und geschätzte Seitenzahl an.</li>
+      <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) wählen, Datei per Klick oder Drag & Drop hochladen und Analyse starten. Nach dem Upload zeigt die App Zeichenzahl und geschätzte Seitenzahl an.</li>
       <li><b>Analyse-Pipeline</b> – zeigt den Live-Fortschritt der vier Analysestufen mit kurzer Erklärung, was jede Stufe tut. Während einer laufenden Prüfung kann die Analyse hier abgebrochen werden.</li>
-      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, den letzten fünf Analysen zum direkten Öffnen, sowie Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei.</li>
+      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, den letzten fünf Analysen zum direkten Öffnen, Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei sowie Zurücksetzen des aktuellen Arbeitsbereichs.</li>
     </ul>
     <p><b>Ergebnisbereich (erscheint nach der ersten Analyse):</b></p>
     <ul>
@@ -872,7 +876,7 @@ const HELP_CONTENT = [
   `},
   { id:"eingaben", title:"Eingaben & Daten", body:`
     <h3>Eingaben & Daten</h3>
-    <p><b>Unterstützte Dateiformate:</b> PDF (auch gescannt, dann automatisch per Bilderkennung statt Textauslesung), Word (.docx), Text (.txt).</p>
+    <p><b>Unterstützte Dateiformate:</b> PDF (auch gescannt, dann automatisch vollständig seitenweise per Bilderkennung statt Textauslesung), Word (.docx), Text (.txt).</p>
     <p><b>Größenrahmen:</b> Es werden bis zu ca. 300.000 Zeichen (grob 100–110 Seiten, je nach Zeichendichte) je Vertrag analysiert. Längere Dokumente werden nach dem Erreichen dieses Limits mit einem Hinweis versehen; der überschüssige Teil fließt nicht in die Analyse ein.</p>
     <p><b>Wird der Vertrag selbst gespeichert? Standardmäßig nein, optional ja.</b> Im Normalfall liegt der hochgeladene Vertragstext nur temporär im Arbeitsspeicher deines Browsers, solange die Analyse läuft bzw. das Ergebnis auf dem Bildschirm angezeigt wird. Er wird nicht lokal gespeichert und nicht an einen Server dieser App übertragen – lediglich für die Dauer der Analyse an die Anthropic-API gesendet. Schließt oder lädst du die Seite neu, ist der Originaltext weg.</p>
     <p>Über die Checkbox <b>„Vertragstext mit im Verlauf speichern"</b> im Bereich „Dokument" (Standard: <b>aus</b>) kannst du das bewusst ändern: Ist sie beim Start der Analyse aktiviert, wird der Vertragstext zusätzlich im Verlaufseintrag abgelegt und lässt sich dort später über „Vertragstext anzeigen" wieder einsehen – praktisch für die erneute Analyse oder den schnellen Abgleich, erhöht aber den lokalen Speicherbedarf spürbar (Verträge können mehrere hunderttausend Zeichen umfassen) und vergrößert die Menge an potenziell sensiblen Daten, die dauerhaft in deinem Browser liegen. Ist der verfügbare Speicherplatz knapp, speichert die App das Analyseergebnis trotzdem, lässt in diesem Fall aber automatisch nur den Vertragstext weg und informiert dich darüber.</p>
@@ -894,7 +898,7 @@ const HELP_CONTENT = [
     <p><b>„Kein API-Key hinterlegt"</b> – API-Key im Bereich „API-Zugang" eintragen und speichern.</p>
     <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – das Dokument ist für diesen Analyseschritt sehr umfangreich. Erneut versuchen; bei wiederholtem Auftreten hilft manchmal ein Wechsel auf ein leistungsfähigeres Modell (z. B. Opus 4.8) oder ein kürzeres Dokument.</p>
     <p><b>„Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden"</b> – die übrige Analyse (Klauseln, Risikobewertung, Maßnahmen) bleibt davon unberührt und vollständig nutzbar; nur das Fristenmodul konnte in diesem Lauf nicht abgeschlossen werden. Ein erneuter Analyselauf kann helfen.</p>
-    <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs ohne durchsuchbaren Text und wechselt auf Bilderkennung; das kann etwas länger dauern als bei normalem Text.</p>
+    <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs ohne durchsuchbaren Text, bereitet alle Seiten als Bilder vor und analysiert sie in Seitenpaketen. Das dauert länger und kann höhere API-Kosten verursachen, verhindert aber, dass spätere Vertragsseiten unberücksichtigt bleiben.</p>
     <p><b>„Modellantwort war kein gültiges JSON"</b> – tritt selten bei kurzzeitigen API-Störungen auf. Die App versucht automatisch bis zu zwei weitere Male; hält der Fehler an, hilft meist ein erneuter Versuch nach kurzer Wartezeit.</p>
     <p><b>„API antwortete mit Status 401/403"</b> – der API-Key ist ungültig, abgelaufen oder wurde in der Anthropic Console widerrufen; einen neuen Key erstellen und in der App aktualisieren.</p>
     <p><b>„Nicht unterstütztes Dateiformat"</b> – nur PDF, DOCX und TXT werden unterstützt; andere Formate (z. B. gescannte Bilder als JPG/PNG, ZIP-Archive) müssen vorher in eines dieser Formate umgewandelt werden.</p>
@@ -1213,6 +1217,8 @@ let extractedText = "";
 let currentFileName = "";
 let isScanned = false;
 let documentImages = [];
+let scannedPageCount = 0;
+const SCAN_BATCH_SIZE = 8;
 
 // ---------- storage ----------
 async function loadKB(){
@@ -1709,6 +1715,7 @@ function resetWorkspace(){
   currentFileName = "";
   extractedText = "";
   documentImages = [];
+  scannedPageCount = 0;
   isScanned = false;
   latestReportSnapshot = null;
   fileInput.value = "";
@@ -1754,15 +1761,17 @@ async function handleFile(file){
     if(ext === 'pdf'){
       extractedText = sanitizeText(await extractPdf(file));
       if(extractedText.trim().length < 50){
-        setStatus('Kein Textlayer gefunden – rendere Seiten als Bilder für Bilderkennung …', 'loading');
+        setStatus('Kein Textlayer gefunden – bereite alle Seiten für Bilderkennung vor …', 'loading');
         const result = await renderPdfPagesAsImages(file);
         documentImages = result.images;
+        scannedPageCount = result.totalPages;
         isScanned = true;
         document.getElementById('fileInfo').innerHTML = `
           <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
-          <span>Scan · ${result.totalPages} Seite${result.totalPages===1?'':'n'}${result.truncated?' (erste 15 analysiert)':''}</span></div>`;
+          <span>Scan · ${result.totalPages} Seite${result.totalPages===1?'':'n'} · alle Seiten vorbereitet</span></div>
+          <p class="hint" style="color:var(--amber);">Gescanntes PDF: Die Analyse erfolgt in Seitenpaketen per Bilderkennung. Das kann länger dauern und zusätzliche Anthropic-Kosten verursachen.</p>`;
         document.getElementById('analyzeBtn').disabled = documentImages.length === 0;
-        setStatus(documentImages.length ? 'Gescanntes Dokument erkannt. Bereit zur Analyse per Bilderkennung.' : 'Konnte keine Seiten rendern.', documentImages.length ? 'done' : undefined);
+        setStatus(documentImages.length ? `Gescanntes Dokument erkannt. ${documentImages.length} von ${result.totalPages} Seiten bereit zur vollständigen Analyse.` : 'Konnte keine Seiten rendern.', documentImages.length ? 'done' : undefined);
         return;
       }
     } else if(ext === 'docx'){
@@ -1812,11 +1821,10 @@ async function extractPdf(file){
   return text;
 }
 async function renderPdfPagesAsImages(file, maxPages){
-  maxPages = maxPages || 8;
   pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
   const buf = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({data:buf}).promise;
-  const pageCount = Math.min(pdf.numPages, maxPages);
+  const pageCount = maxPages ? Math.min(pdf.numPages, maxPages) : pdf.numPages;
   const images = [];
   for(let i=1;i<=pageCount;i++){
     const page = await pdf.getPage(i);
@@ -1828,7 +1836,7 @@ async function renderPdfPagesAsImages(file, maxPages){
     const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
     images.push(dataUrl.split(',')[1]);
   }
-  return {images, truncated: pdf.numPages > maxPages, totalPages: pdf.numPages};
+  return {images, truncated: !!maxPages && pdf.numPages > maxPages, totalPages: pdf.numPages};
 }
 async function extractDocx(file){
   const buf = await file.arrayBuffer();
@@ -1977,6 +1985,138 @@ async function callClaudeWithRetry(content, statusPrefix, maxTokens, signal){
   throw lastErr;
 }
 
+function chunkArray(arr, size){
+  const chunks = [];
+  for(let i=0;i<arr.length;i+=size) chunks.push(arr.slice(i, i + size));
+  return chunks;
+}
+function normalizeDedupeText(value){
+  return String(value || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+function reindexItems(items){
+  return (items || []).map((item, index) => ({...item, id:String(index + 1)}));
+}
+function dedupeByKey(items, keyFn){
+  const seen = new Set();
+  const result = [];
+  (items || []).forEach(item => {
+    const key = keyFn(item);
+    if(!key || seen.has(key)) return;
+    seen.add(key);
+    result.push(item);
+  });
+  return result;
+}
+function dedupeClauseItems(items){
+  return reindexItems(dedupeByKey(items, item => `${normalizeDedupeText(item.kategorie)}|${normalizeDedupeText(item.text).slice(0,140)}`));
+}
+function dedupeDeadlineItems(items){
+  return reindexItems(dedupeByKey(items, item => [
+    normalizeDedupeText(item.bezeichnung).slice(0,70),
+    normalizeDedupeText(item.datum).slice(0,50),
+    normalizeDedupeText(item.bezug).slice(0,70),
+    normalizeDedupeText(item.folge).slice(0,90)
+  ].join('|')));
+}
+function mergeMarketComparisons(markets){
+  const merged = {};
+  (markets || []).forEach(market => {
+    Object.entries(market || {}).forEach(([key, value]) => {
+      if(!merged[key] && String(value || '').trim()) merged[key] = value;
+    });
+  });
+  return merged;
+}
+function parseStageOneResult(parsed){
+  if(Array.isArray(parsed)) return {projektkontext:'', marktvergleich:{}, items:parsed};
+  return {
+    projektkontext: parsed?.projektkontext || '',
+    marktvergleich: parsed?.marktvergleich || {},
+    items: Array.isArray(parsed?.items) ? parsed.items : []
+  };
+}
+function buildImageBatchContent(images, instruction, startPage, endPage, totalPages){
+  const content = images.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
+  content.push({
+    type:"text",
+    text: `${instruction}
+
+Du siehst nur den Seitenabschnitt ${startPage}-${endPage} von insgesamt ${totalPages} Seiten. Analysiere diesen Abschnitt vollständig. Spätere Abschnitte werden separat geprüft und anschließend zusammengeführt.`
+  });
+  return content;
+}
+async function extractScannedClausesInBatches(extractInstruction, signal){
+  const batches = chunkArray(documentImages, SCAN_BATCH_SIZE);
+  const allItems = [];
+  const contexts = [];
+  const markets = [];
+  for(let i=0;i<batches.length;i++){
+    const startPage = i * SCAN_BATCH_SIZE + 1;
+    const endPage = Math.min(startPage + batches[i].length - 1, documentImages.length);
+    const prefix = `Extrahiere relevante Klauseln aus Scan-Seiten ${startPage}-${endPage} (${i+1}/${batches.length}) …`;
+    setStatus(prefix, 'loading');
+    const content = buildImageBatchContent(batches[i], extractInstruction, startPage, endPage, documentImages.length);
+    const raw = await callClaudeWithRetry(content, prefix, undefined, signal);
+    const parsed = parseStageOneResult(parseJson(raw));
+    allItems.push(...parsed.items.map(item => ({...item, quelle:`Seiten ${startPage}-${endPage}`})));
+    if(parsed.projektkontext) contexts.push(parsed.projektkontext);
+    if(parsed.marktvergleich) markets.push(parsed.marktvergleich);
+  }
+  const dedupedItems = dedupeClauseItems(allItems);
+  if(batches.length <= 1){
+    return {items:dedupedItems, projektkontext:contexts[0] || '', marktvergleich:mergeMarketComparisons(markets)};
+  }
+  const consolidationPrompt = `Du konsolidierst Teilergebnisse einer vollständig seitenweise geprüften gescannten Vertrags-PDF. Alle Seiten wurden berücksichtigt. Fasse doppelte oder sehr ähnliche Punkte zusammen, erhalte aber alle wirtschaftlich oder rechtlich wesentlichen Risiken. Kritische Themen wie Vertragsstrafe, Sicherheiten, Abnahme, Dokumentation, Fristen, Zahlung, Nachträge, Haftung, Kündigung, BIM/Planung und Projektziele dürfen nicht verloren gehen.
+Gib typischerweise 12 bis 25 eindeutige Punkte zurück; bei sehr umfangreichen Verträgen auch mehr, wenn fachlich erforderlich. Entferne nur echte Dubletten.
+Nutze vorhandene Projektkontexte und Marktvergleichswerte, soweit sie belastbar sind.
+Antworte AUSSCHLIESSLICH mit JSON im Format:
+{"projektkontext":"kurzer Satz","marktvergleich":{},"items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze konkrete Paraphrase"}]}
+
+Projektkontexte:
+${JSON.stringify(contexts)}
+
+Marktvergleich:
+${JSON.stringify(mergeMarketComparisons(markets))}
+
+Teilergebnisse:
+${JSON.stringify(dedupedItems)}`;
+  try{
+    setStatus('Führe Scan-Teilergebnisse zu einer Gesamtauswertung zusammen …', 'loading');
+    const raw = await callClaudeWithRetry(consolidationPrompt, 'Führe Scan-Teilergebnisse zusammen …', 20000, signal);
+    const parsed = parseStageOneResult(parseJson(raw));
+    return {
+      items: dedupeClauseItems(parsed.items),
+      projektkontext: parsed.projektkontext || contexts[0] || '',
+      marktvergleich: Object.keys(parsed.marktvergleich || {}).length ? parsed.marktvergleich : mergeMarketComparisons(markets)
+    };
+  }catch(err){
+    if(err.name === 'AbortError') throw err;
+    console.warn('Konsolidierung der Scan-Klauseln fehlgeschlagen, nutze deduplizierte Teilergebnisse', err);
+    return {items:dedupedItems, projektkontext:contexts[0] || '', marktvergleich:mergeMarketComparisons(markets)};
+  }
+}
+async function extractScannedDeadlinesInBatches(fristenInstruction, signal){
+  const batches = chunkArray(documentImages, SCAN_BATCH_SIZE);
+  const allDeadlines = [];
+  for(let i=0;i<batches.length;i++){
+    const startPage = i * SCAN_BATCH_SIZE + 1;
+    const endPage = Math.min(startPage + batches[i].length - 1, documentImages.length);
+    const prefix = `Extrahiere Fristen aus Scan-Seiten ${startPage}-${endPage} (${i+1}/${batches.length}) …`;
+    setStatus(prefix, 'loading');
+    const content = buildImageBatchContent(batches[i], fristenInstruction, startPage, endPage, documentImages.length);
+    const raw = await callClaudeWithRetry(content, prefix, 20000, signal);
+    const parsed = parseJson(raw);
+    if(Array.isArray(parsed)){
+      allDeadlines.push(...parsed.map(item => ({...item, quelle:`Seiten ${startPage}-${endPage}`})));
+    }
+  }
+  return dedupeDeadlineItems(allDeadlines);
+}
+
 document.getElementById('analyzeBtn').onclick = runAnalysis;
 
 document.getElementById('testBtn').onclick = async () => {
@@ -2027,18 +2167,22 @@ Ermittle außerdem kurz das Bauvorhaben (Projektbezeichnung und/oder Adresse, fa
 Ermittle zusätzlich, sofern im Vertrag auffindbar, die tatsächlichen Vertragswerte für einen Marktvergleich im Feld "marktvergleich" (jeweils als kurzer String, max 12 Wörter; wenn eine Angabe im Vertrag fehlt, lasse den Wert leer statt zu raten): ${marketPrompt.fieldsText}
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 {"projektkontext":"kurzer Satz zu Bauvorhaben und Vertragsparteien","marktvergleich":${marketPrompt.jsonExample},"items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]}`;
-    let extractContent;
+    let items = [];
+    let projektKontext = '';
+    let marktvergleich = {};
     if(isScanned && documentImages.length){
-      extractContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
-      extractContent.push({type:"text", text: extractInstruction + "\n\nDie Bilder zeigen die Seiten des gescannten Vertragsdokuments in der richtigen Reihenfolge."});
+      const scannedStage1 = await extractScannedClausesInBatches(extractInstruction, analysisSignal);
+      items = scannedStage1.items;
+      projektKontext = scannedStage1.projektkontext;
+      marktvergleich = scannedStage1.marktvergleich;
     } else {
-      extractContent = extractInstruction + "\n\nVertragstext:\n" + docExcerpt;
+      const extractContent = extractInstruction + "\n\nVertragstext:\n" + docExcerpt;
+      const stage1Raw = await callClaudeWithRetry(extractContent, 'Extrahiere relevante Klauseln …', undefined, analysisSignal);
+      const stage1Parsed = parseJson(stage1Raw);
+      items = Array.isArray(stage1Parsed) ? stage1Parsed : (stage1Parsed.items || []);
+      projektKontext = Array.isArray(stage1Parsed) ? '' : (stage1Parsed.projektkontext || '');
+      marktvergleich = Array.isArray(stage1Parsed) ? {} : (stage1Parsed.marktvergleich || {});
     }
-    const stage1Raw = await callClaudeWithRetry(extractContent, 'Extrahiere relevante Klauseln …', undefined, analysisSignal);
-    const stage1Parsed = parseJson(stage1Raw);
-    let items = Array.isArray(stage1Parsed) ? stage1Parsed : (stage1Parsed.items || []);
-    let projektKontext = Array.isArray(stage1Parsed) ? '' : (stage1Parsed.projektkontext || '');
-    let marktvergleich = Array.isArray(stage1Parsed) ? {} : (stage1Parsed.marktvergleich || {});
     setPipelineStep(1,'done');
 
 
@@ -2054,18 +2198,16 @@ Gib im Feld "folge" an, ob mit der Frist eine konkrete wirtschaftliche oder rech
 Vergib im Feld "prioritaet" eine Einstufung "kritisch|hoch|mittel|niedrig" – kritisch/hoch, wenn Vertragsstrafe, Schadensersatz, Einbehalt, Abnahmeverzug, Schlusszahlungsverzug, Verjährungsbeginn, Gewährleistung oder Nachtragsverlust betroffen sind.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","bezeichnung":"kurze Bezeichnung, max 8 Wörter","datum":"Datum oder Fristdauer, z.B. 20.05.2025 oder 12 Werktage","bezug":"Bezugspunkt bei relativen Fristen oder leer","kategorie":"Vertragsfrist|Pruefungsfrist|Zahlungsfrist|Reaktionsfrist|Verjaehrungsfrist|Vertragsstrafe","folge":"kurze Folge oder leer","prioritaet":"kritisch|hoch|mittel|niedrig"}]`;
-    let fristenContent;
-    if(isScanned && documentImages.length){
-      fristenContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
-      fristenContent.push({type:"text", text: fristenInstruction + "\n\nDie Bilder zeigen die Seiten des gescannten Vertragsdokuments in der richtigen Reihenfolge."});
-    } else {
-      fristenContent = fristenInstruction + "\n\nVertragstext:\n" + docExcerpt;
-    }
     let fristenItems = [];
     let fristenFailed = false;
     try{
-      const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', 20000, analysisSignal);
-      fristenItems = parseJson(stageFristenRaw);
+      if(isScanned && documentImages.length){
+        fristenItems = await extractScannedDeadlinesInBatches(fristenInstruction, analysisSignal);
+      } else {
+        const fristenContent = fristenInstruction + "\n\nVertragstext:\n" + docExcerpt;
+        const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', 20000, analysisSignal);
+        fristenItems = parseJson(stageFristenRaw);
+      }
       setPipelineStep(2,'done');
     }catch(e){
       if(e.name === 'AbortError') throw e;
