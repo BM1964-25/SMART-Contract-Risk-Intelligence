@@ -917,7 +917,7 @@ const HELP_CONTENT = [
     <h3>Ergebnisse verstehen</h3>
     <p><b>Risikostufen:</b> kritisch (Ausnahme, 2–4 gravierendste Punkte im gesamten Vertrag) · hoch · mittel (Regelfall für die meisten Standardregelungen) · niedrig.</p>
     <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Das Balkendiagramm in der Management Summary zeigt relativ zueinander, welche Achse bei diesem Vertrag am stärksten betroffen ist. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
-    <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – je nach Vertragsgrundlage unterschiedlich. Bei Bauverträgen werden z. B. Gewährleistung, Vertragsstrafe, Zahlungsfrist, VOB/B-Einbeziehung und Sicherheiten betrachtet; bei Planungsverträgen/HOAI stehen Honorar-/Leistungsumfang, stufenweise Beauftragung, Kostensteuerung, Nutzungsrechte, BIM-/Projektplattformpflichten, Freigaben und Zahlungs-/Prüffristen im Vordergrund.</p>
+    <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – je nach Vertragsgrundlage unterschiedlich. Bei Bauverträgen werden z. B. Gewährleistung, Vertragsstrafe, Zahlungsziel, Skonto, VOB/B-Einbeziehung, Vertragserfüllungssicherheit, Mängelsicherheit, kumulierte Einbehalte, Abnahme, Nachträge und Schlussdokumentation getrennt betrachtet; bei Planungsverträgen/HOAI stehen Honorar-/Leistungsumfang, stufenweise Beauftragung, Kostensteuerung, Nutzungsrechte, BIM-/Projektplattformpflichten, Freigaben und Zahlungs-/Prüffristen im Vordergrund.</p>
     <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge (z. B. Vertragsstrafe, Sicherheitseinbehalt) erkannt wurde, priorisiert nach Dringlichkeit.</p>
     <p><b>Fristen:</b> zweigeteilt – oben ein chronologischer Zeitstrahl für alle Fristen mit einem echten Kalenderdatum, darunter die vollständige, nach Kategorie gruppierte Liste aller Fristen (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine). Relative Fristen (z. B. „12 Werktage nach Erhalt der Ausführungsplanung") zeigen zusätzlich eine Dauer-Kennzeichnung und den hervorgehobenen Bezugspunkt.</p>
     <p><b>Referenz:</b> zeigt, welche Wissensbasis-Einträge zur Bewertung eines Punktes herangezogen wurden.</p>
@@ -1018,20 +1018,26 @@ applyRole(false);
 
 const MARKET_BENCHMARKS_BY_TYPE = {
   bauvertrag: [
-    {key:"gewaehrleistung", label:"Gewährleistung", markt:"4 Jahre (VOB/B) bzw. 5 Jahre (BGB)"},
-    {key:"vertragsstrafe", label:"Vertragsstrafe", markt:"0,1-0,2 %/Tag, Deckel ca. 5 %"},
-    {key:"zahlung", label:"Zahlung (bis Schlusszahlung)", markt:"14-30 Tage"},
-    {key:"vobb", label:"VOB/B einbezogen", markt:"Üblich bei B2B-Bauverträgen"},
-    {key:"buergschaft", label:"Vertragserfüllungssicherheit", markt:"ca. 5 % der Auftragssumme"}
+    {key:"gewaehrleistung", label:"Gewährleistung / Verjährung", markt:"4 Jahre (VOB/B) bzw. 5 Jahre (BGB)", einordnung:"Abweichungen wirken auf Haftungsdauer und Mängelrisiko."},
+    {key:"vertragsstrafe", label:"Vertragsstrafe", markt:"0,1-0,2 %/Tag, Deckel ca. 5 %", einordnung:"Höhe, Deckel und Schadensersatzvorbehalt gemeinsam bewerten."},
+    {key:"zahlungsziel", label:"Zahlungsziel / Schlusszahlung", markt:"14-30 Tage", einordnung:"Längere Fristen belasten Liquidität und Vorfinanzierung."},
+    {key:"skonto", label:"Skonto", markt:"Nur freiwillig, klar befristet und wirtschaftlich einkalkuliert", einordnung:"Skonto wirkt direkt auf Marge und Rechnungsprozess."},
+    {key:"vobb", label:"VOB/B einbezogen", markt:"Üblich bei B2B-Bauverträgen", einordnung:"Einbeziehung und Abweichungen beeinflussen Mängel-, Abnahme- und Nachtragslogik."},
+    {key:"vertragserfuellungssicherheit", label:"Vertragserfüllungssicherheit", markt:"ca. 5 % der Auftragssumme", einordnung:"Höhere Sicherheiten binden Linie und Liquidität."},
+    {key:"gewaehrleistungssicherheit", label:"Gewährleistungs- / Mängelsicherheit", markt:"ca. 5 % der Abrechnungssumme", einordnung:"Dauer und Rückgabemechanik sind wirtschaftlich entscheidend."},
+    {key:"sicherheitseinbehalt", label:"Sicherheitseinbehalt / kumulierte Sicherheiten", markt:"Sicherheiten getrennt und begrenzt; Kumulation vermeiden", einordnung:"Kumulation kann Liquidität und Avalrahmen stark belasten."},
+    {key:"abnahme", label:"Abnahmevoraussetzungen", markt:"Klare Abnahme, angemessene Unterlagen, Folgen eindeutig geregelt", einordnung:"Abnahme steuert Schlusszahlung, Gewährleistungsbeginn und Verjährung."},
+    {key:"nachtrag", label:"Nachtragsregelung", markt:"Prüfbare Angebote, klare Fristen, Vergütungsanpassung", einordnung:"Zu enge Vorgaben gefährden Nachtragsdurchsetzung und Marge."},
+    {key:"schlussdokumentation", label:"Schlussdokumentation", markt:"Konkrete Unterlagen, angemessene Fristen, Einbehalte begrenzen", einordnung:"Dokumentationspflichten können Zahlung und Abnahme verzögern."}
   ],
   planung: [
-    {key:"honorar", label:"Honorar / Leistungsumfang", markt:"Grundleistungen und Besondere Leistungen klar trennen; Anpassung bei Änderungen regeln"},
-    {key:"stufen", label:"Stufenweise Beauftragung", markt:"Abruf weiterer Leistungsphasen klar regeln; kein stiller Automatismus"},
-    {key:"kostensteuerung", label:"Kostensteuerung / Budget", markt:"Hinweis- und Steuerungspflichten üblich; Haftung regelmäßig nur bei Vertretenmüssen"},
-    {key:"nutzungsrechte", label:"Nutzungsrechte", markt:"Projektbezogene Rechte üblich; Änderung, Weitergabe und BIM-Nutzung begrenzen"},
-    {key:"bim", label:"BIM / Projektplattform", markt:"BIM-, IFC- und Uploadpflichten mit Datenrichtlinie, Rollen und Mehraufwand regeln"},
-    {key:"freigabe", label:"Freigaben / Prüffristen", markt:"Klare Prüffristen und Mitwirkungsfolgen üblich; Freigabeprozess dokumentieren"},
-    {key:"zahlung", label:"Zahlungs- / Prüffristen", markt:"Abschlags- und Honorarzahlungen nach Leistungsstand; Prüffristen eindeutig definieren"}
+    {key:"honorar", label:"Honorar / Leistungsumfang", markt:"Grundleistungen und Besondere Leistungen klar trennen; Anpassung bei Änderungen regeln", einordnung:"Unklare Abgrenzung wirkt auf Marge und Nachträge."},
+    {key:"stufen", label:"Stufenweise Beauftragung", markt:"Abruf weiterer Leistungsphasen klar regeln; kein stiller Automatismus", einordnung:"Abruflogik bestimmt Planungssicherheit und Vergütungsanspruch."},
+    {key:"kostensteuerung", label:"Kostensteuerung / Budget", markt:"Hinweis- und Steuerungspflichten üblich; Haftung regelmäßig nur bei Vertretenmüssen", einordnung:"Kostenrisiken sauber von Planerhaftung und Projektzielen trennen."},
+    {key:"nutzungsrechte", label:"Nutzungsrechte", markt:"Projektbezogene Rechte üblich; Änderung, Weitergabe und BIM-Nutzung begrenzen", einordnung:"Weite Rechte erhöhen Kontroll- und Haftungsrisiken."},
+    {key:"bim", label:"BIM / Projektplattform", markt:"BIM-, IFC- und Uploadpflichten mit Datenrichtlinie, Rollen und Mehraufwand regeln", einordnung:"BIM-Pflichten brauchen Rollen, Datenstandard und Vergütung."},
+    {key:"freigabe", label:"Freigaben / Prüffristen", markt:"Klare Prüffristen und Mitwirkungsfolgen üblich; Freigabeprozess dokumentieren", einordnung:"Freigaben steuern Termine, Haftung und Planungsfortschritt."},
+    {key:"zahlung", label:"Zahlungs- / Prüffristen", markt:"Abschlags- und Honorarzahlungen nach Leistungsstand; Prüffristen eindeutig definieren", einordnung:"Lange Prüffristen oder unklare Fälligkeit belasten Liquidität."}
   ]
 };
 function getMarketBenchmarks(contractType){
@@ -1045,9 +1051,54 @@ function getMarketPromptConfig(contractType){
     };
   }
   return {
-    fieldsText: '"gewaehrleistung" (Dauer der Gewährleistungs-/Verjährungsfrist), "vertragsstrafe" (Satz und Deckel), "zahlung" (Frist bis zur Schlusszahlung), "vobb" ("einbezogen" oder "ausgeschlossen"), "buergschaft" (Höhe der Vertragserfüllungssicherheit in %).',
-    jsonExample: '{"gewaehrleistung":"","vertragsstrafe":"","zahlung":"","vobb":"","buergschaft":""}'
+    fieldsText: '"gewaehrleistung" (Dauer der Gewährleistungs-/Verjährungsfrist), "vertragsstrafe" (Satz, Deckel und Schadensersatzvorbehalt), "zahlungsziel" (Frist bis Abschlags- oder Schlusszahlung), "skonto" (Skonto, Skontofrist oder Abzug), "vobb" ("einbezogen", "ausgeschlossen" oder wesentliche Abweichungen), "vertragserfuellungssicherheit" (Höhe der Vertragserfüllungssicherheit in %), "gewaehrleistungssicherheit" (Höhe und Dauer der Mängel-/Gewährleistungssicherheit), "sicherheitseinbehalt" (Einbehalte, kumulierte Sicherheiten oder Avalbelastung), "abnahme" (Abnahmevoraussetzungen, fiktive Abnahme oder Unterlagenabhängigkeit), "nachtrag" (Nachtragsfristen, Preisbildung oder Durchsetzungsregeln), "schlussdokumentation" (Dokumentationspflichten, Fristen oder Einbehalte). Trenne Zahlung, Skonto und Sicherheiten sauber; keine Sammelzeilen.',
+    jsonExample: '{"gewaehrleistung":"","vertragsstrafe":"","zahlungsziel":"","skonto":"","vobb":"","vertragserfuellungssicherheit":"","gewaehrleistungssicherheit":"","sicherheitseinbehalt":"","abnahme":"","nachtrag":"","schlussdokumentation":""}'
   };
+}
+function normalizeMarketComparison(rawMarket){
+  const market = {...(rawMarket || {})};
+  const oldPayment = String(market.zahlung || '');
+  const oldSecurity = String(market.buergschaft || '');
+  const oldCombined = `${oldPayment} ${oldSecurity}`.toLowerCase();
+  const paymentParts = oldPayment.split(/[,;]\s*/).map(part => part.trim()).filter(Boolean);
+  const pickPaymentParts = (pattern) => paymentParts.filter(part => pattern.test(part.toLowerCase())).join(', ');
+  const securityPart = pickPaymentParts(/sicherheit|einbehalt|bürgschaft|buergschaft|aval|10\s*%|5\s*%/);
+  const skontoPart = pickPaymentParts(/skonto|abzug/);
+  const paymentPart = paymentParts.filter(part => !/(sicherheit|einbehalt|bürgschaft|buergschaft|aval|skonto|abzug)/.test(part.toLowerCase())).join(', ');
+
+  if(oldPayment && !market.zahlungsziel) market.zahlungsziel = paymentPart || oldPayment;
+  if(oldPayment && !market.skonto && oldCombined.includes('skonto')) market.skonto = skontoPart || oldPayment;
+  if(oldSecurity && !market.vertragserfuellungssicherheit) market.vertragserfuellungssicherheit = oldSecurity;
+  if(!market.sicherheitseinbehalt && /(sicherheit|einbehalt|bürgschaft|buergschaft|aval|10\s*%|5\s*%)/.test(oldCombined)){
+    market.sicherheitseinbehalt = oldSecurity || securityPart || oldPayment;
+  }
+  return market;
+}
+function getMarketAssessment(benchmark, value){
+  const text = String(value || '').toLowerCase();
+  const base = benchmark.einordnung || 'Abweichung fachlich einordnen und im Einzelfall prüfen.';
+  if(benchmark.key === 'zahlungsziel' && /(45|60|90|schlusszahlung|netto)/.test(text)){
+    return 'Liquidität prüfen: längere oder an Bedingungen geknüpfte Zahlung kann Vorfinanzierung erhöhen.';
+  }
+  if(benchmark.key === 'skonto'){
+    return 'Marge prüfen: Skonto nur akzeptabel, wenn Frist, Freiwilligkeit und Preisbildung passen.';
+  }
+  if(['vertragserfuellungssicherheit','gewaehrleistungssicherheit','sicherheitseinbehalt'].includes(benchmark.key) && /(10\s*%|einbehalt|kumuliert|aval|bürgschaft|buergschaft)/.test(text)){
+    return 'Liquidität und Avalrahmen prüfen: Höhe, Dauer und Kumulation getrennt bewerten.';
+  }
+  if(benchmark.key === 'vertragsstrafe' && /(schadensersatz|beschleunigung|werktag|deckel|3\s*%|5\s*%)/.test(text)){
+    return 'Termin- und Margenrisiko: Vertragsstrafe, Zusatzschaden und Beschleunigung zusammen prüfen.';
+  }
+  if(benchmark.key === 'abnahme' && /(unterlage|dokumentation|fiktiv|mangel|begehung|schlusszahlung)/.test(text)){
+    return 'Abnahmefolge prüfen: Unterlagenpflichten können Zahlung, Verjährung und Mängelrechte verschieben.';
+  }
+  if(benchmark.key === 'nachtrag' && /(frist|2\s*wochen|angebot|prüf|anordnung|vergütung)/.test(text)){
+    return 'Nachtragsdurchsetzung prüfen: Fristen und Preisbildungslogik können Ansprüche gefährden.';
+  }
+  if(benchmark.key === 'schlussdokumentation' && /(einbehalt|100\.?000|frist|unterlagen|dokumentation)/.test(text)){
+    return 'Zahlungsrisiko prüfen: Dokumentation kann Abnahme und Auszahlung unmittelbar steuern.';
+  }
+  return base;
 }
 function getRequiredAreas(contractType){
   if(contractType === 'planung'){
@@ -2302,7 +2353,7 @@ Kategorisierung: Ordne jeden Punkt der inhaltlich treffendsten Kategorie zu, nic
 Wichtig: Bleibe so konkret wie der Vertrag es hergibt. Wenn der Vertrag Prozentsätze, Fristtage, Deckelungsgrenzen, konkrete Kündigungsgründe oder Paragrafen nennt, übernimm diese Zahlen/Bezeichnungen in die Paraphrase statt nur die allgemeine Kategorie zu benennen (z.B. "Vertragsstrafe 0,2%/Tag, Deckel 5% bei Endtermin-Verzug" statt nur "Vertragsstrafe vereinbart").
 Präzision statt Verallgemeinerung: Formuliere den genauen Anwendungsbereich einer Klausel nicht weiter, als der Vertragstext es hergibt. Wenn eine Regelung z.B. nur für "weitere Leistungen im Zusammenhang mit dem Bauvorhaben" gilt, schreibe das so – nicht verkürzt als "gilt auch für Folgeaufträge" o.ä., da das den Anwendungsbereich fälschlich verbreitert.
 Ermittle außerdem kurz das Bauvorhaben (Projektbezeichnung und/oder Adresse, falls im Vertrag genannt) sowie die Vertragsparteien (Firmenname von Auftraggeber und Auftragnehmer, keine natürlichen Personen/Unterzeichner) und fasse dies in einem Satz im Feld "projektkontext" zusammen (max 30 Wörter). Wenn ein Aspekt nicht auffindbar ist, lasse ihn im Satz einfach weg, statt ihn zu erfinden.
-Ermittle zusätzlich, sofern im Vertrag auffindbar, die tatsächlichen Vertragswerte für einen Marktvergleich im Feld "marktvergleich" (jeweils als kurzer String, max 12 Wörter; wenn eine Angabe im Vertrag fehlt, lasse den Wert leer statt zu raten): ${marketPrompt.fieldsText}
+Ermittle zusätzlich, sofern im Vertrag auffindbar, die tatsächlichen Vertragswerte für einen Marktvergleich im Feld "marktvergleich" (jeweils als kurzer String, max 18 Wörter; wenn eine Angabe im Vertrag fehlt, lasse den Wert leer statt zu raten): ${marketPrompt.fieldsText}
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 {"projektkontext":"kurzer Satz zu Bauvorhaben und Vertragsparteien","marktvergleich":${marketPrompt.jsonExample},"items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]}`;
     let items = [];
@@ -2697,19 +2748,21 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
       </div>
     </div>`;
 
+  marktvergleich = normalizeMarketComparison(marktvergleich);
   const marketBenchmarks = getMarketBenchmarks(currentContractType);
   const marktRows = marketBenchmarks.filter(b => marktvergleich[b.key] && String(marktvergleich[b.key]).trim());
   const marktvergleichHtml = marktRows.length ? `
     <div class="card">
       <h2>Marktvergleich</h2>
-      <p class="hint">Vertragswerte im Vergleich zu marktüblichen Richtwerten – dient der Einordnung, nicht als Rechtsauskunft</p>
+      <p class="hint">Vertragswerte im Vergleich zu marktüblichen Richtwerten – getrennt nach Fachthemen, dient der Einordnung, nicht als Rechtsauskunft</p>
       <div class="table-scroll"><table>
-        <thead><tr><th>Klausel</th><th>Marktüblich</th><th>Dieser Vertrag</th></tr></thead>
+        <thead><tr><th>Klausel</th><th>Marktüblich</th><th>Dieser Vertrag</th><th>Einordnung</th></tr></thead>
         <tbody>${marktRows.map(b => `
           <tr>
             <td><b>${escapeHtml(b.label)}</b></td>
             <td>${escapeHtml(b.markt)}</td>
             <td>${escapeHtml(marktvergleich[b.key])}</td>
+            <td>${escapeHtml(getMarketAssessment(b, marktvergleich[b.key]))}</td>
           </tr>`).join('')}</tbody>
       </table></div>
     </div>` : '';
