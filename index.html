@@ -355,12 +355,13 @@
   .top5-list li{ margin-bottom:10px; font-size:13.5px; line-height:1.5; }
   .top5-list li .badge{ margin-right:8px; }
   .risk-profile-grid{
-    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:18px 0 4px;
+    display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:18px 0 4px;
   }
   .risk-profile-card{
     border:1px solid var(--border); border-radius:8px; padding:14px;
     display:grid; grid-template-columns:112px 1fr; gap:14px; align-items:center; background:#fffdf8;
   }
+  .risk-profile-card.summary{ display:block; border-top:3px solid var(--gold); }
   .donut-chart{
     width:104px; height:104px; border-radius:50%; position:relative; flex-shrink:0;
     background:conic-gradient(var(--border) 0 360deg);
@@ -375,12 +376,22 @@
   }
   .donut-total span{ margin-top:4px; color:var(--text-muted); font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:0.4px; }
   .risk-profile-title{ font-weight:bold; color:var(--navy); font-size:13.5px; margin-bottom:8px; }
+  .risk-profile-note{ color:var(--text-muted); font-size:11.5px; line-height:1.45; margin:-2px 0 9px; }
   .risk-profile-legend{ display:flex; flex-direction:column; gap:5px; }
   .legend-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-muted); }
   .legend-name{ display:flex; align-items:center; gap:7px; min-width:0; }
   .legend-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--border); }
   .legend-value{ color:var(--text); font-weight:bold; }
-  @media (max-width:780px){
+  .summary-badge{
+    display:inline-flex; align-items:center; gap:8px; font-size:18px; font-weight:bold;
+    color:var(--navy); margin:2px 0 8px;
+  }
+  .summary-dot{ width:13px; height:13px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 3px rgba(201,162,39,0.18); }
+  .summary-meta{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+  .summary-meta-item{ background:#fff; border:1px solid var(--border); border-radius:6px; padding:7px; }
+  .summary-meta-value{ display:block; color:var(--navy); font-size:16px; font-weight:bold; line-height:1; }
+  .summary-meta-label{ display:block; color:var(--text-muted); font-size:10.5px; margin-top:4px; }
+  @media (max-width:1040px){
     .risk-profile-grid{ grid-template-columns:1fr; }
     .risk-profile-card{ grid-template-columns:96px 1fr; }
     .donut-chart{ width:90px; height:90px; }
@@ -950,7 +961,9 @@ const HELP_CONTENT = [
   { id:"ergebnisse", title:"Ergebnisse verstehen", body:`
     <h3>Ergebnisse verstehen</h3>
     <p><b>Risikostufen:</b> kritisch (Ausnahme, 2–4 gravierendste Punkte im gesamten Vertrag) · hoch · mittel (Regelfall für die meisten Standardregelungen) · niedrig.</p>
-    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Die Management Summary zeigt dies zweifach: als kompaktes Donut-Diagramm für den schnellen Überblick und als Balkendiagramm für die relative Gewichtung je Achse. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
+    <p><b>Risikoprofil:</b> Die Management Summary zeigt zuerst die Anzahl der erkannten Risikopunkte nach Stufe. „20 Risiken" bedeutet nicht automatisch gut oder schlecht, sondern: Es wurden 20 bewertungsrelevante Punkte erkannt. Entscheidend ist die Mischung aus kritisch/hoch/mittel/niedrig.</p>
+    <p><b>Management-Ampel:</b> Die Ampel übersetzt Anzahl und Schwere der Risiken in eine schnelle Einordnung: gering, moderat, erhöht oder kritisch. Sie ist keine Rechtsbewertung, sondern eine Priorisierungshilfe für Management, Projektleitung und anschließende fachkundige Prüfung.</p>
+    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Der Wirkungsindex ist ein gewichteter Orientierungswert: höher bedeutet stärkeren wirtschaftlichen Druck, nicht automatisch einen „schlechten Vertrag". Die Balken darunter zeigen zusätzlich, welche Achse relativ am stärksten betroffen ist. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
     <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – je nach Vertragsgrundlage unterschiedlich. Bei Bauverträgen werden z. B. Gewährleistung, Vertragsstrafe, Zahlungsziel, Skonto, VOB/B-Einbeziehung, Vertragserfüllungssicherheit, Mängelsicherheit, kumulierte Einbehalte, Abnahme, Nachträge und Schlussdokumentation getrennt betrachtet; bei Planungsverträgen/HOAI stehen Honorar-/Leistungsumfang, stufenweise Beauftragung, Kostensteuerung, Nutzungsrechte, BIM-/Projektplattformpflichten, Freigaben und Zahlungs-/Prüffristen im Vordergrund.</p>
     <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge (z. B. Vertragsstrafe, Sicherheitseinbehalt) erkannt wurde, priorisiert nach Dringlichkeit.</p>
     <p><b>Fristen:</b> zweigeteilt – oben ein chronologischer Zeitstrahl für alle Fristen mit einem echten Kalenderdatum, darunter die vollständige, nach Kategorie gruppierte Liste aller Fristen (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine). Relative Fristen (z. B. „12 Werktage nach Erhalt der Ausführungsplanung") zeigen zusätzlich eine Dauer-Kennzeichnung und den hervorgehobenen Bezugspunkt.</p>
@@ -2751,7 +2764,7 @@ function buildDonutGradient(entries){
     });
   return `conic-gradient(${stops.join(', ')})`;
 }
-function renderDonutCard(title, entries, totalLabel){
+function renderDonutCard(title, entries, totalLabel, note = ''){
   const total = entries.reduce((sum, entry) => sum + Math.max(0, Number(entry.value) || 0), 0);
   const visibleEntries = entries.filter(entry => Number(entry.value) > 0);
   return `
@@ -2761,12 +2774,75 @@ function renderDonutCard(title, entries, totalLabel){
       </div>
       <div>
         <div class="risk-profile-title">${escapeHtml(title)}</div>
+        ${note ? `<div class="risk-profile-note">${escapeHtml(note)}</div>` : ''}
         <div class="risk-profile-legend">
           ${(visibleEntries.length ? visibleEntries : [{label:'Keine Werte', value:0, color:'var(--border)'}]).map(entry => `
             <div class="legend-row">
               <span class="legend-name"><span class="legend-dot" style="background:${entry.color}"></span>${escapeHtml(entry.label)}</span>
               <span class="legend-value">${Math.round(Number(entry.value) || 0)}</span>
             </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+function getOverallRiskAssessment(summary){
+  const counts = summary.riskCounts || {};
+  const totalRisks = Object.values(counts).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const weightedRisk = (counts.kritisch || 0) * 3 + (counts.hoch || 0) * 2 + (counts.mittel || 0);
+  const criticalHigh = (counts.kritisch || 0) + (counts.hoch || 0);
+  if((counts.kritisch || 0) >= 3 || criticalHigh >= 8 || weightedRisk >= 26){
+    return {
+      label:'Kritisch',
+      color:'#8b1e1e',
+      text:'Mehrere wesentliche Risiken. Vor Freigabe/Unterschrift fachkundig prüfen und zentrale Punkte verhandeln.',
+      totalRisks,
+      weightedRisk
+    };
+  }
+  if((counts.kritisch || 0) >= 1 || criticalHigh >= 4 || weightedRisk >= 14){
+    return {
+      label:'Erhöht',
+      color:'#b0512a',
+      text:'Relevante Risiken vorhanden. Kritische und hohe Punkte gezielt prüfen, priorisieren und verhandeln.',
+      totalRisks,
+      weightedRisk
+    };
+  }
+  if(weightedRisk >= 6 || totalRisks >= 8){
+    return {
+      label:'Moderat',
+      color:'#a5750f',
+      text:'Überschaubares Risikoprofil. Einzelpunkte prüfen; Standardrisiken bleiben möglich.',
+      totalRisks,
+      weightedRisk
+    };
+  }
+  return {
+    label:'Gering',
+    color:'#2f7a4f',
+    text:'Aktuell geringe Risikodichte. Ergebnis trotzdem fachlich plausibilisieren.',
+    totalRisks,
+    weightedRisk
+  };
+}
+function renderOverallRiskCard(summary){
+  const assessment = getOverallRiskAssessment(summary);
+  const strongestAxis = AUSWIRKUNG_ACHSEN
+    .map(axis => ({axis, score:summary.axisScores[axis] || 0}))
+    .sort((a,b) => b.score - a.score)[0] || {axis:'-', score:0};
+  return `
+    <div class="risk-profile-card summary">
+      <div class="risk-profile-title">Management-Ampel</div>
+      <div class="summary-badge"><span class="summary-dot" style="background:${assessment.color}; box-shadow:0 0 0 3px ${assessment.color}22"></span>${escapeHtml(assessment.label)}</div>
+      <div class="risk-profile-note">${escapeHtml(assessment.text)}</div>
+      <div class="summary-meta">
+        <div class="summary-meta-item">
+          <span class="summary-meta-value">${assessment.weightedRisk}</span>
+          <span class="summary-meta-label">Risikoindex</span>
+        </div>
+        <div class="summary-meta-item">
+          <span class="summary-meta-value">${escapeHtml(strongestAxis.axis)}</span>
+          <span class="summary-meta-label">stärkste Wirkung</span>
         </div>
       </div>
     </div>`;
@@ -2784,8 +2860,9 @@ function renderRiskProfileCharts(summary){
   }));
   return `
     <div class="risk-profile-grid">
-      ${renderDonutCard('Risikoverteilung', riskEntries, 'Punkte')}
-      ${renderDonutCard('Wirtschaftliche Wirkung', axisEntries, 'Score')}
+      ${renderDonutCard('Risikoverteilung', riskEntries, 'Risiken', 'Anzahl erkannter Risikopunkte. Kritisch und hoch sind besonders verhandlungsrelevant.')}
+      ${renderDonutCard('Wirtschaftliche Wirkung', axisEntries, 'Index', 'Gewichteter Wirkungsindex nach Risikoauswirkung. Höher bedeutet stärkeren wirtschaftlichen Druck.')}
+      ${renderOverallRiskCard(summary)}
     </div>`;
 }
 function buildManagementSummary(items){
