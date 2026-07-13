@@ -307,6 +307,19 @@
     color:var(--text); font-size:12px; line-height:1.45;
   }
   .upload-notice.warn{ border-left-color:var(--amber); background:var(--amber-bg); }
+  .upload-notice.compact{ padding:8px 10px; }
+  .upload-notice-head{ display:flex; flex-direction:column; gap:2px; }
+  .upload-notice-title{ font-weight:bold; color:var(--navy); }
+  .upload-notice-short{ color:var(--text-muted); }
+  .upload-notice details{ margin-top:6px; }
+  .upload-notice summary{
+    display:inline-flex; align-items:center; color:var(--navy); font-weight:bold;
+    cursor:pointer; list-style:none; user-select:none;
+  }
+  .upload-notice summary::-webkit-details-marker{ display:none; }
+  .upload-notice summary::after{ content:' anzeigen'; }
+  .upload-notice details[open] summary::after{ content:' ausblenden'; }
+  .upload-notice-detail{ margin-top:6px; color:var(--text); }
   .upload-notice button{
     margin-top:7px; border:1px solid var(--border); background:#fff; color:var(--navy);
     border-radius:5px; padding:5px 8px; font-family:inherit; font-size:11.5px; font-weight:bold; cursor:pointer;
@@ -1916,8 +1929,15 @@ function updateUploadNotices(){
   const notices = [];
   if(isScanned && documentImages.length){
     notices.push(`
-      <div class="upload-notice warn">
-        <b>Hinweis zu gescannten PDFs:</b> Die vollständige Bilderkennung ist fachlich sinnvoll, kann aber länger dauern und höhere API-Kosten verursachen. Wenn möglich, sollte stattdessen ein durchsuchbares OCR-PDF, eine Word-Datei oder eine Textfassung hochgeladen werden. Reine Anlagen oder technische Nachweise können vorab entfernt werden, sofern sie keine Vertragsbedingungen, Fristen, Sicherheiten, Vertragsstrafen oder Abnahmeregelungen enthalten.
+      <div class="upload-notice warn compact">
+        <div class="upload-notice-head">
+          <span class="upload-notice-title">Scan-PDF erkannt.</span>
+          <span class="upload-notice-short">Vollständige Bilderkennung kann länger dauern und höhere API-Kosten verursachen.</span>
+        </div>
+        <details>
+          <summary>Details</summary>
+          <div class="upload-notice-detail">Bei gescannten PDFs ist die vollständige Bilderkennung fachlich sinnvoll, kann aber länger dauern und höhere API-Kosten verursachen. Wenn möglich, sollte stattdessen ein durchsuchbares OCR-PDF, eine Word-Datei oder eine Textfassung hochgeladen werden. Reine Anlagen oder technische Nachweise können vorab entfernt werden, sofern sie keine Vertragsbedingungen, Fristen, Sicherheiten, Vertragsstrafen oder Abnahmeregelungen enthalten.</div>
+        </details>
       </div>`);
   }
   if(hasPlausibilitySource && currentContractType !== 'planung' && looksLikePlanningContract(plausibilitySource)){
