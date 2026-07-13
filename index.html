@@ -592,8 +592,8 @@
         </div>
         <select id="modelSelect" style="width:100%; padding:13px 12px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13.5px; margin-bottom:8px;">
           <option value="claude-sonnet-5">Claude Sonnet 5 (empfohlen)</option>
-          <option value="claude-opus-4-8">Claude Opus 4.8 (höchste Genauigkeit)</option>
-          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (schnell &amp; günstig)</option>
+          <option value="claude-opus-4-8">Claude Opus 4.8 (komplexe/Scan-Verträge)</option>
+          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (kurze Vorprüfung)</option>
         </select>
         <button class="btn secondary small" id="saveKeyBtn" style="width:100%;">Key speichern</button>
         <button class="btn secondary small" id="testBtn" style="width:100%; margin-top:8px;">Verbindung testen</button>
@@ -601,15 +601,15 @@
         <div class="model-guide" aria-label="Modellübersicht">
           <div class="model-guide-title">Modellwahl kurz erklärt</div>
           <div class="model-option">
-            <strong>Sonnet 5</strong><span>Standard · ausgewogen</span>
+            <strong>Sonnet 5</strong><span>Standard · auch Scan-PDFs</span>
           </div>
           <div class="model-option">
-            <strong>Opus 4.8</strong><span>Premium · teuer</span>
+            <strong>Opus 4.8</strong><span>Premium · komplexe Scans</span>
           </div>
           <div class="model-option">
-            <strong>Haiku 4.5</strong><span>schnell · günstig</span>
+            <strong>Haiku 4.5</strong><span>kurz · klare Texte</span>
           </div>
-          <div class="model-cost-note">Kosten über Anthropic; abhängig von Länge, Analyseumfang und Modell.</div>
+          <div class="model-cost-note">Scan-PDFs erzeugen zusätzliche Bild-/Vision-Tokens; Kosten hängen auch von Lesbarkeit, Auflösung und Seitenpaketen ab.</div>
           <div class="model-help-note"><button type="button" class="model-help-link" id="modelHelpLink">Ausführliche Modell- und Kostenhinweise in der Hilfe öffnen.</button></div>
         </div>
       </div>
@@ -836,22 +836,24 @@ const HELP_CONTENT = [
 
     <h4>f) Welches Modell wofür? (Modellwahl im API-Zugang)</h4>
     <p>Im Bereich „API-Zugang" kannst du zwischen drei Modellen wählen. Sie unterscheiden sich in Analysetiefe, Geschwindigkeit und Preis:</p>
-    <p><b>Praktische Empfehlung:</b> Starte in der Regel mit <b>Claude Sonnet 5</b>. Dieses Modell ist für die meisten Vertragsanalysen der beste Kompromiss aus fachlicher Tiefe, Geschwindigkeit und Kosten. Wechsle nur dann bewusst auf Opus oder Haiku, wenn der konkrete Anwendungsfall dafür spricht.</p>
+    <p><b>Praktische Empfehlung:</b> Starte in der Regel mit <b>Claude Sonnet 5</b>. Dieses Modell ist für die meisten Vertragsanalysen der beste Kompromiss aus fachlicher Tiefe, Geschwindigkeit und Kosten – auch bei normalen Scan-PDFs. Wechsle nur dann bewusst auf Opus oder Haiku, wenn der konkrete Anwendungsfall dafür spricht.</p>
     <table class="help-kitable">
       <thead><tr><th>Modell</th><th>Am besten für</th><th>Kontext</th></tr></thead>
       <tbody>
-        <tr><td><b>Claude Sonnet 5</b><br>(empfohlen)</td><td>Standardwahl für die meisten Vertragsprüfungen – gutes Verhältnis aus Analysetiefe und Kosten, deckt fast alle Fälle gut ab.</td><td>1 Mio. Token</td></tr>
-        <tr><td><b>Claude Opus 4.8</b><br>(höchste Genauigkeit)</td><td>Besonders komplexe, lange oder wirtschaftlich kritische Verträge (z. B. GU-Verträge mit Open-Book-Mechanismen), wenn maximale Analysetiefe und die zuverlässigste Erkennung von Kumulationseffekten wichtiger ist als der Preis.</td><td>1 Mio. Token</td></tr>
-        <tr><td><b>Claude Haiku 4.5</b><br>(schnell & günstig)</td><td>Schnelle erste Einschätzungen, Testläufe oder kürzere/einfachere Verträge. Bei sehr langen Verträgen (nahe am 300.000-Zeichen-Limit) ist das kleinere Kontextfenster am ehesten der limitierende Faktor.</td><td>200.000 Token</td></tr>
+        <tr><td><b>Claude Sonnet 5</b><br>(empfohlen)</td><td>Standardwahl für die meisten Vertragsprüfungen und normale Scan-PDFs – gutes Verhältnis aus Analysetiefe, Vision-Qualität und Kosten.</td><td>1 Mio. Token</td></tr>
+        <tr><td><b>Claude Opus 4.8</b><br>(Premium)</td><td>Besonders komplexe, lange, wirtschaftlich kritische oder schwer lesbare Verträge, insbesondere GU-/Open-Book-Verträge und dichte Scan-PDFs, wenn Qualität wichtiger ist als der Preis.</td><td>1 Mio. Token</td></tr>
+        <tr><td><b>Claude Haiku 4.5</b><br>(schnell & günstig)</td><td>Kurze Vorprüfungen, Testläufe, Demo-Dokumente oder gut lesbare kurze Scans. Für umfangreiche oder schwer lesbare Scan-PDFs nur bedingt empfohlen.</td><td>200.000 Token</td></tr>
       </tbody>
     </table>
     <p><b>Wann welches Modell?</b></p>
     <ul>
-      <li><b>Sonnet 5:</b> Standard für normale Bauverträge, VOB/B-Verträge, BGB-Bauverträge und Planungsverträge. Gute Wahl, wenn du ein belastbares Ergebnis ohne unnötig hohe Modellkosten möchtest.</li>
-      <li><b>Opus 4.8:</b> Für besonders wichtige Entscheidungen, sehr komplexe GU-/NU-Verträge, Open-Book-/Cost-plus-Regelungen, ungewöhnliche Haftungs- oder Sicherheitenkonstruktionen und Fälle, in denen ein übersehener Punkt teuer werden kann.</li>
-      <li><b>Haiku 4.5:</b> Für kurze Vorprüfungen, Testläufe, Demo-Dokumente oder wenn du zunächst schnell sehen willst, ob sich eine tiefergehende Analyse lohnt.</li>
+      <li><b>Sonnet 5:</b> Standard für normale Bauverträge, VOB/B-Verträge, BGB-Bauverträge, Planungsverträge und übliche Scan-PDFs. Gute Wahl, wenn ein belastbares Ergebnis ohne unnötig hohe Modellkosten benötigt wird.</li>
+      <li><b>Opus 4.8:</b> Für besonders wichtige Entscheidungen, sehr komplexe GU-/NU-Verträge, Open-Book-/Cost-plus-Regelungen, ungewöhnliche Haftungs- oder Sicherheitenkonstruktionen, schwer lesbare Scans und Fälle, in denen ein übersehener Punkt teuer werden kann.</li>
+      <li><b>Haiku 4.5:</b> Für kurze Vorprüfungen, Testläufe, Demo-Dokumente oder klar lesbare kurze Verträge. Bei langen Scan-PDFs ist Haiku wegen kleinerem Kontextfenster und Standard-Bildauflösung nicht die erste Wahl.</li>
     </ul>
-    <p><b>Kostenlogik:</b> Die App rechnet nicht selbst ab. Jede Analyse wird direkt über dein eigenes Anthropic-Konto abgerechnet. Kosten entstehen, weil der Vertragstext und die erzeugten Antworten als Token verarbeitet werden. Lange Verträge, viele erkannte Klauseln und ausführliche Maßnahmenvorschläge erhöhen die Tokenmenge. Bei gescannten PDFs kommen Bildseiten hinzu: Die App verarbeitet alle Seiten in Paketen, was fachlich vollständiger ist, aber länger dauern und deutlich mehr API-Nutzung auslösen kann als ein PDF mit sauberem Textlayer.</p>
+    <p><b>Besonderheit bei Scan-PDFs:</b> Alle drei auswählbaren Claude-Modelle unterstützen Bild-/Vision-Eingaben. Bei Scan-PDFs ist aber nicht nur die Seitenzahl entscheidend, sondern auch Bildauflösung, Lesbarkeit und Anzahl der Seitenpakete. Sonnet 5 und Opus 4.8 haben ein Kontextfenster von 1 Mio. Token und nutzen bei Bildern eine höhere Auflösungsstufe als Haiku 4.5. Das kann bei dichten Vertragsscans fachlich besser sein, kann aber mehr visuelle Tokens und damit höhere Kosten verursachen. Haiku 4.5 hat 200.000 Token Kontext und eignet sich eher für kurze, gut lesbare Scans oder Testläufe.</p>
+    <p><b>Fable 5:</b> Anthropic führt Fable 5 als noch leistungsfähigeres Modell. Für diese App ist es bewusst nicht als Standardauswahl vorgesehen, weil die meisten Vertragsprüfungen mit Sonnet 5 oder bei Premiumfällen mit Opus 4.8 wirtschaftlicher abgedeckt werden. Fable 5 kann später als gesonderte Experten-/Hochrisiko-Option ergänzt werden, wenn der zusätzliche Nutzen die deutlich höheren Kosten rechtfertigt.</p>
+    <p><b>Kostenlogik:</b> Die App rechnet nicht selbst ab. Jede Analyse wird direkt über dein eigenes Anthropic-Konto abgerechnet. Kosten entstehen, weil der Vertragstext, Scan-Bilder und die erzeugten Antworten als Token verarbeitet werden. Lange Verträge, viele erkannte Klauseln und ausführliche Maßnahmenvorschläge erhöhen die Tokenmenge. Bei gescannten PDFs kommen Bildseiten hinzu: Die App verarbeitet alle Seiten in Paketen, was fachlich vollständiger ist, aber länger dauern und deutlich mehr API-Nutzung auslösen kann als ein PDF mit sauberem Textlayer.</p>
     <p><b>Kosten-Gegenüberstellung</b> (Anthropic-Preise pro Million Token, Stand Juli 2026; die Abrechnung erfolgt direkt über dein eigenes Anthropic-Konto):</p>
     <table class="help-kitable">
       <thead><tr><th>Modell</th><th>Input</th><th>Output</th></tr></thead>
@@ -871,7 +873,7 @@ const HELP_CONTENT = [
       </tbody>
     </table>
     <p style="font-size:12px; color:var(--text-muted);">Diese Werte sind Schätzungen und können je nach Vertragsinhalt (Anzahl erkannter Klauseln und Fristen), Antwortlänge und Modellpreisen abweichen. Prüfe für verbindliche Beträge immer die Nutzungsübersicht und aktuellen Preise in der Anthropic Console.</p>
-    <p><b>Faustregel:</b> Für den produktiven Alltag Sonnet 5 verwenden, für besonders kritische Verträge Opus 4.8 wählen, für schnelle Tests oder kurze Vorprüfungen Haiku 4.5 nutzen.</p>
+    <p><b>Faustregel:</b> Für den produktiven Alltag und normale Scan-PDFs Sonnet 5 verwenden, für besonders kritische oder schwer lesbare Verträge Opus 4.8 wählen, für schnelle Tests oder kurze Vorprüfungen Haiku 4.5 nutzen.</p>
   `},
   { id:"schnellstart", title:"Schnellstart", body:`
     <h3>Schnellstart</h3>
