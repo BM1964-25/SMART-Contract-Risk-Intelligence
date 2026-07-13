@@ -171,9 +171,10 @@
   input[type=file]{ display:none; }
   .file-info{
     margin-top:14px; padding:10px 12px; background:var(--bg); border-radius:6px;
-    font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+    font-size:13px; display:flex; flex-direction:column; align-items:flex-start; gap:4px;
   }
   .file-info .name{ font-weight:bold; word-break:break-all; }
+  .file-info .meta{ color:var(--text-muted); font-size:12.5px; line-height:1.35; }
   .btn{
     position:relative;
     display:inline-flex; align-items:center; justify-content:center; gap:8px;
@@ -2030,7 +2031,7 @@ async function handleFile(file){
         isScanned = true;
         document.getElementById('fileInfo').innerHTML = `
           <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
-          <span>Scan · ${result.totalPages} Seite${result.totalPages===1?'':'n'} · alle Seiten vorbereitet</span></div>`;
+          <span class="meta">Scan · ${result.totalPages} Seite${result.totalPages===1?'':'n'} · alle Seiten vorbereitet</span></div>`;
         updateUploadNotices();
         document.getElementById('analyzeBtn').disabled = documentImages.length === 0;
         setStatus(documentImages.length ? `Gescanntes Dokument erkannt. ${documentImages.length} von ${result.totalPages} Seiten bereit zur vollständigen Analyse.` : 'Konnte keine Seiten rendern.', documentImages.length ? 'done' : undefined);
@@ -2048,7 +2049,7 @@ async function handleFile(file){
     const overLimit = charCount > DOC_CHAR_LIMIT;
     document.getElementById('fileInfo').innerHTML = `
       <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
-      <span>${Math.round(charCount/1000)} Tsd. Zeichen · ca. ${estPages} Seiten</span></div>
+      <span class="meta">${Math.round(charCount/1000)} Tsd. Zeichen · ca. ${estPages} Seiten</span></div>
       ${overLimit ? `<p class="hint" style="color:var(--amber);">Sehr langes Dokument – nur die ersten ca. ${Math.round(DOC_CHAR_LIMIT/2800)} Seiten werden analysiert, der Rest wird nicht berücksichtigt.</p>` : ''}`;
     updateUploadNotices();
     document.getElementById('analyzeBtn').disabled = extractedText.trim().length < 20;
