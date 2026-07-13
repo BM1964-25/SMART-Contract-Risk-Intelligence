@@ -117,8 +117,13 @@
     color:var(--navy); font-size:11.3px; white-space:nowrap;
   }
   .model-option span{ color:var(--text-muted); text-align:right; }
-  .model-cost-note{ margin:2px 1px 0; font-size:10px; line-height:1.3; color:var(--text-muted); }
-  .model-help-note{ margin:1px 1px 0; font-size:10px; line-height:1.3; color:var(--navy); }
+  .model-cost-note{ margin:4px 1px 0; font-size:11.5px; line-height:1.35; color:var(--text-muted); }
+  .model-help-note{ margin:2px 1px 0; font-size:11.5px; line-height:1.35; color:var(--navy); }
+  .model-help-link{
+    border:none; background:none; padding:0; margin:0; color:var(--navy); font:inherit;
+    font-weight:bold; text-align:left; text-decoration:underline; cursor:pointer;
+  }
+  .model-help-link:hover{ color:var(--gold); }
   .wb-caption{ font-size:11px; color:var(--text-muted); margin:4px 2px 0; }
   .recent-history-list{ display:flex; flex-direction:column; gap:4px; margin-top:6px; }
   .recent-history-item{
@@ -129,6 +134,14 @@
   .recent-history-item:hover{ border-color:var(--border); color:var(--navy); }
   .recent-history-item .rh-name{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
   .recent-history-item .rh-date{ flex-shrink:0; font-size:10.5px; color:var(--text-muted); }
+  .backup-section{
+    margin-top:14px; padding-top:13px; border-top:1px solid var(--border);
+  }
+  .backup-title{
+    font-size:11px; color:var(--text-muted); text-transform:uppercase;
+    letter-spacing:.35px; font-weight:bold; margin-bottom:4px;
+  }
+  .backup-hint{ font-size:11.5px; line-height:1.4; color:var(--text-muted); margin:0 0 9px; }
   .card{
     background:var(--card); border:1px solid var(--border); border-radius:8px;
     padding:20px 22px;
@@ -245,6 +258,15 @@
   .summary-card.mittel .num, .summary-card.mittel .lbl{ color:var(--amber); }
   .summary-card.niedrig{ background:var(--green-bg); }
   .summary-card.niedrig .num, .summary-card.niedrig .lbl{ color:var(--green); }
+  .project-insight-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:18px 0 4px; }
+  .project-insight{
+    border:1px solid var(--border); border-radius:7px; padding:12px 13px; background:var(--bg);
+  }
+  .project-insight h3{ margin:0 0 7px; font-size:13px; color:var(--navy); }
+  .project-insight p{ margin:0; font-size:12.5px; line-height:1.45; color:var(--text-muted); }
+  .project-chip-row{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+  .project-chip{ display:inline-block; border:1px solid var(--border); border-radius:999px; padding:3px 8px; font-size:11.5px; color:var(--navy); background:#fff; }
+  @media(max-width:760px){ .project-insight-grid{ grid-template-columns:1fr; } }
 
   table{ width:100%; border-collapse:collapse; font-size:13px; }
   .table-scroll{ overflow-x:auto; }
@@ -263,7 +285,10 @@
   .cat{ font-size:11.5px; color:var(--text-muted); }
   .empty{ text-align:center; padding:50px 20px; color:var(--text-muted); }
   .empty .icon{ font-size:30px; margin-bottom:10px; color:var(--border); }
-  .status-line{ font-size:12.5px; color:var(--text-muted); margin-top:10px; min-height:16px; display:flex; align-items:center; gap:7px; }
+  .status-line{
+    font-size:12.8px; color:var(--text-muted); margin-top:14px; min-height:18px;
+    display:flex; align-items:center; gap:7px; padding-top:10px; border-top:1px solid var(--border);
+  }
   .error-box{
     background:var(--red-bg); color:var(--red); border-radius:6px; padding:10px 12px;
     font-size:12.5px; margin-top:10px;
@@ -317,7 +342,7 @@
   .axis-bar-track{ flex:1; height:10px; background:var(--bg); border-radius:5px; overflow:hidden; }
   .axis-bar-fill{ height:100%; background:var(--gold); border-radius:5px; }
   .axis-score{ width:20px; text-align:right; flex-shrink:0; color:var(--text-muted); font-size:12px; }
-  .result-tabs{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:0 0 12px; }
+  .result-tabs{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:18px 0 12px; }
   .result-tab{
     text-align:left; background:#fff; border:1px solid var(--border); border-top:3px solid transparent;
     border-radius:8px; padding:12px 13px; font-family:inherit; color:var(--text);
@@ -436,11 +461,36 @@
     margin-bottom:14px;
   }
   .disclaimer-card{ background:var(--amber-bg); border-color:var(--amber); }
-  .vt-summary{ cursor:pointer; font-weight:bold; color:var(--navy); font-size:14px; }
+  .vt-summary{
+    cursor:pointer; font-weight:bold; color:var(--navy); font-size:14px;
+    display:flex; align-items:center; gap:8px; list-style:none;
+  }
+  .vt-summary::-webkit-details-marker{ display:none; }
+  .vt-summary:before{ content:"+"; display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; background:var(--gold-light); color:var(--navy); font-weight:bold; }
+  details[open] .vt-summary:before{ content:"-"; }
+  .vt-panel{
+    margin-top:12px; border:1px solid var(--border); border-radius:8px;
+    background:#fff; overflow:hidden;
+  }
+  .vt-toolbar{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+    padding:12px 14px; border-bottom:1px solid var(--border); background:var(--bg);
+  }
+  .vt-title{ font-weight:bold; color:var(--navy); font-size:13.5px; }
+  .vt-meta{ margin-top:3px; color:var(--text-muted); font-size:12px; line-height:1.35; }
+  .vt-badge{
+    flex:0 0 auto; border:1px solid var(--border); border-radius:999px; padding:4px 9px;
+    font-size:11.5px; color:var(--navy); background:#fff; white-space:nowrap;
+  }
   .vt-text{
-    white-space:pre-wrap; word-break:break-word; font-family:inherit; font-size:12px;
-    line-height:1.5; background:var(--bg); border:1px solid var(--border); border-radius:6px;
-    padding:14px; margin-top:10px; max-height:420px; overflow-y:auto;
+    white-space:pre-wrap; word-break:break-word; font-family:Georgia, "Times New Roman", serif; font-size:13.5px;
+    line-height:1.72; color:#1f2937; background:#fff; padding:22px 26px;
+    margin:0; max-height:560px; overflow-y:auto;
+  }
+  .vt-text::selection{ background:var(--gold-light); }
+  @media(max-width:760px){
+    .vt-toolbar{ flex-direction:column; }
+    .vt-text{ padding:18px 16px; font-size:13px; }
   }
   .disclaimer-text{ font-size:12px; line-height:1.6; color:var(--text); }
   .disclaimer-text b{ color:var(--amber); }
@@ -482,6 +532,7 @@
           <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (schnell &amp; günstig)</option>
         </select>
         <button class="btn secondary small" id="saveKeyBtn" style="width:100%;">Key speichern</button>
+        <button class="btn secondary small" id="testBtn" style="width:100%; margin-top:8px;">Verbindung testen</button>
         <div class="key-status" id="keyStatus"><span class="key-status-dot"></span><span class="key-status-text"></span></div>
         <div class="model-guide" aria-label="Modellübersicht">
           <div class="model-guide-title">Modellwahl kurz erklärt</div>
@@ -495,7 +546,7 @@
             <strong>Haiku 4.5</strong><span>schnell · günstig</span>
           </div>
           <div class="model-cost-note">Kosten über Anthropic; abhängig von Länge, Analyseumfang und Modell.</div>
-          <div class="model-help-note">Ausführliche Modell- und Kostenhinweise findest du in der Hilfe.</div>
+          <div class="model-help-note"><button type="button" class="model-help-link" id="modelHelpLink">Ausführliche Modell- und Kostenhinweise in der Hilfe öffnen.</button></div>
         </div>
       </div>
 
@@ -521,8 +572,6 @@
           <span>Vertragstext mit im Verlauf speichern (erhöht den lokalen Speicherbedarf, Standard: aus)</span>
         </label>
         <button class="btn" id="analyzeBtn" disabled>Analyse starten</button>
-        <button class="btn secondary small" id="testBtn" style="width:100%; margin-top:8px;">API-Verbindung testen</button>
-        <div class="status-line" id="statusLine"></div>
         <div id="errorBox"></div>
       </div>
 
@@ -538,6 +587,7 @@
           <div class="pipe-line"></div>
           <div class="pipe-step" data-step="4"><div class="dot">4</div><div><div class="pipe-step-title">Maßnahmenvorschläge</div><div class="pipe-step-desc">Für kritische/hohe Punkte werden konkrete Empfehlungen erstellt.</div></div></div>
         </div>
+        <div class="status-line" id="statusLine"></div>
       </div>
 
       <div class="card">
@@ -551,8 +601,12 @@
           <span>Verlauf</span><span class="tag" id="historyCountBadge">0</span>
         </button>
         <div class="recent-history-list" id="recentHistoryList"></div>
-        <button class="btn secondary small" id="sidebarHistorySaveBtn" style="width:100%; margin-top:14px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Verlauf als JSON speichern</button>
-        <button class="btn secondary small" id="sidebarHistoryRestoreBtn" style="width:100%; margin-top:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Verlauf wiederherstellen</button>
+        <div class="backup-section">
+          <div class="backup-title">Sicherung &amp; Wiederherstellung</div>
+          <p class="backup-hint">Verlauf lokal sichern oder aus einer JSON-Datei wiederherstellen.</p>
+          <button class="btn secondary small" id="sidebarHistorySaveBtn" style="width:100%;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Verlauf als JSON speichern</button>
+          <button class="btn secondary small" id="sidebarHistoryRestoreBtn" style="width:100%; margin-top:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Verlauf wiederherstellen</button>
+        </div>
       </div>
 
   </div>
@@ -765,12 +819,12 @@ const HELP_CONTENT = [
       <li><b>API-Zugang</b> – API-Key eintragen (mit Ein-/Ausblenden- und Lösch-Funktion), Modell wählen (Sonnet 5 / Opus 4.8 / Haiku 4.5), Verbindung testen. Ein farbiger Status zeigt den aktuellen Zustand: grau = kein Key, navy = Key gespeichert, grün = Verbindung erfolgreich getestet.</li>
       <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) wählen, Datei per Klick oder Drag & Drop hochladen, Analyse starten. Nach dem Upload zeigt die App Zeichenzahl und geschätzte Seitenzahl an.</li>
       <li><b>Analyse-Pipeline</b> – zeigt den Live-Fortschritt der vier Analysestufen mit kurzer Erklärung, was jede Stufe tut.</li>
-      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, den letzten drei Analysen zum direkten Öffnen, sowie Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei.</li>
+      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, den letzten fünf Analysen zum direkten Öffnen, sowie Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei.</li>
     </ul>
     <p><b>Ergebnisbereich (erscheint nach der ersten Analyse):</b></p>
     <ul>
-      <li><b>Management Summary</b> – immer sichtbar, unabhängig vom gewählten Tab: kurze Einordnung von Bauvorhaben/Vertragsparteien, die fünf größten Risiken, Balkendiagramm der wirtschaftlichen Auswirkungsachsen.</li>
-      <li><b>Marktvergleich</b> – erscheint automatisch, wenn vergleichbare Werte im Vertrag gefunden wurden (Gewährleistung, Vertragsstrafe, Zahlungsfrist, VOB/B-Einbeziehung, Sicherheiten).</li>
+      <li><b>Management Summary</b> – immer sichtbar, unabhängig vom gewählten Tab: kurze Einordnung von Bauvorhaben/Vertragsparteien, die fünf größten Risiken, bei HOAI-Verträgen zusätzlich Projektziele und Projektkomplexität, danach das Balkendiagramm der wirtschaftlichen Auswirkungsachsen.</li>
+      <li><b>Marktvergleich</b> – erscheint automatisch, wenn vergleichbare Werte im Vertrag gefunden wurden. Die Richtwerte passen sich an die Vertragsgrundlage an: Bauvertrag/VOB/B/BGB oder Planungsvertrag/HOAI.</li>
       <li><b>Drei Tabs</b> darunter: Risikobewertung (vollständige Tabelle), Terminkritische Klauseln (Fristen mit finanzieller/rechtlicher Folge, priorisiert), Fristen (Zeitstrahl für datierte Termine plus vollständige, nach Kategorie gruppierte Liste aller Fristen).</li>
     </ul>
     <p>Oben rechts im Header findest du jederzeit den <b>Hilfe-Button</b>, der dieses Fenster öffnet, ohne deine aktuelle Analyse zu verlieren.</p>
@@ -790,8 +844,8 @@ const HELP_CONTENT = [
         <tr><td>Marktvergleich (Vertragswerte werden von der KI erkannt)</td><td class="yes">Ja</td></tr>
       </tbody>
     </table>
-    <p>Die eigentliche Risikoanalyse ist also vollständig KI-gestützt; Verwaltung und Organisation (Wissensbasis, Verlauf, Dokumentenvorschau) funktionieren auch ohne API-Key. Die Markt-Richtwerte selbst (z. B. „4 Jahre VOB/B") sind fest in der App hinterlegt und werden nicht von der KI erfunden – nur die tatsächlichen Werte deines Vertrags werden von ihr erkannt und gegenübergestellt.</p>
-    <p>Weitere Funktionen im Überblick: Auge-/Papierkorb-Symbol zur Verwaltung des API-Keys, farbiger Verbindungsstatus, druckoptimierter PDF-Export im Querformat, Schnellzugriff auf die letzten drei Analysen direkt in der Kachel „Weitere Bereiche".</p>
+    <p>Die eigentliche Risikoanalyse ist also vollständig KI-gestützt; Verwaltung und Organisation (Wissensbasis, Verlauf, Dokumentenvorschau) funktionieren auch ohne API-Key. Die Markt-Richtwerte selbst sind fest in der App hinterlegt und werden nicht von der KI erfunden – bei Bauverträgen z. B. VOB/B-/BGB-typische Werte, bei HOAI-Planungsverträgen praxisübliche Einordnung zu Honorar, Stufenbeauftragung, Kostensteuerung, Nutzungsrechten, BIM, Freigaben und Zahlungs-/Prüffristen. Nur die tatsächlichen Werte deines Vertrags werden von der KI erkannt und gegenübergestellt.</p>
+    <p>Weitere Funktionen im Überblick: Auge-/Papierkorb-Symbol zur Verwaltung des API-Keys, farbiger Verbindungsstatus, druckoptimierter PDF-Export im Querformat, Schnellzugriff auf die letzten fünf Analysen direkt in der Kachel „Weitere Bereiche".</p>
   `},
   { id:"workflow", title:"Typischer Workflow", body:`
     <h3>Typischer Workflow</h3>
@@ -817,8 +871,8 @@ const HELP_CONTENT = [
   { id:"ergebnisse", title:"Ergebnisse verstehen", body:`
     <h3>Ergebnisse verstehen</h3>
     <p><b>Risikostufen:</b> kritisch (Ausnahme, 2–4 gravierendste Punkte im gesamten Vertrag) · hoch · mittel (Regelfall für die meisten Standardregelungen) · niedrig.</p>
-    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Das Balkendiagramm in der Management Summary zeigt relativ zueinander, welche Achse bei diesem Vertrag am stärksten betroffen ist.</p>
-    <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte (Gewährleistung, Vertragsstrafe, Zahlungsfrist, VOB/B-Einbeziehung, Vertragserfüllungssicherheit) den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – dient der schnellen Einordnung, nicht als Rechtsauskunft.</p>
+    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Das Balkendiagramm in der Management Summary zeigt relativ zueinander, welche Achse bei diesem Vertrag am stärksten betroffen ist. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
+    <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – je nach Vertragsgrundlage unterschiedlich. Bei Bauverträgen werden z. B. Gewährleistung, Vertragsstrafe, Zahlungsfrist, VOB/B-Einbeziehung und Sicherheiten betrachtet; bei Planungsverträgen/HOAI stehen Honorar-/Leistungsumfang, stufenweise Beauftragung, Kostensteuerung, Nutzungsrechte, BIM-/Projektplattformpflichten, Freigaben und Zahlungs-/Prüffristen im Vordergrund.</p>
     <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge (z. B. Vertragsstrafe, Sicherheitseinbehalt) erkannt wurde, priorisiert nach Dringlichkeit.</p>
     <p><b>Fristen:</b> zweigeteilt – oben ein chronologischer Zeitstrahl für alle Fristen mit einem echten Kalenderdatum, darunter die vollständige, nach Kategorie gruppierte Liste aller Fristen (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine). Relative Fristen (z. B. „12 Werktage nach Erhalt der Ausführungsplanung") zeigen zusätzlich eine Dauer-Kennzeichnung und den hervorgehobenen Bezugspunkt.</p>
     <p><b>Referenz:</b> zeigt, welche Wissensbasis-Einträge zur Bewertung eines Punktes herangezogen wurden.</p>
@@ -854,15 +908,16 @@ function renderHelp(activeId){
   document.getElementById('helpContent').innerHTML = active.body;
   document.getElementById('helpContent').scrollTop = 0;
 }
-function openHelp(){
+function openHelp(activeId){
   document.getElementById('helpOverlay').style.display = 'flex';
   document.getElementById('helpSearch').value = '';
-  renderHelp();
+  renderHelp(activeId);
 }
 function closeHelp(){
   document.getElementById('helpOverlay').style.display = 'none';
 }
 document.getElementById('openHelpBtn').onclick = openHelp;
+document.getElementById('modelHelpLink').onclick = () => openHelp('einrichtung');
 document.getElementById('helpCloseBtn').onclick = closeHelp;
 document.getElementById('helpOverlay').onclick = (e) => { if(e.target.id === 'helpOverlay') closeHelp(); };
 document.getElementById('helpSearch').oninput = (e) => {
@@ -912,6 +967,50 @@ function applyRole(){
 document.getElementById('roleSelect').onchange = applyRole;
 applyRole();
 
+const MARKET_BENCHMARKS_BY_TYPE = {
+  bauvertrag: [
+    {key:"gewaehrleistung", label:"Gewährleistung", markt:"4 Jahre (VOB/B) bzw. 5 Jahre (BGB)"},
+    {key:"vertragsstrafe", label:"Vertragsstrafe", markt:"0,1-0,2 %/Tag, Deckel ca. 5 %"},
+    {key:"zahlung", label:"Zahlung (bis Schlusszahlung)", markt:"14-30 Tage"},
+    {key:"vobb", label:"VOB/B einbezogen", markt:"Üblich bei B2B-Bauverträgen"},
+    {key:"buergschaft", label:"Vertragserfüllungssicherheit", markt:"ca. 5 % der Auftragssumme"}
+  ],
+  planung: [
+    {key:"honorar", label:"Honorar / Leistungsumfang", markt:"Grundleistungen und Besondere Leistungen klar trennen; Anpassung bei Änderungen regeln"},
+    {key:"stufen", label:"Stufenweise Beauftragung", markt:"Abruf weiterer Leistungsphasen klar regeln; kein stiller Automatismus"},
+    {key:"kostensteuerung", label:"Kostensteuerung / Budget", markt:"Hinweis- und Steuerungspflichten üblich; Haftung regelmäßig nur bei Vertretenmüssen"},
+    {key:"nutzungsrechte", label:"Nutzungsrechte", markt:"Projektbezogene Rechte üblich; Änderung, Weitergabe und BIM-Nutzung begrenzen"},
+    {key:"bim", label:"BIM / Projektplattform", markt:"BIM-, IFC- und Uploadpflichten mit Datenrichtlinie, Rollen und Mehraufwand regeln"},
+    {key:"freigabe", label:"Freigaben / Prüffristen", markt:"Klare Prüffristen und Mitwirkungsfolgen üblich; Freigabeprozess dokumentieren"},
+    {key:"zahlung", label:"Zahlungs- / Prüffristen", markt:"Abschlags- und Honorarzahlungen nach Leistungsstand; Prüffristen eindeutig definieren"}
+  ]
+};
+function getMarketBenchmarks(contractType){
+  return contractType === 'planung' ? MARKET_BENCHMARKS_BY_TYPE.planung : MARKET_BENCHMARKS_BY_TYPE.bauvertrag;
+}
+function getMarketPromptConfig(contractType){
+  if(contractType === 'planung'){
+    return {
+      fieldsText: '"honorar" (Pauschalhonorar, Honorargrundlage oder Änderungs-/Anpassungsregel), "stufen" (stufenweise Beauftragung oder Abruf weiterer Leistungsphasen), "kostensteuerung" (Budget-/Kostengrenze, KG 400, Kostenkontrolle oder Hinweispflichten), "nutzungsrechte" (Nutzungs-, Änderungs-, Weitergabe- oder BIM-Rechte), "bim" (BIM, IFC, Projektplattform, Datenrichtlinie oder Uploadpflichten), "freigabe" (Freigabe-/Prüffristen für Leistungsphasen oder Zwischenergebnisse), "zahlung" (Honorarzahlung, Abschläge, Rechnungsprüfung oder Zahlungsfrist).',
+      jsonExample: '{"honorar":"","stufen":"","kostensteuerung":"","nutzungsrechte":"","bim":"","freigabe":"","zahlung":""}'
+    };
+  }
+  return {
+    fieldsText: '"gewaehrleistung" (Dauer der Gewährleistungs-/Verjährungsfrist), "vertragsstrafe" (Satz und Deckel), "zahlung" (Frist bis zur Schlusszahlung), "vobb" ("einbezogen" oder "ausgeschlossen"), "buergschaft" (Höhe der Vertragserfüllungssicherheit in %).',
+    jsonExample: '{"gewaehrleistung":"","vertragsstrafe":"","zahlung":"","vobb":"","buergschaft":""}'
+  };
+}
+function getRequiredAreas(contractType){
+  if(contractType === 'planung'){
+    return 'Folgende Bereiche MÜSSEN bei Planungsverträgen/HOAI aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten klassischer Bauvertragsklauseln: Leistungsphasen und stufenweise Beauftragung, Honorar/Pauschalhonorar und Abgrenzung Grundleistungen/Besondere Leistungen, Kostensteuerungs- und Hinweispflichten (insbesondere KG 400), Projektziele wie DGNB/LEED/Energieeffizienz/Wirtschaftlichkeit/Freihamer Gebäudestandard/maximale Mietflächen/BIM/Schnittstellenkoordination als eigener Risikoblock, BIM-/IFC-/Projektplattformpflichten, Nutzungsrechte an Plänen/digitalen Unterlagen/BIM-Modellen, Freigabe- und Prüffristen je Leistungsphase oder Zwischenergebnis, Koordinationspflichten, Kündigungsrechte, Haftungsregelungen, Zahlungs- und Rechnungsprüfungsfristen, Sicherungsrechte/Sicherungshypothek und deren Ausschluss sowie Nachtrags-/Vergütungsanpassungslogik. Bewerte außerdem die Projektkomplexität mit: Projektgröße, Anzahl der Beteiligten, Nachhaltigkeitsanforderungen, Genehmigungsaufwand, Schnittstellenkoordination und digitale/BIM-Anforderungen. Wende VOB/B-Marktwerte oder GU-Vertragsmuster nur an, wenn der Vertrag sie ausdrücklich enthält.';
+  }
+  return 'Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel), Sicherheiten (Vertragserfüllungssicherheit UND Gewährleistungs-/Mängelsicherheit als ZWEI getrennte Punkte mit jeweils eigenem Prozentsatz, falls beide vorhanden – nicht zusammenfassen), Versicherungen (Betriebshaftpflichtversicherung mit Mindestdeckungssumme, Bauleistungsversicherung und wer sie trägt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen ausgeschlossen), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten, Open-Book-/Cost-plus-fee-Mechanismen mit AG-Eingriffsrechten, Festpreis-/Gleitklausel-Regelung (insbesondere wenn eine Gleitklausel für Lohn-/Material-/Stoffkosten ausgeschlossen ist – das ist ein Margenrisiko), sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.';
+}
+function getClassificationCalibration(contractType){
+  if(contractType !== 'planung') return '';
+  return 'Planungsvertrag-/HOAI-Kalibrierung: Kostensteuerungspflichten mit Schutzmechanismen (Haftung nur bei Vertretenmüssen, allgemeine Marktpreissteigerungen ausgeschlossen, Beweislast beim Auftraggeber) sind in der Regel "hoch", aber nicht automatisch "kritisch". BIM-/Modell- und Projektplattformpflichten sind zunehmend marktüblich und oft "mittel" bis "hoch"; "kritisch" nur bei unbeschränkter Modellhaftung, Haftung für Fremdmodelle, sehr weiten Weitergaberechten oder unvergütetem erheblichem Mehraufwand. Bei der wirtschaftlichen Auswirkung von Planungsverträgen sind häufig "Marge" und "Haftung" stärker betroffen als "Liquidität", besonders bei Pauschalhonorar, Zusatzaufwand, erweiterten Projektzielen, Planungsaufwand, Leistungsumfang und Kostensteuerung. Setze "Liquidität" bei Planerverträgen nur dann hoch an, wenn außergewöhnliche Sicherheiten, Einbehalte, lange Zahlungsaufschübe, konkrete Vorfinanzierungspflichten oder der Ausschluss gesetzlicher Sicherungsrechte/Sicherungshypothek erkennbar sind; sonst sind "Marge", "Nachtrag" oder "Haftung" meist treffender. Der Ausschluss der Sicherungshypothek bzw. vergleichbarer Sicherungsrechte ist als eigenständiges Durchsetzungs- und Zahlungsausfallrisiko zu behandeln, nicht nur als Formalie.';
+}
+
 function updateKeyStatus(state){
   const el = document.getElementById('keyStatus');
   el.className = 'key-status' + (state !== 'none' ? ' ' + state : '');
@@ -920,23 +1019,27 @@ function updateKeyStatus(state){
 }
 function loadApiKey(){
   apiKey = localStorage.getItem('scri-api-key') || "";
+  const testedKey = localStorage.getItem('scri-api-tested-key') || "";
   const savedModel = localStorage.getItem('scri-model');
   if(savedModel) MODEL = savedModel;
   document.getElementById('apiKeyInput').value = apiKey;
   document.getElementById('modelSelect').value = MODEL;
-  updateKeyStatus(apiKey ? 'saved' : 'none');
+  updateKeyStatus(apiKey ? (testedKey === apiKey ? 'tested' : 'saved') : 'none');
 }
 document.getElementById('saveKeyBtn').onclick = () => {
+  const previousTestedKey = localStorage.getItem('scri-api-tested-key') || "";
   apiKey = document.getElementById('apiKeyInput').value.trim();
   MODEL = document.getElementById('modelSelect').value;
   localStorage.setItem('scri-api-key', apiKey);
   localStorage.setItem('scri-model', MODEL);
-  updateKeyStatus(apiKey ? 'saved' : 'none');
+  if(previousTestedKey && previousTestedKey !== apiKey) localStorage.removeItem('scri-api-tested-key');
+  updateKeyStatus(apiKey ? (previousTestedKey === apiKey ? 'tested' : 'saved') : 'none');
 };
 document.getElementById('clearKeyBtn').onclick = () => {
   apiKey = '';
   document.getElementById('apiKeyInput').value = '';
   localStorage.removeItem('scri-api-key');
+  localStorage.removeItem('scri-api-tested-key');
   updateKeyStatus('none');
 };
 document.getElementById('toggleKeyVisBtn').onclick = () => {
@@ -1036,7 +1139,30 @@ const DEFAULT_KB = [
    tags:["vollständigkeit","werkstattplanung","funktional","nachtrag"]},
   {id:"kb22", title:"Prüfpflicht der Ausführungsplanung durch den AN", typ:["vob","bgb","planung"],
    text:"Verpflichtet der Vertrag den AN, vom AG übergebene Ausführungsplanung innerhalb einer kurzen Frist (z.B. 8-12 Werktage) auf Richtigkeit, Vollständigkeit und Widerspruchsfreiheit zu prüfen, haftet der AN in der Regel für später erkennbare, aber übersehene Fehler. Bei eng bemessener Prüffrist und umfangreicher Planung ist dies ein hohes Haftungsrisiko, nicht nur eine organisatorische Pflicht – besonders wenn die Planfreigabe die Verantwortung des AN ausdrücklich unberührt lässt.",
-   tags:["prüfpflicht","ausführungsplanung","haftung","frist"]}
+   tags:["prüfpflicht","ausführungsplanung","haftung","frist"]},
+
+  // G) Planungsvertrag / HOAI-spezifische Risikomuster
+  {id:"kb23", title:"HOAI – Kostensteuerung & KG 400", typ:["planung"],
+   text:"Bei Planerverträgen sind Kostensteuerungs-, Kostenkontroll- und Hinweispflichten besonders relevant, vor allem bei technischer Ausrüstung/KG 400. Die Einstufung ist regelmäßig hoch, aber nicht automatisch kritisch, wenn der Vertrag Schutzmechanismen enthält: Haftung nur bei Vertretenmüssen, Ausschluss allgemeiner Marktpreissteigerungen und Beweislast beim Auftraggeber.",
+   tags:["kostensteuerung","kostenkontrolle","kg400","hoai","haftung","marge"]},
+  {id:"kb24", title:"Planungsvertrag – Nutzungsrechte an Planung und BIM", typ:["planung"],
+   text:"Weite Nutzungsrechte an Plänen, digitalen Unterlagen, BIM-Modellen, Änderungsrechten und Weitergaberechten können die Verwertung und Haftung des Planers deutlich erweitern. Projektbezogene Nutzungsrechte sind üblich; kritisch wird es bei unbeschränkter Weitergabe, Änderung durch Dritte oder Nutzung außerhalb des konkreten Projekts.",
+   tags:["nutzungsrechte","bim","urheberrecht","digital","haftung"]},
+  {id:"kb25", title:"Planungsvertrag – Projektziele als Leistungspflichten", typ:["planung"],
+   text:"Projektziele wie DGNB Gold, LEED Gold, Energieeffizienz, Gebäudestandards, maximale Mietflächen, Wirtschaftlichkeit, Koordination mit Projektbeteiligten und BIM können aus Zielvorgaben faktisch zusätzliche Leistungspflichten machen. Entscheidend ist, ob Verantwortlichkeit, Mitwirkung des Auftraggebers, Nachweismaßstab und Honorarfolgen klar geregelt sind.",
+   tags:["projektziele","dgnb","leed","energieeffizienz","wirtschaftlichkeit","bim","honorar"]},
+  {id:"kb26", title:"Planungsvertrag – Freigaben und Prüffristen", typ:["planung"],
+   text:"Freigabesysteme je Leistungsphase, Zwischenergebnis oder Planstand reduzieren zwar das Risiko späterer Streitigkeiten, erzeugen aber Koordinationsaufwand und Terminrisiken. Wichtig sind klare Prüffristen, Folgen verspäteter Rückmeldungen, dokumentierte Freigaben und die Abgrenzung, ob eine Freigabe die Planerverantwortung unberührt lässt.",
+   tags:["freigabe","prüffrist","leistungsphase","koordination","termin"]},
+  {id:"kb27", title:"Planungsvertrag – Projektplattform, IFC und BIM-Prozesse", typ:["planung"],
+   text:"Pflichten zu Projektplattform, IFC-Modellen, Datenrichtlinien, regelmäßigen Uploads und BIM-Koordination sind organisatorisch erheblich. Sie sollten mit Rollen, Verantwortlichkeiten, Datenformaten, Prüfumfang, Haftungsgrenzen und Vergütung für Mehraufwand verknüpft sein; ansonsten entsteht ein hohes Organisations- und Haftungsrisiko.",
+   tags:["projektplattform","ifc","bim","datenrichtlinie","upload","koordination","haftung"]},
+  {id:"kb28", title:"Planungsvertrag – BIM-Haftung realistisch kalibrieren", typ:["planung"],
+   text:"BIM- und Modellpflichten sind in größeren Projekten zunehmend marktüblich. Eine Einstufung mittel bis hoch ist oft passender als automatisch hoch/kritisch, solange keine unbeschränkte Modellhaftung, keine Haftung für Fremdmodelle und keine weitreichenden Weitergaberechte ohne Kontrollmöglichkeit vereinbart sind.",
+   tags:["bim","modell","haftung","marktvergleich","planung"]},
+  {id:"kb29", title:"Planungsvertrag – Ausschluss der Sicherungshypothek", typ:["planung"],
+   text:"Schließt ein Planervertrag gesetzliche Sicherungsrechte wie die Sicherungshypothek bzw. vergleichbare Sicherungsmöglichkeiten für Honoraransprüche aus, entsteht ein eigenständiges Durchsetzungs- und Zahlungsausfallrisiko. Das ist besonders relevant bei hohen Honoraren, stufenweiser Beauftragung, langen Projektlaufzeiten oder wirtschaftlich schwachem Auftraggeber und sollte nicht nur als Formalie bewertet werden.",
+   tags:["sicherungshypothek","sicherungsrecht","honorar","zahlung","liquidität","durchsetzung"]}
 ];
 
 let knowledgeBase = [];
@@ -1081,7 +1207,8 @@ function renderKB(){
   if(badge) badge.textContent = knowledgeBase.length;
   const caption = document.getElementById('kbCaption');
   if(caption){
-    const customCount = knowledgeBase.filter(k => !/^kb([1-9]|1[0-4])$/.test(k.id)).length;
+    const defaultIds = new Set(DEFAULT_KB.map(k => k.id));
+    const customCount = knowledgeBase.filter(k => !defaultIds.has(k.id)).length;
     caption.textContent = customCount > 0 ? `${customCount} eigene${customCount===1?'r Eintrag':' Einträge'}` : '';
   }
 }
@@ -1128,6 +1255,8 @@ function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, ma
     id: 'h' + Date.now(),
     filename: currentFileName,
     date: new Date().toISOString(),
+    contractType: currentContractType,
+    roleLabel: currentRoleLabel,
     counts,
     items: JSON.parse(JSON.stringify(items)),
     fristenItems: JSON.parse(JSON.stringify(fristenItems || [])),
@@ -1159,7 +1288,7 @@ function renderHistory(){
   if(badge) badge.textContent = historyEntries.length;
   const recentEl = document.getElementById('recentHistoryList');
   if(recentEl){
-    recentEl.innerHTML = historyEntries.slice(0, 3).map(h => `
+    recentEl.innerHTML = historyEntries.slice(0, 5).map(h => `
       <div class="recent-history-item" onclick="openHistoryEntry('${h.id}')" title="${escapeHtml(h.filename)}">
         <span class="rh-name">${escapeHtml(h.filename)}</span>
         <span class="rh-date">${new Date(h.date).toLocaleDateString('de-DE')}</span>
@@ -1185,6 +1314,15 @@ window.openHistoryEntry = function(id){
   const entry = historyEntries.find(h => h.id === id);
   if(!entry) return;
   currentFileName = entry.filename;
+  if(entry.contractType){
+    currentContractType = entry.contractType;
+    const roleSelect = document.getElementById('roleSelect');
+    const roleKey = Object.keys(ROLE_MAP).find(key => ROLE_MAP[key].contractType === entry.contractType);
+    if(roleSelect && roleKey){
+      roleSelect.value = roleKey;
+      applyRole();
+    }
+  }
   document.getElementById('topActions').style.display = 'flex';
   closeModal();
   renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '', entry.marktvergleich || {}, entry.vertragstext || '');
@@ -1755,6 +1893,7 @@ document.getElementById('testBtn').onclick = async () => {
   try{
     const raw = await callClaude("Antworte ausschließlich mit dem einzelnen Wort: OK");
     setStatus('Verbindung erfolgreich. Antwort: ' + raw.trim(), 'done');
+    if(apiKey) localStorage.setItem('scri-api-tested-key', apiKey);
     updateKeyStatus(apiKey ? 'tested' : 'none');
   }catch(err){
     console.error(err);
@@ -1784,15 +1923,17 @@ async function runAnalysis(){
     // Stage 1: Extraktion
     setPipelineStep(1,'active');
     setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …', 'loading');
+    const requiredAreas = getRequiredAreas(currentContractType);
+    const marketPrompt = getMarketPromptConfig(currentContractType);
     const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Generalunternehmerverträge) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext vollständig und extrahiere die wesentlichen vertraglich relevanten Punkte – bei umfangreichen Verträgen (GU-Vertrag, viele Paragrafen) typischerweise 12 bis 20 Punkte, bei kürzeren Verträgen entsprechend weniger.
-Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel), Sicherheiten (Vertragserfüllungssicherheit UND Gewährleistungs-/Mängelsicherheit als ZWEI getrennte Punkte mit jeweils eigenem Prozentsatz, falls beide vorhanden – nicht zusammenfassen), Versicherungen (Betriebshaftpflichtversicherung mit Mindestdeckungssumme, Bauleistungsversicherung und wer sie trägt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen ausgeschlossen), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten, Open-Book-/Cost-plus-fee-Mechanismen mit AG-Eingriffsrechten, Festpreis-/Gleitklausel-Regelung (insbesondere wenn eine Gleitklausel für Lohn-/Material-/Stoffkosten ausgeschlossen ist – das ist ein Margenrisiko), sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.
+${requiredAreas}
 Kategorisierung: Ordne jeden Punkt der inhaltlich treffendsten Kategorie zu, nicht der oberflächlichsten. Beispiele: Eine Prüfpflicht mit Haftungsfolge bei übersehenen Fehlern gehört zu "Haftung", nicht zu "Frist", auch wenn eine Frist genannt wird. Bürgschaften und Sicherheitseinbehalte gehören zur eigenen Kategorie "Sicherheit", nicht zu "Sonstiges" oder "Zahlung".
 Wichtig: Bleibe so konkret wie der Vertrag es hergibt. Wenn der Vertrag Prozentsätze, Fristtage, Deckelungsgrenzen, konkrete Kündigungsgründe oder Paragrafen nennt, übernimm diese Zahlen/Bezeichnungen in die Paraphrase statt nur die allgemeine Kategorie zu benennen (z.B. "Vertragsstrafe 0,2%/Tag, Deckel 5% bei Endtermin-Verzug" statt nur "Vertragsstrafe vereinbart").
 Präzision statt Verallgemeinerung: Formuliere den genauen Anwendungsbereich einer Klausel nicht weiter, als der Vertragstext es hergibt. Wenn eine Regelung z.B. nur für "weitere Leistungen im Zusammenhang mit dem Bauvorhaben" gilt, schreibe das so – nicht verkürzt als "gilt auch für Folgeaufträge" o.ä., da das den Anwendungsbereich fälschlich verbreitert.
 Ermittle außerdem kurz das Bauvorhaben (Projektbezeichnung und/oder Adresse, falls im Vertrag genannt) sowie die Vertragsparteien (Firmenname von Auftraggeber und Auftragnehmer, keine natürlichen Personen/Unterzeichner) und fasse dies in einem Satz im Feld "projektkontext" zusammen (max 30 Wörter). Wenn ein Aspekt nicht auffindbar ist, lasse ihn im Satz einfach weg, statt ihn zu erfinden.
-Ermittle zusätzlich, sofern im Vertrag auffindbar, die tatsächlichen Vertragswerte für einen Marktvergleich im Feld "marktvergleich" (jeweils als kurzer String, max 10 Wörter; wenn eine Angabe im Vertrag fehlt, lasse den Wert leer statt zu raten): "gewaehrleistung" (Dauer der Gewährleistungs-/Verjährungsfrist), "vertragsstrafe" (Satz und Deckel), "zahlung" (Frist bis zur Schlusszahlung), "vobb" ("einbezogen" oder "ausgeschlossen"), "buergschaft" (Höhe der Vertragserfüllungssicherheit in %).
+Ermittle zusätzlich, sofern im Vertrag auffindbar, die tatsächlichen Vertragswerte für einen Marktvergleich im Feld "marktvergleich" (jeweils als kurzer String, max 12 Wörter; wenn eine Angabe im Vertrag fehlt, lasse den Wert leer statt zu raten): ${marketPrompt.fieldsText}
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-{"projektkontext":"kurzer Satz zu Bauvorhaben und Vertragsparteien","marktvergleich":{"gewaehrleistung":"","vertragsstrafe":"","zahlung":"","vobb":"","buergschaft":""},"items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]}`;
+{"projektkontext":"kurzer Satz zu Bauvorhaben und Vertragsparteien","marktvergleich":${marketPrompt.jsonExample},"items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze, konkrete Paraphrase auf Deutsch, max 30 Wörter"}]}`;
     let extractContent;
     if(isScanned && documentImages.length){
       extractContent = documentImages.map(b64 => ({type:"image", source:{type:"base64", media_type:"image/jpeg", data:b64}}));
@@ -1849,11 +1990,13 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
         _referenzTitel: matches.map(k => k.title)
       };
     });
+    const classificationCalibration = getClassificationCalibration(currentContractType);
     const classifyPrompt = `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
 Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere strafbewehrte Zwischentermine statt nur ein Endtermin, oder das Zusammenwirken mehrerer Klauseln wie Vollständigkeitsklausel + funktionale Leistungsbeschreibung + fehlende Leistungsbeschreibung im Detail). Solche Kumulationseffekte rechtfertigen häufig eine höhere Einstufung (hoch/kritisch) als die isolierte Betrachtung nahelegen würde. Wenn zwei oder mehr Punkte inhaltlich unmittelbar zusammenhängen (z.B. Leistungsverweigerungsrecht und Anordnungsrecht), benenne diesen Zusammenhang explizit in der Begründung beider Punkte als Kombinationsrisiko.
 Kalibrierung der Risikoverteilung: Verteile die Einstufungen realistisch und nicht zu gleichmäßig. "kritisch" ist die Ausnahme und gehört nur den 2 bis 4 wirklich gravierendsten Punkten im gesamten Vertrag. "hoch" ist eine kleinere bis mittlere Gruppe. Die Mehrheit der Punkte sollte "mittel" oder "niedrig" sein. Vermeide, dass am Ende ungefähr gleich viele Punkte in jeder Stufe landen.
 Sicherheiten-Regel: Bürgschaften ab ca. 10% der Auftragssumme sowie Sicherheitseinbehalte mit hoher absoluter Liquiditätswirkung (z.B. ab ca. 50.000-100.000€) tendieren eher zu "kritisch" statt "hoch", weil die Liquiditätswirkung unabhängig vom Prozentsatz real und sofort spürbar ist – insbesondere bei mittelständischen Auftragnehmern.
 Margen-Regel: Ein vereinbarter Festpreis OHNE Gleitklausel für Lohn-, Material-, Geräte- oder Stoffkosten überträgt Preissteigerungsrisiken vollständig auf den AN. Ordne einen solchen Punkt der Auswirkung "Marge" zu und bewerte ihn mindestens als "mittel", bei längerer Bauzeit oder volatilen Materialpreisen als "hoch" – nicht als reines Formalie ohne wirtschaftliche Bedeutung.
+${classificationCalibration}
 Ordne zusätzlich jedem Punkt im Feld "auswirkung" die primäre wirtschaftliche Auswirkungsebene zu (nur einen Wert wählen, den treffendsten): "Liquidität" (Zahlungsflüsse, Vorleistungspflicht, Einbehalte, Bürgschaften), "Termin" (Bauzeit, Verzug, Fristen), "Haftung" (Gewährleistung, Schadensersatz, Prüf-/Sorgfaltspflichten), "Nachtrag" (Leistungsänderung, Vergütungsanpassung, Anordnungsrecht), "Marge" (Kostenrisiko, Deckungsbeitrag, Pauschalierungsrisiko, Festpreis-/Gleitklauselrisiko) oder "Sonstiges".
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","auswirkung":"Liquidität|Termin|Haftung|Nachtrag|Marge|Sonstiges","begruendung":"max 20 Wörter"}]
@@ -1942,6 +2085,71 @@ const PRIO_ORDER = {kritisch:0, hoch:1, mittel:2, niedrig:3};
 const AUSWIRKUNG_ACHSEN = ["Liquidität","Nachtrag","Marge","Termin","Haftung"];
 const RISK_WEIGHT = {kritisch:3, hoch:2, mittel:1, niedrig:0};
 
+const PROJECT_TARGET_DEFS = [
+  {label:"DGNB Gold", re:/dgnb/i},
+  {label:"LEED Gold", re:/leed/i},
+  {label:"Energieeffizienz", re:/energie|effizienz/i},
+  {label:"Freihamer Standard", re:/freiham/i},
+  {label:"Wirtschaftlichkeit", re:/wirtschaftlich/i},
+  {label:"maximale Mietflächen", re:/mietfl[aä]ch/i},
+  {label:"BIM", re:/\bbim\b/i},
+  {label:"Schnittstellenkoordination", re:/schnittstelle|koordination/i}
+];
+const PROJECT_COMPLEXITY_DEFS = [
+  {label:"hohe Projektgröße", re:/projektgr[oö][sß]e|gro[ßs]projekt|komplex|umfangreich/i},
+  {label:"viele Beteiligte", re:/beteiligte|schnittstelle|koordination|projektsteuer/i},
+  {label:"BIM / digitale Modelle", re:/\bbim\b|ifc|modell|projektplattform|datenrichtlinie|upload/i},
+  {label:"Nachhaltigkeitsziele", re:/dgnb|leed|nachhaltig|energie/i},
+  {label:"Genehmigungsaufwand", re:/genehmigung|beh[oö]rde|freigabe/i},
+  {label:"enger Leistungsumfang", re:/pauschal|honorar|besondere leistung|grundleistung|leistungsumfang/i},
+  {label:"eingeschränkte Sicherungsrechte", re:/sicherungshypothek|sicherungsrecht|sicherungsmöglichkeit/i}
+];
+
+function collectItemText(items){
+  return items.map(it => [it.kategorie, it.text, it.begruendung, it.massnahme, ...(it.referenzen||[])].filter(Boolean).join(' ')).join(' ');
+}
+function matchProjectLabels(items, defs){
+  const text = collectItemText(items);
+  return defs.filter(def => def.re.test(text)).map(def => def.label);
+}
+function renderProjectInsight(items){
+  if(currentContractType !== 'planung') return '';
+  const targets = matchProjectLabels(items, PROJECT_TARGET_DEFS);
+  const complexity = matchProjectLabels(items, PROJECT_COMPLEXITY_DEFS);
+  if(!targets.length && !complexity.length) return '';
+  return `
+    <div class="project-insight-grid">
+      <div class="project-insight">
+        <h3>Projektziele als Risikotreiber</h3>
+        <p>Erkannte Projektziele können den Leistungsumfang, den Planungsaufwand und die Haftungsnähe des Fachplaners erweitern.</p>
+        <div class="project-chip-row">${(targets.length ? targets : ["keine expliziten Ziele erkannt"]).map(t => `<span class="project-chip">${escapeHtml(t)}</span>`).join('')}</div>
+      </div>
+      <div class="project-insight">
+        <h3>Projektkomplexität</h3>
+        <p>Diese Faktoren erklären, warum die wirtschaftliche Bewertung bei HOAI-Verträgen besonders auf Marge, Nachtrag und Haftung achten sollte.</p>
+        <div class="project-chip-row">${(complexity.length ? complexity : ["keine besonderen Komplexitätsmerkmale erkannt"]).map(t => `<span class="project-chip">${escapeHtml(t)}</span>`).join('')}</div>
+      </div>
+    </div>`;
+}
+function applyPlanningAxisCalibration(items, axisScores){
+  if(currentContractType !== 'planung') return axisScores;
+  items.forEach(it => {
+    const text = [it.kategorie, it.text, it.begruendung, it.massnahme].filter(Boolean).join(' ').toLowerCase();
+    const weight = RISK_WEIGHT[it.risiko] ?? 1;
+    if(it.auswirkung === 'Liquidität' && /(pauschal|honorar|projektziel|dgnb|leed|energie|wirtschaftlich|bim|ifc|kostensteuer|leistungsumfang|besondere leistung|grundleistung)/i.test(text) && !/(einbehalt|bürgschaft|buergschaft|zahlung|abschlag|vorfinanz|sicherheit|sicherungsrecht|sicherungshypothek)/i.test(text)){
+      axisScores.Liquidität = Math.max(0, axisScores.Liquidität - weight);
+      axisScores.Marge += weight;
+    }
+    if(/(pauschal|honorar|projektziel|dgnb|leed|energie|wirtschaftlich|kostensteuer|leistungsumfang|besondere leistung|grundleistung)/i.test(text)){
+      axisScores.Marge += Math.min(weight, 1);
+    }
+    if(/(haftung|nutzungsrecht|bim|ifc|modell|freigabe|prüfpflicht|pruefpflicht)/i.test(text)){
+      axisScores.Haftung += Math.min(weight, 1);
+    }
+  });
+  return axisScores;
+}
+
 function renderAxisBars(axisScores){
   const max = Math.max(...AUSWIRKUNG_ACHSEN.map(a => axisScores[a]||0), 1);
   return AUSWIRKUNG_ACHSEN.map(a => {
@@ -1964,6 +2172,7 @@ function buildManagementSummary(items){
       axisScores[it.auswirkung] += (RISK_WEIGHT[it.risiko] ?? 1);
     }
   });
+  applyPlanningAxisCalibration(items, axisScores);
   return { top5, axisScores };
 }
 
@@ -1975,6 +2184,8 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
 
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
+  const contractTextChars = vertragstext ? vertragstext.length : 0;
+  const contractTextPages = contractTextChars ? Math.max(1, Math.round(contractTextChars / 2800)) : 0;
 
   const CONTRACT_TYPE_LABELS = {vob:"Bauvertrag nach VOB/B", bgb:"Bauvertrag nach BGB", planung:"Planungsvertrag / HOAI", sonstige:"Vertrag"};
   const introText = (projektKontext && projektKontext.trim())
@@ -1982,6 +2193,7 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
     : `Diese Auswertung bezieht sich auf die Datei „${currentFileName}" (${CONTRACT_TYPE_LABELS[currentContractType] || 'Vertrag'}).`;
 
   const summary = buildManagementSummary(items);
+  const projectInsightHtml = renderProjectInsight(items);
   const summaryHtml = `
     <div class="card">
       <h2>Management Summary</h2>
@@ -1990,20 +2202,15 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
       <ol class="top5-list">
         ${summary.top5.map(it => `<li><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span> <span>${escapeHtml(it.text)}</span></li>`).join('')}
       </ol>
+      ${projectInsightHtml}
       <p class="hint" style="margin-top:18px;">Geschätzte wirtschaftliche Risikowirkung</p>
       <div class="axis-grid">
         ${renderAxisBars(summary.axisScores)}
       </div>
     </div>`;
 
-  const MARKT_BENCHMARKS = [
-    {key:"gewaehrleistung", label:"Gewährleistung", markt:"4 Jahre (VOB/B) bzw. 5 Jahre (BGB)"},
-    {key:"vertragsstrafe", label:"Vertragsstrafe", markt:"0,1–0,2 %/Tag, Deckel ca. 5 %"},
-    {key:"zahlung", label:"Zahlung (bis Schlusszahlung)", markt:"14–30 Tage"},
-    {key:"vobb", label:"VOB/B einbezogen", markt:"Üblich bei B2B-Bauverträgen"},
-    {key:"buergschaft", label:"Vertragserfüllungssicherheit", markt:"ca. 5 % der Auftragssumme"}
-  ];
-  const marktRows = MARKT_BENCHMARKS.filter(b => marktvergleich[b.key] && String(marktvergleich[b.key]).trim());
+  const marketBenchmarks = getMarketBenchmarks(currentContractType);
+  const marktRows = marketBenchmarks.filter(b => marktvergleich[b.key] && String(marktvergleich[b.key]).trim());
   const marktvergleichHtml = marktRows.length ? `
     <div class="card">
       <h2>Marktvergleich</h2>
@@ -2153,7 +2360,16 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
       <details>
         <summary class="vt-summary">Vertragstext anzeigen (mit dieser Analyse gespeichert)</summary>
         <p class="hint" style="margin-top:10px;">Dieser Text wurde optional mit im Verlauf gespeichert. Er dient dem schnellen Abgleich mit dem Analyseergebnis und ersetzt keine sichere Vertragsablage.</p>
-        <pre class="vt-text">${escapeHtml(vertragstext)}</pre>
+        <div class="vt-panel">
+          <div class="vt-toolbar">
+            <div>
+              <div class="vt-title">${escapeHtml(currentFileName || 'Gespeicherter Vertragstext')}</div>
+              <div class="vt-meta">${contractTextChars.toLocaleString('de-DE')} Zeichen · ca. ${contractTextPages.toLocaleString('de-DE')} Seiten · lokal im Browser gespeichert</div>
+            </div>
+            <span class="vt-badge">Nur zur Ansicht</span>
+          </div>
+          <pre class="vt-text">${escapeHtml(vertragstext)}</pre>
+        </div>
       </details>
     </div>` : ''}
     <div class="card disclaimer-card">
