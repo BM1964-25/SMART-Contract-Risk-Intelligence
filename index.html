@@ -834,7 +834,7 @@ const HELP_CONTENT = [
       <li><b>API-Zugang</b> – API-Key eintragen (mit Ein-/Ausblenden- und Lösch-Funktion), Modell wählen (Sonnet 5 / Opus 4.8 / Haiku 4.5), Verbindung testen. Ein farbiger Status zeigt den aktuellen Zustand: grau = kein Key, navy = Key gespeichert, grün = Verbindung erfolgreich getestet.</li>
       <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) wählen, Datei per Klick oder Drag & Drop hochladen und Analyse starten. Nach dem Upload zeigt die App Zeichenzahl und geschätzte Seitenzahl an.</li>
       <li><b>Analyse-Pipeline</b> – zeigt den Live-Fortschritt der vier Analysestufen mit kurzer Erklärung, was jede Stufe tut. Während einer laufenden Prüfung kann die Analyse hier abgebrochen werden.</li>
-      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, den letzten zwei Analysen zum direkten Öffnen, Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei sowie Zurücksetzen des aktuellen Arbeitsbereichs.</li>
+      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, der letzten Analyse zum direkten Öffnen, Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei sowie Zurücksetzen des aktuellen Arbeitsbereichs.</li>
     </ul>
     <p><b>Ergebnisbereich (erscheint nach der ersten Analyse):</b></p>
     <ul>
@@ -860,7 +860,7 @@ const HELP_CONTENT = [
       </tbody>
     </table>
     <p>Die eigentliche Risikoanalyse ist also vollständig KI-gestützt; Verwaltung und Organisation (Wissensbasis, Verlauf, Dokumentenvorschau) funktionieren auch ohne API-Key. Die Markt-Richtwerte selbst sind fest in der App hinterlegt und werden nicht von der KI erfunden – bei Bauverträgen z. B. VOB/B-/BGB-typische Werte, bei HOAI-Planungsverträgen praxisübliche Einordnung zu Honorar, Stufenbeauftragung, Kostensteuerung, Nutzungsrechten, BIM, Freigaben und Zahlungs-/Prüffristen. Nur die tatsächlichen Werte deines Vertrags werden von der KI erkannt und gegenübergestellt.</p>
-    <p>Weitere Funktionen im Überblick: Auge-/Papierkorb-Symbol zur Verwaltung des API-Keys, farbiger Verbindungsstatus, druckoptimierter PDF-Export im Querformat, Schnellzugriff auf die letzten zwei Analysen direkt in der Kachel „Weitere Bereiche".</p>
+    <p>Weitere Funktionen im Überblick: Auge-/Papierkorb-Symbol zur Verwaltung des API-Keys, farbiger Verbindungsstatus, druckoptimierter PDF-Export im Querformat, Schnellzugriff auf die letzte Analyse direkt in der Kachel „Weitere Bereiche".</p>
   `},
   { id:"workflow", title:"Typischer Workflow", body:`
     <h3>Typischer Workflow</h3>
@@ -1336,7 +1336,7 @@ function renderHistory(){
   if(badge) badge.textContent = historyEntries.length;
   const recentEl = document.getElementById('recentHistoryList');
   if(recentEl){
-    recentEl.innerHTML = historyEntries.slice(0, 2).map(h => `
+    recentEl.innerHTML = historyEntries.slice(0, 1).map(h => `
       <div class="recent-history-item" onclick="openHistoryEntry('${h.id}')" title="${escapeHtml(h.filename)}">
         <span class="rh-name">${escapeHtml(h.filename)}</span>
         <span class="rh-date">${new Date(h.date).toLocaleDateString('de-DE')}</span>
