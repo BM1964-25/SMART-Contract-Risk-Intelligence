@@ -1004,10 +1004,12 @@ function getRequiredAreas(contractType){
   if(contractType === 'planung'){
     return 'Folgende Bereiche MÜSSEN bei Planungsverträgen/HOAI aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten klassischer Bauvertragsklauseln: Leistungsphasen und stufenweise Beauftragung, Honorar/Pauschalhonorar und Abgrenzung Grundleistungen/Besondere Leistungen, Kostensteuerungs- und Hinweispflichten (insbesondere KG 400), Projektziele wie DGNB/LEED/Energieeffizienz/Wirtschaftlichkeit/Freihamer Gebäudestandard/maximale Mietflächen/BIM/Schnittstellenkoordination als eigener Risikoblock, BIM-/IFC-/Projektplattformpflichten, Nutzungsrechte an Plänen/digitalen Unterlagen/BIM-Modellen, Freigabe- und Prüffristen je Leistungsphase oder Zwischenergebnis, Koordinationspflichten, Kündigungsrechte, Haftungsregelungen, Zahlungs- und Rechnungsprüfungsfristen, Sicherungsrechte/Sicherungshypothek und deren Ausschluss sowie Nachtrags-/Vergütungsanpassungslogik. Bewerte außerdem die Projektkomplexität mit: Projektgröße, Anzahl der Beteiligten, Nachhaltigkeitsanforderungen, Genehmigungsaufwand, Schnittstellenkoordination und digitale/BIM-Anforderungen. Wende VOB/B-Marktwerte oder GU-Vertragsmuster nur an, wenn der Vertrag sie ausdrücklich enthält.';
   }
-  return 'Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel), Sicherheiten (Vertragserfüllungssicherheit UND Gewährleistungs-/Mängelsicherheit als ZWEI getrennte Punkte mit jeweils eigenem Prozentsatz, falls beide vorhanden – nicht zusammenfassen), Versicherungen (Betriebshaftpflichtversicherung mit Mindestdeckungssumme, Bauleistungsversicherung und wer sie trägt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen ausgeschlossen), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten, Open-Book-/Cost-plus-fee-Mechanismen mit AG-Eingriffsrechten, Festpreis-/Gleitklausel-Regelung (insbesondere wenn eine Gleitklausel für Lohn-/Material-/Stoffkosten ausgeschlossen ist – das ist ein Margenrisiko), sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.';
+  return 'Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel), Sicherheiten (Vertragserfüllungssicherheit UND Gewährleistungs-/Mängelsicherheit als ZWEI getrennte Punkte mit jeweils eigenem Prozentsatz, falls beide vorhanden – nicht zusammenfassen), kumulierte Sicherheiten inklusive Vorauszahlungsbürgschaft und Dokumentationseinbehalten, Versicherungen (Betriebshaftpflichtversicherung mit Mindestdeckungssumme, Bauleistungsversicherung und wer sie trägt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen oder ungeklärter Vergütung nach § 650b/650c BGB die Ausführung verlangt wird), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten, Open-Book-/Cost-plus-fee-Mechanismen mit AG-Einsicht in Kalkulationen, Angebote, Nachunternehmer, Nachträge, Rechnungen und Vergaben, Lean-Construction-Pflichten (Taktplanung, Last Planner, tägliche Lean-Besprechungen, Ressourcenverstärkung, Schulungen), Pandemie-/Corona-Klauseln mit Bauzeit-, Mehrkosten-, Lieferengpass-, Materialalternativen-, Kündigungs- und Dokumentationsfolgen, Festpreis-/Gleitklausel-Regelung (insbesondere wenn Eigenleistungen als Festpreis oder ohne Gleitklausel geregelt sind – das ist ein Margenrisiko), risikomindernde Regelungen zur Planungsverantwortung des AG sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.';
 }
 function getClassificationCalibration(contractType){
-  if(contractType !== 'planung') return '';
+  if(contractType !== 'planung'){
+    return 'Cost+Fee-/Open-Book-Kalibrierung: Bei Cost-plus-fee-, Open-Book- oder GU-Verträgen sind weitreichende Einsichts-, Prüfungs- und Eingriffsrechte des Auftraggebers in Kalkulation, Nachunternehmer, Nachträge, Rechnungen und Vergaben als eigenständiges hohes bis kritisches Margen- und Dispositionsrisiko zu bewerten, nicht nur als Transparenzpflicht. Kumulierte Sicherheiten sind zusammen wirtschaftlich zu würdigen: 10% Vertragserfüllungssicherheit plus 5% Gewährleistungssicherheit plus Vorauszahlungsbürgschaft oder Dokumentationseinbehalte können eine außergewöhnliche Liquiditätsbindung darstellen. Eine Pflicht zur Ausführung nach AG-Anordnung bei noch ungeklärter Vergütung ist präzise als Nachtrags-/Vorleistungsrisiko mit verkürzten Entscheidungsfristen zu bewerten, nicht pauschal als vollständiger Ausschluss aller Leistungsverweigerungsrechte. Cost-plus-fee bedeutet nicht automatisch geringe Marge: Festpreise für Eigenleistungen, GU-Zuschlag, Preisprüfung, Open Book und AG-Eingriffe erhöhen das Margenrisiko. Lean-Construction-Pflichten und Pandemie-/Corona-Klauseln sind als besondere organisatorische bzw. Bauzeit-/Mehrkostenrisiken aufzunehmen. Wenn der Vertrag ausdrücklich regelt, dass Planung und Ausführungsplanung beim AG liegen und der AN nur Plausibilität prüft bzw. Werkstattplanung nur soweit erforderlich schuldet, ist dies als haftungsmindernder Faktor zu erwähnen.';
+  }
   return 'Planungsvertrag-/HOAI-Kalibrierung: Kostensteuerungspflichten mit Schutzmechanismen (Haftung nur bei Vertretenmüssen, allgemeine Marktpreissteigerungen ausgeschlossen, Beweislast beim Auftraggeber) sind in der Regel "hoch", aber nicht automatisch "kritisch". BIM-/Modell- und Projektplattformpflichten sind zunehmend marktüblich und oft "mittel" bis "hoch"; "kritisch" nur bei unbeschränkter Modellhaftung, Haftung für Fremdmodelle, sehr weiten Weitergaberechten oder unvergütetem erheblichem Mehraufwand. Bei der wirtschaftlichen Auswirkung von Planungsverträgen sind häufig "Marge" und "Haftung" stärker betroffen als "Liquidität", besonders bei Pauschalhonorar, Zusatzaufwand, erweiterten Projektzielen, Planungsaufwand, Leistungsumfang und Kostensteuerung. Setze "Liquidität" bei Planerverträgen nur dann hoch an, wenn außergewöhnliche Sicherheiten, Einbehalte, lange Zahlungsaufschübe, konkrete Vorfinanzierungspflichten oder der Ausschluss gesetzlicher Sicherungsrechte/Sicherungshypothek erkennbar sind; sonst sind "Marge", "Nachtrag" oder "Haftung" meist treffender. Der Ausschluss der Sicherungshypothek bzw. vergleichbarer Sicherungsrechte ist als eigenständiges Durchsetzungs- und Zahlungsausfallrisiko zu behandeln, nicht nur als Formalie.';
 }
 
@@ -1140,6 +1142,21 @@ const DEFAULT_KB = [
   {id:"kb22", title:"Prüfpflicht der Ausführungsplanung durch den AN", typ:["vob","bgb","planung"],
    text:"Verpflichtet der Vertrag den AN, vom AG übergebene Ausführungsplanung innerhalb einer kurzen Frist (z.B. 8-12 Werktage) auf Richtigkeit, Vollständigkeit und Widerspruchsfreiheit zu prüfen, haftet der AN in der Regel für später erkennbare, aber übersehene Fehler. Bei eng bemessener Prüffrist und umfangreicher Planung ist dies ein hohes Haftungsrisiko, nicht nur eine organisatorische Pflicht – besonders wenn die Planfreigabe die Verantwortung des AN ausdrücklich unberührt lässt.",
    tags:["prüfpflicht","ausführungsplanung","haftung","frist"]},
+  {id:"kb22b", title:"Kumulierte Sicherheiten & Vorauszahlungsbürgschaft", typ:["vob","bgb","sonstige"],
+   text:"Sicherheiten müssen nicht nur einzeln, sondern kumuliert bewertet werden. 10% Vertragserfüllungssicherheit plus 5% Gewährleistungs-/Mängelsicherheit plus Vorauszahlungsbürgschaft oder Dokumentationseinbehalt können eine außergewöhnlich hohe Liquiditätsbindung auslösen und gehören regelmäßig in die Top-Risiken.",
+   tags:["sicherheit","bürgschaft","vorauszahlungsbürgschaft","gewährleistungssicherheit","liquidität","einbehalt"]},
+  {id:"kb22c", title:"Cost-plus-fee – Marge trotz Kostenerstattung", typ:["vob","bgb","sonstige"],
+   text:"Cost-plus-fee reduziert nicht automatisch das Margenrisiko. Open Book, Preisprüfung, Festpreise für Eigenleistungen, feste GU-Zuschläge, Prüf- und Freigaberechte des AG sowie Eingriffe in Nachunternehmervergaben können Deckungsbeitrag und unternehmerische Dispositionsfreiheit erheblich belasten.",
+   tags:["cost-plus-fee","open-book","marge","gu-zuschlag","preisprüfung","eigenleistungen"]},
+  {id:"kb22d", title:"Lean Construction als Organisationspflicht", typ:["vob","bgb","sonstige"],
+   text:"Lean-Construction-Klauseln mit Taktplanung, Last Planner, täglichen Lean-Besprechungen, Ressourcenverstärkung, Schulungen und verbindlichen Lean-Prozessen verursachen erheblichen Organisations- und Steuerungsaufwand. Sie sollten als eigenständiges Termin-/Organisationsrisiko und Kalkulationsfaktor erkannt werden.",
+   tags:["lean","taktplanung","last-planner","ressourcen","schulung","termin","organisation"]},
+  {id:"kb22e", title:"Pandemie-/Corona-Klauseln als Besonderheit", typ:["vob","bgb","sonstige"],
+   text:"Umfangreiche Pandemie- oder Corona-Klauseln regeln häufig Bauzeitverlängerung, Mehrkosten, Lieferengpässe, Materialalternativen, Kündigung und Dokumentation. Sie sind ungewöhnliche Sonderregelungen und sollten als eigener Risiko- bzw. Entlastungsmechanismus erfasst werden.",
+   tags:["pandemie","corona","lieferengpass","materialalternative","bauzeit","mehrkosten","kündigung"]},
+  {id:"kb22f", title:"Planungsverantwortung des AG als Entlastung", typ:["vob","bgb","sonstige"],
+   text:"Stellt ein GU-/Bauvertrag klar, dass Planung und Ausführungsplanung beim Auftraggeber liegen und der Auftragnehmer nur Plausibilität prüft bzw. Werkstattplanung nur soweit erforderlich schuldet, reduziert dies das Haftungsrisiko des AN deutlich. Diese Entlastung sollte ausdrücklich erwähnt werden.",
+   tags:["planungsverantwortung","ausführungsplanung","plausibilität","werkstattplanung","haftung","entlastung"]},
 
   // G) Planungsvertrag / HOAI-spezifische Risikomuster
   {id:"kb23", title:"HOAI – Kostensteuerung & KG 400", typ:["planung"],
@@ -2149,6 +2166,36 @@ function applyPlanningAxisCalibration(items, axisScores){
   });
   return axisScores;
 }
+function applyConstructionAxisCalibration(items, axisScores){
+  if(currentContractType === 'planung') return axisScores;
+  items.forEach(it => {
+    const text = [it.kategorie, it.text, it.begruendung, it.massnahme, ...(it.referenzen||[])].filter(Boolean).join(' ').toLowerCase();
+    const weight = RISK_WEIGHT[it.risiko] ?? 1;
+    if(/(cost.?plus|cost plus|fee|open.?book|open book|preisprüfung|preispruefung|gu-zuschlag|eigenleistung|festpreis|gläserne taschen|glaeserne taschen|nachunternehmervergabe)/i.test(text)){
+      axisScores.Marge += Math.max(1, Math.min(weight, 2));
+    }
+    if(/(vorauszahlungsbürgschaft|vorauszahlungsbuergschaft|vertragserfüllungssicherheit|gewaehrleistungssicherheit|gewährleistungssicherheit|dokumentationseinbehalt|einbehalt)/i.test(text)){
+      axisScores.Liquidität += Math.max(1, Math.min(weight, 2));
+    }
+    if(/(planungsverantwortung.*auftraggeber|ausführungsplanung.*auftraggeber|ausfuehrungsplanung.*auftraggeber|plausibilit[aä]t|werkstattplanung nur soweit)/i.test(text)){
+      axisScores.Haftung = Math.max(0, axisScores.Haftung - Math.min(weight, 2));
+    }
+  });
+  return axisScores;
+}
+function getSummaryPriorityScore(it){
+  const text = [it.kategorie, it.text, it.begruendung, it.massnahme, ...(it.referenzen||[])].filter(Boolean).join(' ').toLowerCase();
+  let score = RISK_WEIGHT[it.risiko] ?? 1;
+  if(/(vorauszahlungsbürgschaft|vorauszahlungsbuergschaft|vertragserfüllungssicherheit|gewährleistungssicherheit|gewaehrleistungssicherheit|dokumentationseinbehalt)/i.test(text)) score += 3.2;
+  if(/(open.?book|open book|cost.?plus|cost plus|gläserne taschen|glaeserne taschen|kalkulation|nachunternehmer|vergabe|preisprüfung|preispruefung)/i.test(text)) score += 3;
+  if(/(ungekl[aä]rte vergütung|ungeklaerte vergütung|ungeklärter vergütung|schriftliche anordnung|§ 650b|650b|650c|leistungsverweiger|zurückbehaltungsrecht|zurueckbehaltungsrecht)/i.test(text)) score += 2.8;
+  if(/(schlusszahlung|dokumentationseinbehalt|liquiditätsbindung|liquiditaetsbindung|einbehalt)/i.test(text)) score += 2.3;
+  if(/(festpreis|eigenleistung|gu-zuschlag|marge|deckungsbeitrag|cost.?plus|cost plus|fee)/i.test(text)) score += 2.2;
+  if(/(lean|taktplanung|last planner|ressourcenverstärkung|ressourcenverstaerkung|schulung)/i.test(text)) score += 1.6;
+  if(/(pandemie|corona|lieferengpass|materialalternative)/i.test(text)) score += 1.4;
+  if(/(ausschluss §1|§1 abs|§2 abs|vob\/b)/i.test(text) && !/(vergütung|verguetung|nachtrag|marge|open.?book|cost.?plus|anordnung)/i.test(text)) score -= 1.2;
+  return score;
+}
 
 function renderAxisBars(axisScores){
   const max = Math.max(...AUSWIRKUNG_ACHSEN.map(a => axisScores[a]||0), 1);
@@ -2164,7 +2211,10 @@ function renderAxisBars(axisScores){
 }
 function buildManagementSummary(items){
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
-  const top5 = [...items].sort((a,b) => (order[a.risiko]??2) - (order[b.risiko]??2)).slice(0,5);
+  const top5 = [...items].sort((a,b) => {
+    const scoreDiff = getSummaryPriorityScore(b) - getSummaryPriorityScore(a);
+    return Math.abs(scoreDiff) > 0.01 ? scoreDiff : (order[a.risiko]??2) - (order[b.risiko]??2);
+  }).slice(0,5);
   const axisScores = {};
   AUSWIRKUNG_ACHSEN.forEach(a => axisScores[a] = 0);
   items.forEach(it => {
@@ -2173,6 +2223,7 @@ function buildManagementSummary(items){
     }
   });
   applyPlanningAxisCalibration(items, axisScores);
+  applyConstructionAxisCalibration(items, axisScores);
   return { top5, axisScores };
 }
 
