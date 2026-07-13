@@ -1868,6 +1868,10 @@ function looksLikePlanningContract(text){
 }
 function looksLikeConstructionContract(text){
   const hay = normalizeDedupeText(text).slice(0, 120000);
+  const strongTerms = [
+    'gu-vertrag', 'gu vertrag', 'generalunternehmervertrag', 'generalunternehmer',
+    'bauvertrag', 'vob b', 'vob/b', 'vob teil b', 'bgb bauvertrag'
+  ];
   const terms = [
     'vob b', 'vob teil b', 'bauvertrag', 'generalunternehmer', 'auftragnehmer',
     'bauleistung', 'bauleistungen', 'abnahme', 'maengelansprueche', 'mangelansprueche',
@@ -1875,8 +1879,9 @@ function looksLikeConstructionContract(text){
     'schlussrechnung', 'abschlagszahlung', 'sicherheitseinbehalt', 'buergschaft',
     'vertragserfuellungssicherheit', 'behinderungsanzeige', 'nachtrag', 'bgb bauvertrag'
   ];
+  const strongHits = strongTerms.filter(term => hay.includes(term)).length;
   const hits = terms.filter(term => hay.includes(term)).length;
-  return hits >= 4 || hay.includes('vob b') || hay.includes('vob teil b') || hay.includes('generalunternehmervertrag');
+  return hits >= 4 || strongHits >= 1;
 }
 function looksLikeVobContract(text){
   const hay = normalizeDedupeText(text).slice(0, 120000);
@@ -1899,9 +1904,14 @@ function looksLikeBgbConstructionContract(text){
   const negative = negativeTerms.some(term => hay.includes(term));
   return positive && !negative;
 }
+function getPlausibilitySource(){
+  return [currentFileName, extractedText].filter(Boolean).join(' ');
+}
 function updateUploadNotices(){
   const el = document.getElementById('uploadNotices');
   if(!el) return;
+  const plausibilitySource = getPlausibilitySource();
+  const hasPlausibilitySource = normalizeDedupeText(plausibilitySource).length > 0;
   const notices = [];
   if(isScanned && documentImages.length){
     notices.push(`
@@ -1909,31 +1919,31 @@ function updateUploadNotices(){
         <b>Hinweis zu gescannten PDFs:</b> Die vollständige Bilderkennung ist fachlich sinnvoll, kann aber länger dauern und höhere API-Kosten verursachen. Wenn möglich, sollte stattdessen ein durchsuchbares OCR-PDF, eine Word-Datei oder eine Textfassung hochgeladen werden. Reine Anlagen oder technische Nachweise können vorab entfernt werden, sofern sie keine Vertragsbedingungen, Fristen, Sicherheiten, Vertragsstrafen oder Abnahmeregelungen enthalten.
       </div>`);
   }
-  if(extractedText.trim() && currentContractType !== 'planung' && looksLikePlanningContract(extractedText)){
+  if(hasPlausibilitySource && currentContractType !== 'planung' && looksLikePlanningContract(plausibilitySource)){
     notices.push(`
       <div class="upload-notice warn">
         <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält mehrere Hinweise auf einen Planungs-/HOAI-Vertrag. Die aktuell gewählte Vertragsgrundlage ist jedoch nicht „Planungsvertrag / HOAI“. Bitte prüfen, ob die Vertragsgrundlage angepasst werden sollte, damit Marktvergleich, Fristenlogik und Risikogewichtung fachlich passen.
         <br><button type="button" onclick="switchToPlanningContract()">Auf Planungsvertrag / HOAI umstellen</button>
       </div>`);
   }
-  if(extractedText.trim() && currentContractType === 'planung' && looksLikeConstructionContract(extractedText)){
-    const suggestedButton = looksLikeBgbConstructionContract(extractedText)
+  if(hasPlausibilitySource && currentContractType === 'planung' && looksLikeConstructionContract(plausibilitySource)){
+    const suggestedButton = looksLikeBgbConstructionContract(plausibilitySource)
       ? '<br><button type="button" onclick="switchToBgbContract()">Auf Bauvertrag nach BGB umstellen</button>'
       : '<br><button type="button" onclick="switchToVobContract()">Auf Bauvertrag nach VOB/B umstellen</button>';
     notices.push(`
       <div class="upload-notice warn">
-        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält mehrere Hinweise auf einen Bauvertrag, etwa Bauleistung, Abnahme, VOB/B, Vertragsstrafe, Sicherheiten, Bauzeit oder Schlussrechnung. Die aktuell gewählte Vertragsgrundlage ist jedoch „Planungsvertrag / HOAI“. Bitte prüfen, ob „Bauvertrag nach VOB/B“ oder „Bauvertrag nach BGB“ passender ist.
+        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Vertrag enthält Hinweise auf einen Bauvertrag, etwa Dateiname, Bauleistung, Abnahme, VOB/B, Vertragsstrafe, Sicherheiten, Bauzeit oder Schlussrechnung. Die aktuell gewählte Vertragsgrundlage ist jedoch „Planungsvertrag / HOAI“. Bitte prüfen, ob „Bauvertrag nach VOB/B“ oder „Bauvertrag nach BGB“ passender ist.
         ${suggestedButton}
       </div>`);
   }
-  if(extractedText.trim() && currentContractType === 'vob' && looksLikeBgbConstructionContract(extractedText)){
+  if(hasPlausibilitySource && currentContractType === 'vob' && looksLikeBgbConstructionContract(plausibilitySource)){
     notices.push(`
       <div class="upload-notice warn">
         <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält Hinweise auf einen BGB-Bauvertrag oder reines BGB-Werkvertragsrecht, aber keine eindeutige VOB/B-Einbeziehung. Die aktuell gewählte Vertragsgrundlage ist „Bauvertrag nach VOB/B“. Bitte prüfen, ob „Bauvertrag nach BGB“ passender ist.
         <br><button type="button" onclick="switchToBgbContract()">Auf Bauvertrag nach BGB umstellen</button>
       </div>`);
   }
-  if(extractedText.trim() && currentContractType === 'bgb' && looksLikeVobContract(extractedText)){
+  if(hasPlausibilitySource && currentContractType === 'bgb' && looksLikeVobContract(plausibilitySource)){
     notices.push(`
       <div class="upload-notice warn">
         <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält deutliche Hinweise auf eine VOB/B-Einbeziehung. Die aktuell gewählte Vertragsgrundlage ist „Bauvertrag nach BGB“. Bitte prüfen, ob „Bauvertrag nach VOB/B“ passender ist.
