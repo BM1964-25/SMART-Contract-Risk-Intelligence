@@ -1736,6 +1736,18 @@ function looksLikePlanningContract(text){
   const hits = terms.filter(term => hay.includes(term)).length;
   return hits >= 3 || hay.includes('fachplanervertrag') || hay.includes('hoai');
 }
+function looksLikeConstructionContract(text){
+  const hay = normalizeDedupeText(text).slice(0, 120000);
+  const terms = [
+    'vob b', 'vob teil b', 'bauvertrag', 'generalunternehmer', 'auftragnehmer',
+    'bauleistung', 'bauleistungen', 'abnahme', 'maengelansprueche', 'mangelansprueche',
+    'gewaehrleistung', 'gewahrleistung', 'vertragsstrafe', 'bauzeit', 'fertigstellung',
+    'schlussrechnung', 'abschlagszahlung', 'sicherheitseinbehalt', 'buergschaft',
+    'vertragserfuellungssicherheit', 'behinderungsanzeige', 'nachtrag', 'bgb bauvertrag'
+  ];
+  const hits = terms.filter(term => hay.includes(term)).length;
+  return hits >= 4 || hay.includes('vob b') || hay.includes('vob teil b') || hay.includes('generalunternehmervertrag');
+}
 function updateUploadNotices(){
   const el = document.getElementById('uploadNotices');
   if(!el) return;
@@ -1753,11 +1765,23 @@ function updateUploadNotices(){
         <br><button type="button" onclick="switchToPlanningContract()">Auf Planungsvertrag / HOAI umstellen</button>
       </div>`);
   }
+  if(extractedText.trim() && currentContractType === 'planung' && looksLikeConstructionContract(extractedText)){
+    notices.push(`
+      <div class="upload-notice warn">
+        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält mehrere Hinweise auf einen Bauvertrag, etwa Bauleistung, Abnahme, VOB/B, Vertragsstrafe, Sicherheiten, Bauzeit oder Schlussrechnung. Die aktuell gewählte Vertragsgrundlage ist jedoch „Planungsvertrag / HOAI“. Bitte prüfen, ob „Bauvertrag nach VOB/B“ oder „Bauvertrag nach BGB“ passender ist.
+        <br><button type="button" onclick="switchToVobContract()">Auf Bauvertrag nach VOB/B umstellen</button>
+      </div>`);
+  }
   el.innerHTML = notices.join('');
 }
 window.switchToPlanningContract = function(){
   const sel = document.getElementById('roleSelect');
   if(sel) sel.value = 'planung';
+  applyRole();
+};
+window.switchToVobContract = function(){
+  const sel = document.getElementById('roleSelect');
+  if(sel) sel.value = 'vob';
   applyRole();
 };
 function resetWorkspace(){
