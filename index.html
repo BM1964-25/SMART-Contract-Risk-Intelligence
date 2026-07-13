@@ -962,8 +962,8 @@ const HELP_CONTENT = [
     <h3>Ergebnisse verstehen</h3>
     <p><b>Risikostufen:</b> kritisch (Ausnahme, 2–4 gravierendste Punkte im gesamten Vertrag) · hoch · mittel (Regelfall für die meisten Standardregelungen) · niedrig.</p>
     <p><b>Risikoprofil:</b> Die Management Summary zeigt zuerst die Anzahl der erkannten Risikopunkte nach Stufe. „20 Risiken" bedeutet nicht automatisch gut oder schlecht, sondern: Es wurden 20 bewertungsrelevante Punkte erkannt. Entscheidend ist die Mischung aus kritisch/hoch/mittel/niedrig.</p>
-    <p><b>Management-Ampel:</b> Die Ampel übersetzt Anzahl und Schwere der Risiken in eine schnelle Einordnung: gering, moderat, erhöht oder kritisch. Sie ist keine Rechtsbewertung, sondern eine Priorisierungshilfe für Management, Projektleitung und anschließende fachkundige Prüfung.</p>
-    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Der Wirkungsindex ist ein gewichteter Orientierungswert: höher bedeutet stärkeren wirtschaftlichen Druck, nicht automatisch einen „schlechten Vertrag". Die Balken darunter zeigen zusätzlich, welche Achse relativ am stärksten betroffen ist. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
+    <p><b>Management-Einschätzung:</b> Die Ampel übersetzt Anzahl und Schwere der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Sie ist keine Rechtsbewertung, sondern eine Priorisierungshilfe für Management, Projektleitung und anschließende fachkundige Prüfung.</p>
+    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Der Wirkungsindex ist ein gewichteter Orientierungswert: höher bedeutet stärkeren wirtschaftlichen Druck, nicht automatisch einen „schlechten Vertrag". Donut und Balkendiagramm nutzen dieselbe Datenbasis; der Donut zeigt den Überblick, die Balken zeigen die Rangfolge der wirtschaftlichen Schwerpunkte. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
     <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – je nach Vertragsgrundlage unterschiedlich. Bei Bauverträgen werden z. B. Gewährleistung, Vertragsstrafe, Zahlungsziel, Skonto, VOB/B-Einbeziehung, Vertragserfüllungssicherheit, Mängelsicherheit, kumulierte Einbehalte, Abnahme, Nachträge und Schlussdokumentation getrennt betrachtet; bei Planungsverträgen/HOAI stehen Honorar-/Leistungsumfang, stufenweise Beauftragung, Kostensteuerung, Nutzungsrechte, BIM-/Projektplattformpflichten, Freigaben und Zahlungs-/Prüffristen im Vordergrund.</p>
     <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge (z. B. Vertragsstrafe, Sicherheitseinbehalt) erkannt wurde, priorisiert nach Dringlichkeit.</p>
     <p><b>Fristen:</b> zweigeteilt – oben ein chronologischer Zeitstrahl für alle Fristen mit einem echten Kalenderdatum, darunter die vollständige, nach Kategorie gruppierte Liste aller Fristen (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine). Relative Fristen (z. B. „12 Werktage nach Erhalt der Ausführungsplanung") zeigen zusätzlich eine Dauer-Kennzeichnung und den hervorgehobenen Bezugspunkt.</p>
@@ -2832,7 +2832,7 @@ function renderOverallRiskCard(summary){
     .sort((a,b) => b.score - a.score)[0] || {axis:'-', score:0};
   return `
     <div class="risk-profile-card summary">
-      <div class="risk-profile-title">Management-Ampel</div>
+      <div class="risk-profile-title">Management-Einschätzung</div>
       <div class="summary-badge"><span class="summary-dot" style="background:${assessment.color}; box-shadow:0 0 0 3px ${assessment.color}22"></span>${escapeHtml(assessment.label)}</div>
       <div class="risk-profile-note">${escapeHtml(assessment.text)}</div>
       <div class="summary-meta">
@@ -2860,8 +2860,8 @@ function renderRiskProfileCharts(summary){
   }));
   return `
     <div class="risk-profile-grid">
-      ${renderDonutCard('Risikoverteilung', riskEntries, 'Risiken', 'Anzahl erkannter Risikopunkte. Kritisch und hoch sind besonders verhandlungsrelevant.')}
-      ${renderDonutCard('Wirtschaftliche Wirkung', axisEntries, 'Index', 'Gewichteter Wirkungsindex nach Risikoauswirkung. Höher bedeutet stärkeren wirtschaftlichen Druck.')}
+      ${renderDonutCard('Geschätzte Risikoverteilung', riskEntries, 'Risiken', 'Anzahl erkannter Risikopunkte nach Schweregrad. Entscheidend ist die Mischung der Stufen.')}
+      ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Index', 'Gewichteter Wirkungsindex nach Risikoauswirkung. Höher bedeutet stärkeren wirtschaftlichen Druck, nicht automatisch einen schlechteren Vertrag.')}
       ${renderOverallRiskCard(summary)}
     </div>`;
 }
@@ -2939,7 +2939,8 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
       <p class="hint" style="margin-top:18px;">Risikoprofil auf einen Blick</p>
       ${renderRiskProfileCharts(summary)}
       ${projectInsightHtml}
-      <p class="hint" style="margin-top:18px;">Geschätzte wirtschaftliche Risikowirkung</p>
+      <p class="hint" style="margin-top:18px;">Geschätzte wirtschaftliche Risikowirkung nach Dimension</p>
+      <p class="hint">Gleiche Datenbasis wie „Geschätzte wirtschaftliche Wirkung“, hier als Rangfolge dargestellt. Höhere Werte zeigen stärkere relative Betroffenheit.</p>
       <div class="axis-grid">
         ${renderAxisBars(summary.axisScores)}
       </div>
