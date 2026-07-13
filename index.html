@@ -354,6 +354,38 @@
   .top5-list{ margin:0; padding:0 0 0 22px; }
   .top5-list li{ margin-bottom:10px; font-size:13.5px; line-height:1.5; }
   .top5-list li .badge{ margin-right:8px; }
+  .risk-profile-grid{
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:18px 0 4px;
+  }
+  .risk-profile-card{
+    border:1px solid var(--border); border-radius:8px; padding:14px;
+    display:grid; grid-template-columns:112px 1fr; gap:14px; align-items:center; background:#fffdf8;
+  }
+  .donut-chart{
+    width:104px; height:104px; border-radius:50%; position:relative; flex-shrink:0;
+    background:conic-gradient(var(--border) 0 360deg);
+  }
+  .donut-chart::after{
+    content:''; position:absolute; inset:22px; border-radius:50%; background:var(--card);
+    box-shadow:inset 0 0 0 1px rgba(15,42,74,0.05);
+  }
+  .donut-total{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:1; color:var(--navy); font-weight:bold; font-size:20px; line-height:1;
+  }
+  .donut-total span{ margin-top:4px; color:var(--text-muted); font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:0.4px; }
+  .risk-profile-title{ font-weight:bold; color:var(--navy); font-size:13.5px; margin-bottom:8px; }
+  .risk-profile-legend{ display:flex; flex-direction:column; gap:5px; }
+  .legend-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-muted); }
+  .legend-name{ display:flex; align-items:center; gap:7px; min-width:0; }
+  .legend-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; background:var(--border); }
+  .legend-value{ color:var(--text); font-weight:bold; }
+  @media (max-width:780px){
+    .risk-profile-grid{ grid-template-columns:1fr; }
+    .risk-profile-card{ grid-template-columns:96px 1fr; }
+    .donut-chart{ width:90px; height:90px; }
+    .donut-chart::after{ inset:19px; }
+  }
   .axis-grid{ display:flex; flex-direction:column; gap:10px; }
   .axis-bar-row{ display:flex; align-items:center; gap:12px; font-size:13px; }
   .axis-label{ width:80px; flex-shrink:0; color:var(--text-muted); }
@@ -865,7 +897,7 @@ const HELP_CONTENT = [
     </ul>
     <p><b>Ergebnisbereich (erscheint nach der ersten Analyse):</b></p>
     <ul>
-      <li><b>Management Summary</b> – immer sichtbar, unabhängig vom gewählten Tab: kurze Einordnung von Bauvorhaben/Vertragsparteien, die fünf größten Risiken, bei HOAI-Verträgen zusätzlich Projektziele und Projektkomplexität, danach das Balkendiagramm der wirtschaftlichen Auswirkungsachsen.</li>
+      <li><b>Management Summary</b> – immer sichtbar, unabhängig vom gewählten Tab: kurze Einordnung von Bauvorhaben/Vertragsparteien, die fünf größten Risiken, ein kompaktes Risikoprofil mit Diagrammen, bei HOAI-Verträgen zusätzlich Projektziele und Projektkomplexität, danach das Balkendiagramm der wirtschaftlichen Auswirkungsachsen.</li>
       <li><b>Marktvergleich</b> – erscheint automatisch, wenn vergleichbare Werte im Vertrag gefunden wurden. Die Richtwerte passen sich an die Vertragsgrundlage an: Bauvertrag/VOB/B/BGB oder Planungsvertrag/HOAI.</li>
       <li><b>Drei Tabs</b> darunter: Risikobewertung (vollständige Tabelle), Terminkritische Klauseln (Fristen mit finanzieller/rechtlicher Folge, priorisiert), Fristen (Zeitstrahl für datierte Termine plus vollständige, nach Kategorie gruppierte Liste aller Fristen).</li>
     </ul>
@@ -916,7 +948,7 @@ const HELP_CONTENT = [
   { id:"ergebnisse", title:"Ergebnisse verstehen", body:`
     <h3>Ergebnisse verstehen</h3>
     <p><b>Risikostufen:</b> kritisch (Ausnahme, 2–4 gravierendste Punkte im gesamten Vertrag) · hoch · mittel (Regelfall für die meisten Standardregelungen) · niedrig.</p>
-    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Das Balkendiagramm in der Management Summary zeigt relativ zueinander, welche Achse bei diesem Vertrag am stärksten betroffen ist. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
+    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Die Management Summary zeigt dies zweifach: als kompaktes Donut-Diagramm für den schnellen Überblick und als Balkendiagramm für die relative Gewichtung je Achse. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
     <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – je nach Vertragsgrundlage unterschiedlich. Bei Bauverträgen werden z. B. Gewährleistung, Vertragsstrafe, Zahlungsziel, Skonto, VOB/B-Einbeziehung, Vertragserfüllungssicherheit, Mängelsicherheit, kumulierte Einbehalte, Abnahme, Nachträge und Schlussdokumentation getrennt betrachtet; bei Planungsverträgen/HOAI stehen Honorar-/Leistungsumfang, stufenweise Beauftragung, Kostensteuerung, Nutzungsrechte, BIM-/Projektplattformpflichten, Freigaben und Zahlungs-/Prüffristen im Vordergrund.</p>
     <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge (z. B. Vertragsstrafe, Sicherheitseinbehalt) erkannt wurde, priorisiert nach Dringlichkeit.</p>
     <p><b>Fristen:</b> zweigeteilt – oben ein chronologischer Zeitstrahl für alle Fristen mit einem echten Kalenderdatum, darunter die vollständige, nach Kategorie gruppierte Liste aller Fristen (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine). Relative Fristen (z. B. „12 Werktage nach Erhalt der Ausführungsplanung") zeigen zusätzlich eine Dauer-Kennzeichnung und den hervorgehobenen Bezugspunkt.</p>
@@ -2674,22 +2706,89 @@ function renderAxisBars(axisScores){
     </div>`;
   }).join('');
 }
+const RISK_DONUT_COLORS = {
+  kritisch:'#8b1e1e',
+  hoch:'#b0512a',
+  mittel:'#a5750f',
+  niedrig:'#2f7a4f'
+};
+const AXIS_DONUT_COLORS = {
+  Liquidität:'#0f2a4a',
+  Termin:'#c9a227',
+  Haftung:'#8b1e1e',
+  Nachtrag:'#2f7a4f',
+  Marge:'#7a4f9a'
+};
+function buildDonutGradient(entries){
+  const total = entries.reduce((sum, entry) => sum + Math.max(0, Number(entry.value) || 0), 0);
+  if(!total) return 'conic-gradient(var(--border) 0 360deg)';
+  let current = 0;
+  const stops = entries
+    .filter(entry => Number(entry.value) > 0)
+    .map(entry => {
+      const start = current;
+      current += (Number(entry.value) / total) * 360;
+      return `${entry.color} ${start.toFixed(1)}deg ${current.toFixed(1)}deg`;
+    });
+  return `conic-gradient(${stops.join(', ')})`;
+}
+function renderDonutCard(title, entries, totalLabel){
+  const total = entries.reduce((sum, entry) => sum + Math.max(0, Number(entry.value) || 0), 0);
+  const visibleEntries = entries.filter(entry => Number(entry.value) > 0);
+  return `
+    <div class="risk-profile-card">
+      <div class="donut-chart" style="background:${buildDonutGradient(entries)}">
+        <div class="donut-total">${Math.round(total)}<span>${escapeHtml(totalLabel)}</span></div>
+      </div>
+      <div>
+        <div class="risk-profile-title">${escapeHtml(title)}</div>
+        <div class="risk-profile-legend">
+          ${(visibleEntries.length ? visibleEntries : [{label:'Keine Werte', value:0, color:'var(--border)'}]).map(entry => `
+            <div class="legend-row">
+              <span class="legend-name"><span class="legend-dot" style="background:${entry.color}"></span>${escapeHtml(entry.label)}</span>
+              <span class="legend-value">${Math.round(Number(entry.value) || 0)}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+function renderRiskProfileCharts(summary){
+  const riskEntries = ['kritisch','hoch','mittel','niedrig'].map(key => ({
+    label:key.charAt(0).toUpperCase() + key.slice(1),
+    value:summary.riskCounts[key] || 0,
+    color:RISK_DONUT_COLORS[key]
+  }));
+  const axisEntries = AUSWIRKUNG_ACHSEN.map(key => ({
+    label:key,
+    value:summary.axisScores[key] || 0,
+    color:AXIS_DONUT_COLORS[key] || '#5c6570'
+  }));
+  return `
+    <div class="risk-profile-grid">
+      ${renderDonutCard('Risikoverteilung', riskEntries, 'Punkte')}
+      ${renderDonutCard('Wirtschaftliche Wirkung', axisEntries, 'Score')}
+    </div>`;
+}
 function buildManagementSummary(items){
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
   const top5 = [...items].sort((a,b) => {
     const scoreDiff = getSummaryPriorityScore(b) - getSummaryPriorityScore(a);
     return Math.abs(scoreDiff) > 0.01 ? scoreDiff : (order[a.risiko]??2) - (order[b.risiko]??2);
   }).slice(0,5);
+  const riskCounts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   const axisScores = {};
   AUSWIRKUNG_ACHSEN.forEach(a => axisScores[a] = 0);
   items.forEach(it => {
+    if(riskCounts[it.risiko] !== undefined){
+      riskCounts[it.risiko]++;
+    }
     if(axisScores[it.auswirkung] !== undefined){
       axisScores[it.auswirkung] += (RISK_WEIGHT[it.risiko] ?? 1);
     }
   });
   applyPlanningAxisCalibration(items, axisScores);
   applyConstructionAxisCalibration(items, axisScores);
-  return { top5, axisScores };
+  return { top5, riskCounts, axisScores };
 }
 
 function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext, scanPreviewImages = []){
@@ -2741,6 +2840,8 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
       <ol class="top5-list">
         ${summary.top5.map(it => `<li><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span> <span>${escapeHtml(it.text)}</span></li>`).join('')}
       </ol>
+      <p class="hint" style="margin-top:18px;">Risikoprofil auf einen Blick</p>
+      ${renderRiskProfileCharts(summary)}
       ${projectInsightHtml}
       <p class="hint" style="margin-top:18px;">Geschätzte wirtschaftliche Risikowirkung</p>
       <div class="axis-grid">
