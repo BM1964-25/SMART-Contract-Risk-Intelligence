@@ -289,6 +289,13 @@
     font-size:12.8px; color:var(--text-muted); margin-top:14px; min-height:18px;
     display:flex; align-items:center; gap:7px; padding-top:10px; border-top:1px solid var(--border);
   }
+  .card-title-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+  .card-title-row h2{ margin-bottom:0; }
+  .reset-workspace-btn{
+    border:1px solid var(--border); background:#fff; color:var(--text-muted); border-radius:5px;
+    padding:6px 8px; font-size:11.5px; font-weight:bold; cursor:pointer; white-space:nowrap;
+  }
+  .reset-workspace-btn:hover{ color:var(--navy); border-color:var(--gold); background:var(--gold-light); }
   .error-box{
     background:var(--red-bg); color:var(--red); border-radius:6px; padding:10px 12px;
     font-size:12.5px; margin-top:10px;
@@ -551,7 +558,10 @@
       </div>
 
       <div class="card">
-        <h2><span class="card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span>Dokument</h2>
+        <div class="card-title-row">
+          <h2><span class="card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span>Dokument</h2>
+          <button class="reset-workspace-btn" id="newAnalysisBtn" type="button">Arbeitsbereich zurücksetzen</button>
+        </div>
         <p class="hint">PDF, Word (.docx) oder Text-Datei hochladen</p>
         <label style="font-size:12.5px; color:var(--text-muted); display:block; margin-bottom:4px;">Vertragsgrundlage</label>
         <select id="roleSelect" style="width:100%; padding:13px 12px; border:1px solid var(--border); border-radius:5px; font-family:inherit; font-size:13.5px; margin-bottom:8px;">
@@ -587,6 +597,7 @@
           <div class="pipe-line"></div>
           <div class="pipe-step" data-step="4"><div class="dot">4</div><div><div class="pipe-step-title">Maßnahmenvorschläge</div><div class="pipe-step-desc">Für kritische/hohe Punkte werden konkrete Empfehlungen erstellt.</div></div></div>
         </div>
+        <button class="btn secondary small" id="abortAnalysisBtn" type="button" style="width:100%; margin-top:12px; display:none;">Analyse abbrechen</button>
         <div class="status-line" id="statusLine"></div>
       </div>
 
@@ -817,8 +828,8 @@ const HELP_CONTENT = [
     <p><b>Obere Zeile – vier Karten zur Einrichtung und Steuerung:</b></p>
     <ul>
       <li><b>API-Zugang</b> – API-Key eintragen (mit Ein-/Ausblenden- und Lösch-Funktion), Modell wählen (Sonnet 5 / Opus 4.8 / Haiku 4.5), Verbindung testen. Ein farbiger Status zeigt den aktuellen Zustand: grau = kein Key, navy = Key gespeichert, grün = Verbindung erfolgreich getestet.</li>
-      <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) wählen, Datei per Klick oder Drag & Drop hochladen, Analyse starten. Nach dem Upload zeigt die App Zeichenzahl und geschätzte Seitenzahl an.</li>
-      <li><b>Analyse-Pipeline</b> – zeigt den Live-Fortschritt der vier Analysestufen mit kurzer Erklärung, was jede Stufe tut.</li>
+      <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) wählen, Datei per Klick oder Drag & Drop hochladen, Analyse starten oder den Arbeitsbereich über „Arbeitsbereich zurücksetzen" leeren. Nach dem Upload zeigt die App Zeichenzahl und geschätzte Seitenzahl an.</li>
+      <li><b>Analyse-Pipeline</b> – zeigt den Live-Fortschritt der vier Analysestufen mit kurzer Erklärung, was jede Stufe tut. Während einer laufenden Prüfung kann die Analyse hier abgebrochen werden.</li>
       <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, den letzten fünf Analysen zum direkten Öffnen, sowie Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei.</li>
     </ul>
     <p><b>Ergebnisbereich (erscheint nach der ersten Analyse):</b></p>
@@ -851,7 +862,7 @@ const HELP_CONTENT = [
     <h3>Typischer Workflow</h3>
     <ol>
       <li>Vertragsgrundlage und Rolle festlegen – das steuert, welche Wissensbasis-Einträge einbezogen werden und aus welcher Rechtsgrundlage heraus bewertet wird.</li>
-      <li>Vertrag hochladen. Bei sehr langen Dokumenten zeigt die App eine Seitenschätzung und ggf. einen Hinweis, falls das Analyse-Limit überschritten wird.</li>
+      <li>Vertrag hochladen. Bei sehr langen Dokumenten zeigt die App eine Seitenschätzung und ggf. einen Hinweis, falls das Analyse-Limit überschritten wird. Beim Laden einer neuen Datei wird der aktuelle Arbeitsbereich für diese neue Prüfung vorbereitet; gespeicherte Verläufe bleiben erhalten.</li>
       <li>Analyse starten – die vier Stufen (Klausel-Extraktion, Fristen-Extraktion, Risiko-Klassifikation, Maßnahmenvorschläge) laufen automatisch nacheinander.</li>
       <li>Management Summary zuerst lesen für den Überblick, dann bei Bedarf den Marktvergleich prüfen, anschließend gezielt in die drei Tabs wechseln.</li>
       <li>Bei kritischen/hohen Punkten die vorgeschlagenen Maßnahmen als Verhandlungsgrundlage nutzen – sie sind bewusst als Verhandlungsrahmen formuliert, nicht als starre Zielvorgabe.</li>
@@ -944,6 +955,8 @@ let currentContractType = "vob";
 let currentPerspective = "auftragnehmer";
 let currentRoleLabel = "Auftragnehmer";
 let latestReportSnapshot = null;
+let analysisAbortController = null;
+let isAnalysisRunning = false;
 
 const ROLE_MAP = {
   vob:      {contractType:"vob", perspective:"auftragnehmer", roleLabel:"Auftragnehmer (Bauunternehmen)",
@@ -1004,12 +1017,12 @@ function getRequiredAreas(contractType){
   if(contractType === 'planung'){
     return 'Folgende Bereiche MÜSSEN bei Planungsverträgen/HOAI aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten klassischer Bauvertragsklauseln: Leistungsphasen und stufenweise Beauftragung, Honorar/Pauschalhonorar und Abgrenzung Grundleistungen/Besondere Leistungen, Kostensteuerungs- und Hinweispflichten (insbesondere KG 400), Projektziele wie DGNB/LEED/Energieeffizienz/Wirtschaftlichkeit/Freihamer Gebäudestandard/maximale Mietflächen/BIM/Schnittstellenkoordination als eigener Risikoblock, BIM-/IFC-/Projektplattformpflichten, Nutzungsrechte an Plänen/digitalen Unterlagen/BIM-Modellen, Freigabe- und Prüffristen je Leistungsphase oder Zwischenergebnis, Koordinationspflichten, Kündigungsrechte, Haftungsregelungen, Zahlungs- und Rechnungsprüfungsfristen, Sicherungsrechte/Sicherungshypothek und deren Ausschluss sowie Nachtrags-/Vergütungsanpassungslogik. Bewerte außerdem die Projektkomplexität mit: Projektgröße, Anzahl der Beteiligten, Nachhaltigkeitsanforderungen, Genehmigungsaufwand, Schnittstellenkoordination und digitale/BIM-Anforderungen. Wende VOB/B-Marktwerte oder GU-Vertragsmuster nur an, wenn der Vertrag sie ausdrücklich enthält.';
   }
-  return 'Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel), Sicherheiten (Vertragserfüllungssicherheit UND Gewährleistungs-/Mängelsicherheit als ZWEI getrennte Punkte mit jeweils eigenem Prozentsatz, falls beide vorhanden – nicht zusammenfassen), kumulierte Sicherheiten inklusive Vorauszahlungsbürgschaft und Dokumentationseinbehalten, Versicherungen (Betriebshaftpflichtversicherung mit Mindestdeckungssumme, Bauleistungsversicherung und wer sie trägt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen oder ungeklärter Vergütung nach § 650b/650c BGB die Ausführung verlangt wird), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten, Open-Book-/Cost-plus-fee-Mechanismen mit AG-Einsicht in Kalkulationen, Angebote, Nachunternehmer, Nachträge, Rechnungen und Vergaben, Lean-Construction-Pflichten (Taktplanung, Last Planner, tägliche Lean-Besprechungen, Ressourcenverstärkung, Schulungen), Pandemie-/Corona-Klauseln mit Bauzeit-, Mehrkosten-, Lieferengpass-, Materialalternativen-, Kündigungs- und Dokumentationsfolgen, Festpreis-/Gleitklausel-Regelung (insbesondere wenn Eigenleistungen als Festpreis oder ohne Gleitklausel geregelt sind – das ist ein Margenrisiko), risikomindernde Regelungen zur Planungsverantwortung des AG sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.';
+  return 'Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: Vertragsstrafe (mit Prozentsätzen/Deckel, z.B. 0,1% pro Werktag und 3%-Deckel, Beschleunigungspflicht sowie Schadensersatz neben der Vertragsstrafe), Sicherheiten (Vertragserfüllungssicherheit UND Gewährleistungs-/Mängelsicherheit als ZWEI getrennte Punkte mit jeweils eigenem Prozentsatz, falls beide vorhanden – nicht zusammenfassen), Zahlungsbürgschaft des Auftraggebers, kumulierte Sicherheiten inklusive Vorauszahlungsbürgschaft und Dokumentationseinbehalten, Versicherungen (Betriebshaftpflichtversicherung mit Mindestdeckungssumme, Bauleistungsversicherung und wer sie trägt), Abnahmevoraussetzungen (insbesondere Ausschluss der fiktiven Abnahme sowie Zusammenspiel mit Schlussdokumentation, Funktionsprüfungen, Einweisungen und Bescheinigungen), Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen oder ungeklärter Vergütung nach § 650b/650c BGB die Ausführung verlangt wird), Nachtragsmanagement-Anforderungen (welche Angaben ein Nachtragsangebot enthalten muss), Dokumentations-/Berichtspflichten und Dokumentationseinbehalte mit konkreten Beträgen (z.B. 100.000€), Open-Book-/Cost-plus-fee-Mechanismen mit AG-Einsicht in Kalkulationen, Angebote, Nachunternehmer, Nachträge, Rechnungen und Vergaben, Lean-Construction-Pflichten (Taktplanung, Last Planner, tägliche Lean-Besprechungen, Ressourcenverstärkung, Schulungen), Pandemie-/Corona-Klauseln mit Bauzeit-, Mehrkosten-, Lieferengpass-, Materialalternativen-, Kündigungs- und Dokumentationsfolgen, Festpreis-/Gleitklausel-Regelung (insbesondere wenn Eigenleistungen als Festpreis oder ohne Gleitklausel geregelt sind – das ist ein Margenrisiko), risikomindernde Regelungen zur Planungsverantwortung des AG sowie das Zusammenspiel von Vollständigkeitsklausel mit funktionaler Leistungsbeschreibung.';
 }
 function getClassificationCalibration(contractType){
   if(contractType !== 'planung'){
-    return 'Cost+Fee-/Open-Book-Kalibrierung: Bei Cost-plus-fee-, Open-Book- oder GU-Verträgen sind weitreichende Einsichts-, Prüfungs- und Eingriffsrechte des Auftraggebers in Kalkulation, Nachunternehmer, Nachträge, Rechnungen und Vergaben als eigenständiges hohes bis kritisches Margen- und Dispositionsrisiko zu bewerten, nicht nur als Transparenzpflicht. Kumulierte Sicherheiten sind zusammen wirtschaftlich zu würdigen: 10% Vertragserfüllungssicherheit plus 5% Gewährleistungssicherheit plus Vorauszahlungsbürgschaft oder Dokumentationseinbehalte können eine außergewöhnliche Liquiditätsbindung darstellen. Eine Pflicht zur Ausführung nach AG-Anordnung bei noch ungeklärter Vergütung ist präzise als Nachtrags-/Vorleistungsrisiko mit verkürzten Entscheidungsfristen zu bewerten, nicht pauschal als vollständiger Ausschluss aller Leistungsverweigerungsrechte. Cost-plus-fee bedeutet nicht automatisch geringe Marge: Festpreise für Eigenleistungen, GU-Zuschlag, Preisprüfung, Open Book und AG-Eingriffe erhöhen das Margenrisiko. Lean-Construction-Pflichten und Pandemie-/Corona-Klauseln sind als besondere organisatorische bzw. Bauzeit-/Mehrkostenrisiken aufzunehmen. Wenn der Vertrag ausdrücklich regelt, dass Planung und Ausführungsplanung beim AG liegen und der AN nur Plausibilität prüft bzw. Werkstattplanung nur soweit erforderlich schuldet, ist dies als haftungsmindernder Faktor zu erwähnen.';
-  }
+  return 'Cost+Fee-/Open-Book-/GU-Kalibrierung: Bei Cost-plus-fee-, Open-Book- oder GU-Verträgen sind weitreichende Einsichts-, Prüfungs- und Eingriffsrechte des Auftraggebers in Kalkulation, Nachunternehmer, Nachträge, Rechnungen und Vergaben als eigenständiges hohes bis kritisches Margen- und Dispositionsrisiko zu bewerten, nicht nur als Transparenzpflicht. Kumulierte Sicherheiten sind zusammen wirtschaftlich zu würdigen: 10% Vertragserfüllungssicherheit plus 5% Gewährleistungssicherheit plus Vorauszahlungsbürgschaft, Zahlungsbürgschaft des AG oder Dokumentationseinbehalte müssen vollständig dargestellt werden. Eine Vertragsstrafe mit 0,1% je Werktag, 3%-Deckel, zusätzlicher Beschleunigungspflicht und Schadensersatz neben der Vertragsstrafe ist ein Top-Management-Risiko mit Termin- und Margenwirkung. Dokumentationseinbehalte mit konkretem Betrag (z.B. 100.000€) und Abnahmevoraussetzungen mit Schlussdokumentation, Funktionsprüfungen, Einweisungen und Bescheinigungen sind als Liquiditäts- und Terminrisiko zu behandeln. Eine Pflicht zur Ausführung nach AG-Anordnung bei noch ungeklärter Vergütung ist präzise als Nachtrags-/Vorleistungsrisiko mit verkürzten Entscheidungsfristen zu bewerten, nicht pauschal als vollständiger Ausschluss aller Leistungsverweigerungsrechte. Cost-plus-fee bedeutet nicht automatisch geringe Marge: Festpreise für Eigenleistungen, GU-Zuschlag, Preisprüfung, Open Book und AG-Eingriffe erhöhen das Margenrisiko. Lean-Construction-Pflichten und Pandemie-/Corona-Klauseln sind als besondere organisatorische bzw. Bauzeit-/Mehrkostenrisiken aufzunehmen. Wenn der Vertrag ausdrücklich regelt, dass Planung und Ausführungsplanung beim AG liegen und der AN nur Plausibilität prüft bzw. Werkstattplanung nur soweit erforderlich schuldet, ist dies als haftungsmindernder Faktor zu erwähnen.';
+}
   return 'Planungsvertrag-/HOAI-Kalibrierung: Kostensteuerungspflichten mit Schutzmechanismen (Haftung nur bei Vertretenmüssen, allgemeine Marktpreissteigerungen ausgeschlossen, Beweislast beim Auftraggeber) sind in der Regel "hoch", aber nicht automatisch "kritisch". BIM-/Modell- und Projektplattformpflichten sind zunehmend marktüblich und oft "mittel" bis "hoch"; "kritisch" nur bei unbeschränkter Modellhaftung, Haftung für Fremdmodelle, sehr weiten Weitergaberechten oder unvergütetem erheblichem Mehraufwand. Bei der wirtschaftlichen Auswirkung von Planungsverträgen sind häufig "Marge" und "Haftung" stärker betroffen als "Liquidität", besonders bei Pauschalhonorar, Zusatzaufwand, erweiterten Projektzielen, Planungsaufwand, Leistungsumfang und Kostensteuerung. Setze "Liquidität" bei Planerverträgen nur dann hoch an, wenn außergewöhnliche Sicherheiten, Einbehalte, lange Zahlungsaufschübe, konkrete Vorfinanzierungspflichten oder der Ausschluss gesetzlicher Sicherungsrechte/Sicherungshypothek erkennbar sind; sonst sind "Marge", "Nachtrag" oder "Haftung" meist treffender. Der Ausschluss der Sicherungshypothek bzw. vergleichbarer Sicherungsrechte ist als eigenständiges Durchsetzungs- und Zahlungsausfallrisiko zu behandeln, nicht nur als Formalie.';
 }
 
@@ -1102,6 +1115,9 @@ const DEFAULT_KB = [
   {id:"kb12", title:"Sicherheitseinbehalt & Bürgschaft", typ:["vob","bgb"],
    text:"Bauverträge verlangen häufig zwei getrennte Sicherheiten: eine Vertragserfüllungssicherheit (üblich 5-10% der Auftragssumme, sichert die vertragsgemäße Ausführung bis Abnahme) und eine separate Gewährleistungs-/Mängelsicherheit (üblich ca. 5% der Abrechnungssumme, für die Dauer der Verjährungsfrist nach Abnahme). Beide sollten als eigenständige, wirtschaftlich bedeutsame Risikopunkte erfasst werden, nicht als ein einzelner Punkt. Bürgschaften müssen unbedingt, unbefristet und unter Verzicht auf die Einrede der Vorausklage gestellt werden, um werthaltig zu sein. Häufig hat der AN ein Wahlrecht zwischen Bürgschaft und Bareinbehalt/Hinterlegung – das bindet bei Einbehalt zusätzlich Liquidität.",
    tags:["sicherheit","bürgschaft","einbehalt","vertragserfüllung","gewährleistungssicherheit"]},
+  {id:"kb12a", title:"Zahlungsbürgschaft des Auftraggebers", typ:["vob","bgb"],
+   text:"Verlangt ein GU-/VOB-Vertrag eine Zahlungsbürgschaft des Auftraggebers (z.B. 10%), ist dies als gesonderter Sicherheitenmechanismus zu erfassen. Sie mindert zwar Zahlungsausfallrisiken des AN, gehört aber im Sicherheitenblock vollständig neben Vertragserfüllungs- und Gewährleistungssicherheit dargestellt, damit die wirtschaftliche Sicherheitenstruktur korrekt verstanden wird.",
+   tags:["zahlungsbürgschaft","zahlungsbuergschaft","auftraggeber","sicherheit","bürgschaft","liquidität"]},
   {id:"kb12b", title:"Betriebshaftpflichtversicherung", typ:["vob","bgb"],
    text:"Bauverträge verpflichten den AN praktisch immer zum Abschluss und Nachweis einer Betriebshaftpflichtversicherung mit Mindestdeckungssummen (häufig 3-15 Mio. € je nach Projektgröße), meist mit Nachweispflicht vor Baubeginn und Fortbestehenspflicht bis zur Abnahme. Fehlt der Nachweis oder erlischt die Versicherung während der Bauzeit, drohen Kündigungsrechte des AG und im Schadensfall persönliche Haftung ohne Versicherungsdeckung – ein wirtschaftlich bedeutsamer, oft nur am Rande wahrgenommener Punkt.",
    tags:["versicherung","haftpflicht","deckungssumme","nachweispflicht"]},
@@ -1133,6 +1149,15 @@ const DEFAULT_KB = [
   {id:"kb19", title:"Sicherheitseinbehalt bei fehlender Dokumentation", typ:["vob","bgb"],
    text:"Manche Verträge erlauben dem AG einen eigenständigen, oft hohen Sicherheitseinbehalt speziell für den Fall, dass Dokumentationsunterlagen (Revisionspläne, Wartungsunterlagen, Bestandspläne) nicht fristgerecht geliefert werden – unabhängig von den sonstigen Sicherheiten nach § 17 VOB/B. Das ist ein zusätzlicher, oft übersehener Liquiditätshebel des AG, der bei größeren Bausummen erhebliche Beträge erreichen kann.",
    tags:["sicherheit","dokumentation","einbehalt"]},
+  {id:"kb19b", title:"Dokumentationseinbehalt mit konkretem Betrag", typ:["vob","bgb"],
+   text:"Ein Dokumentationseinbehalt mit konkretem Betrag (z.B. 100.000€ bis zur vollständigen Schlussdokumentation) ist ein eigenständiges Liquiditäts- und Abnahmerisiko. Er sollte nicht in allgemeinen Dokumentationspflichten untergehen, sondern separat mit Betrag, Fälligkeit und Abhängigkeit von Revisionsunterlagen/Einweisungen/Bescheinigungen dargestellt werden.",
+   tags:["dokumentationseinbehalt","dokumentation","schlussdokumentation","einbehalt","liquidität","abnahme"]},
+  {id:"kb19c", title:"Vertragsstrafe mit Beschleunigung und Schadensersatz", typ:["vob","bgb"],
+   text:"Vertragsstrafen mit Tagessatz und Deckel (z.B. 0,1% je Werktag, max. 3%) sind besonders relevant, wenn zusätzlich Beschleunigungspflichten und Schadensersatzansprüche neben der Vertragsstrafe vorbehalten bleiben. Dann besteht ein kumulatives Termin- und Margenrisiko, das regelmäßig in die Management Summary gehört.",
+   tags:["vertragsstrafe","beschleunigung","schadensersatz","werktag","termin","marge"]},
+  {id:"kb19d", title:"Abnahmevoraussetzungen mit Schlussdokumentation", typ:["vob","bgb"],
+   text:"Umfangreiche Abnahmevoraussetzungen wie Schlussdokumentation, Revisionsunterlagen, Funktionsprüfungen, Einweisungen, Bescheinigungen und Nachweise verschieben Abnahme, Gefahrübergang, Schlusszahlung und Verjährungsbeginn. In Kombination mit Dokumentationseinbehalten entsteht ein erhebliches Liquiditäts- und Terminrisiko.",
+   tags:["abnahme","schlussdokumentation","funktionsprüfung","einweisung","bescheinigung","liquidität","termin"]},
   {id:"kb20", title:"Open-Book-Vergabeprozess mit AG-Eingriffsrechten", typ:["vob","bgb","sonstige"],
    text:"Bei Open-Book-/Cost-plus-fee-Regelungen in GU-Verträgen erhält der AG häufig weitreichende Mitwirkungs- und Eingriffsrechte in die Nachunternehmervergabe des AN (Einsicht in Angebote und Kalkulation, Vorschlagsrecht für Bieter, Widerspruchsrecht gegen die Vergabeentscheidung, Prinzip der „gläsernen Taschen“). Das geht über eine reine Kostentransparenzpflicht hinaus und beschränkt die unternehmerische Dispositionsfreiheit des AN erheblich – je nach Ausgestaltung eher hohes bis kritisches Risiko, nicht nur eine Transparenzpflicht.",
    tags:["open-book","nachunternehmer","vergabe","transparenz","cost-plus-fee"]},
@@ -1659,6 +1684,48 @@ async function exportEncryptedHtmlReport(){
 }
 document.getElementById('htmlExportBtn').onclick = exportEncryptedHtmlReport;
 
+function emptyResultsHtml(){
+  return `
+    <div class="card">
+      <div class="empty">
+        <div class="icon">&#128203;</div>
+        <div>Noch keine Analyse durchgeführt.<br>Wähle oben eine Vertragsgrundlage, lade ein Dokument hoch und starte die Prüfung.</div>
+      </div>
+    </div>`;
+}
+function setAnalysisRunning(running){
+  isAnalysisRunning = running;
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const abortBtn = document.getElementById('abortAnalysisBtn');
+  const newBtn = document.getElementById('newAnalysisBtn');
+  if(analyzeBtn) analyzeBtn.disabled = running || (!extractedText.trim() && !documentImages.length);
+  if(abortBtn) abortBtn.style.display = running ? 'block' : 'none';
+  if(newBtn) newBtn.disabled = running;
+}
+function resetWorkspace(){
+  if(isAnalysisRunning && analysisAbortController) analysisAbortController.abort();
+  analysisAbortController = null;
+  isAnalysisRunning = false;
+  currentFileName = "";
+  extractedText = "";
+  documentImages = [];
+  isScanned = false;
+  latestReportSnapshot = null;
+  fileInput.value = "";
+  document.getElementById('fileInfo').innerHTML = "";
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('abortAnalysisBtn').style.display = 'none';
+  document.getElementById('topActions').style.display = 'none';
+  document.getElementById('resultsArea').innerHTML = emptyResultsHtml();
+  setError('');
+  setStatus('');
+  resetPipeline();
+}
+document.getElementById('newAnalysisBtn').onclick = resetWorkspace;
+document.getElementById('abortAnalysisBtn').onclick = () => {
+  if(analysisAbortController) analysisAbortController.abort();
+};
+
 // ---------- file handling ----------
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
@@ -1672,9 +1739,14 @@ dropzone.ondrop = (e) => {
 fileInput.onchange = (e) => { if(e.target.files.length) handleFile(e.target.files[0]); };
 
 async function handleFile(file){
+  if(isAnalysisRunning && analysisAbortController) analysisAbortController.abort();
   currentFileName = file.name;
   setError('');
   setStatus('Lese Dokument …', 'loading');
+  resetPipeline();
+  latestReportSnapshot = null;
+  document.getElementById('topActions').style.display = 'none';
+  document.getElementById('resultsArea').innerHTML = emptyResultsHtml();
   isScanned = false;
   documentImages = [];
   const ext = file.name.split('.').pop().toLowerCase();
@@ -1782,7 +1854,7 @@ function retrieveContextForItem(item, topN){
 }
 
 // ---------- Claude API ----------
-async function callClaude(content, maxTokens){
+async function callClaude(content, maxTokens, signal){
   if(!apiKey){
     throw new Error('Kein API-Key hinterlegt. Bitte oben im Feld "API-Zugang" deinen Anthropic-API-Key eintragen und speichern.');
   }
@@ -1800,9 +1872,11 @@ async function callClaude(content, maxTokens){
         model: MODEL,
         max_tokens: maxTokens || 16000,
         messages: [{role:"user", content: content}]
-      })
+      }),
+      signal
     });
   }catch(networkErr){
+    if(networkErr.name === 'AbortError') throw networkErr;
     throw new Error('Netzwerkfehler beim API-Aufruf (' + (networkErr.name||'Error') + '): ' + networkErr.message);
   }
   if(!response.ok){
@@ -1884,13 +1958,14 @@ function setError(msg){
 }
 
 // ---------- analysis ----------
-async function callClaudeWithRetry(content, statusPrefix, maxTokens){
+async function callClaudeWithRetry(content, statusPrefix, maxTokens, signal){
   const maxRetries = 2;
   let lastErr;
   for(let attempt=0; attempt<=maxRetries; attempt++){
     try{
-      return await callClaude(content, maxTokens);
+      return await callClaude(content, maxTokens, signal);
     }catch(err){
+      if(err.name === 'AbortError') throw err;
       lastErr = err;
       if(attempt < maxRetries){
         console.warn('Versuch ' + (attempt+1) + ' fehlgeschlagen, wiederhole …', err.message);
@@ -1921,8 +1996,9 @@ document.getElementById('testBtn').onclick = async () => {
 };
 
 async function runAnalysis(){
-  const btn = document.getElementById('analyzeBtn');
-  btn.disabled = true;
+  analysisAbortController = new AbortController();
+  const analysisSignal = analysisAbortController.signal;
+  setAnalysisRunning(true);
   setError('');
   resetPipeline();
   const docExcerpt = extractedText.slice(0, DOC_CHAR_LIMIT);
@@ -1958,7 +2034,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     } else {
       extractContent = extractInstruction + "\n\nVertragstext:\n" + docExcerpt;
     }
-    const stage1Raw = await callClaudeWithRetry(extractContent, 'Extrahiere relevante Klauseln …');
+    const stage1Raw = await callClaudeWithRetry(extractContent, 'Extrahiere relevante Klauseln …', undefined, analysisSignal);
     const stage1Parsed = parseJson(stage1Raw);
     let items = Array.isArray(stage1Parsed) ? stage1Parsed : (stage1Parsed.items || []);
     let projektKontext = Array.isArray(stage1Parsed) ? '' : (stage1Parsed.projektkontext || '');
@@ -1970,10 +2046,12 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     setPipelineStep(2,'active');
     setStatus('Extrahiere alle Fristen und Termine …', 'loading');
     const fristenInstruction = `Durchsuche den gesamten Vertragstext systematisch nach JEDER konkreten Frist, jedem Termin und jeder Zeitangabe – unabhängig davon, ob sie im Fließtext, in einer Aufzählung oder in Tabellen-/Listenform steht (z.B. auch reine Datums-Stichpunkte wie "Beginn Stahlbetonarbeiten: 16.10.2023" oder "Fertigstellung: 20.05.2025"). Erfasse ALLE auffindbaren Fristen, nicht nur die wichtigsten – hier hat Vollständigkeit Vorrang vor Kürze.
+Bei GU-/VOB/B-Verträgen besonders sorgfältig suchen nach: Gesamtfertigstellung, Baubeginn, Zwischenterminen, Vertragsstrafenfristen und strafbewehrten Terminen, Dokumentations-/Schlussdokumentationsfristen, Abnahmevoraussetzungen und Abnahmefristen, Fertigstellungsanzeige (z.B. 7 Wochen vor Fertigstellung), Nachtragsfristen (z.B. Nachtragsangebot 2 Wochen, AG-Stellungnahme 2 Wochen), Prüf-/Reaktionsfristen, Zahlungs-/Schlusszahlungsfristen (z.B. Schlussrechnung 6 Wochen nach Fertigstellung), Kündigungsfristen und Verjährungsfristen.
+Wichtig: Verknüpfe Folgen auch dann, wenn sie in einem anderen Paragrafen stehen. Typisches Muster: § 10 enthält Gesamtfertigstellung, § 11 Vertragsstrafe/Schadensersatz/Beschleunigung, § 12 Schlussrechnung/Zahlung, § 15 Abnahme, § 16 Dokumentation. Ein Termin wie "Fertigstellung 31.12.2019" ist terminkritisch, wenn der Vertrag an anderer Stelle Vertragsstrafe, Schadensersatz oder Beschleunigung bei Terminüberschreitung regelt. Eine Dokumentationsfrist ist terminkritisch, wenn an anderer Stelle ein Dokumentationseinbehalt (z.B. 100.000€) geregelt ist. Eine Fertigstellungsanzeige 7 Wochen vor Fertigstellung ist terminkritisch, wenn sie Abnahmeverfahren, Schlusszahlung, Gewährleistung oder Verjährungsbeginn beeinflusst.
 Ordne jede Frist einer Kategorie zu: "Vertragsfrist" (Baubeginn, Zwischentermine, Gesamtfertigstellung, Bauzeit), "Pruefungsfrist" (Prüfpflichten mit Frist, z.B. Planprüfung, Bemusterung, Nachtragsprüfung), "Zahlungsfrist" (Abschlagsrechnung, Schlussrechnung, Schlusszahlung), "Reaktionsfrist" (Widerspruch, Anzeige, Stellungnahme, Benennung von Dritten), "Verjaehrungsfrist" (Gewährleistung, Mängelansprüche) oder "Vertragsstrafe" (strafbewehrte Termine).
 Unterscheide bei "datum" zwei Fälle: Feste Kalenderdaten (z.B. "20.05.2025") gibst du direkt so an. Relative Fristen (z.B. "12 Werktage") gibst du als reine Dauer im Feld "datum" an, und trägst den Bezugspunkt/Auslöser separat im Feld "bezug" ein (z.B. "nach Erhalt der Ausführungsplanung" oder "vor der Abnahme") – kurz, max 8 Wörter. Bei festen Kalenderdaten bleibt "bezug" leer.
-Gib im Feld "folge" an, ob mit der Frist eine konkrete wirtschaftliche oder rechtliche Folge bei Versäumung verbunden ist (z.B. "Vertragsstrafe 0,2%/Werktag, Deckel 5%" oder "Sicherheitseinbehalt 100.000€") – lasse das Feld leer, wenn der Vertrag keine Folge nennt.
-Vergib im Feld "prioritaet" eine Einstufung "kritisch|hoch|mittel|niedrig" – kritisch/hoch nur, wenn eine konkrete finanzielle oder Haftungsfolge genannt ist, sonst mittel/niedrig.
+Gib im Feld "folge" an, ob mit der Frist eine konkrete wirtschaftliche oder rechtliche Folge bei Versäumung verbunden ist – auch bei paragrafenübergreifender Verknüpfung. Beispiele: "Vertragsstrafe 0,1%/Werktag, Deckel 3% + Schadensersatz", "100.000€ Dokumentationseinbehalt", "Verzögerung Abnahme/Schlusszahlung/Verjährungsbeginn", "Verlust oder Streit von Nachtragsansprüchen", "verzögerte Schlusszahlung". Lasse das Feld nur leer, wenn im gesamten Vertrag keine Folge auffindbar ist.
+Vergib im Feld "prioritaet" eine Einstufung "kritisch|hoch|mittel|niedrig" – kritisch/hoch, wenn Vertragsstrafe, Schadensersatz, Einbehalt, Abnahmeverzug, Schlusszahlungsverzug, Verjährungsbeginn, Gewährleistung oder Nachtragsverlust betroffen sind.
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
 [{"id":"1","bezeichnung":"kurze Bezeichnung, max 8 Wörter","datum":"Datum oder Fristdauer, z.B. 20.05.2025 oder 12 Werktage","bezug":"Bezugspunkt bei relativen Fristen oder leer","kategorie":"Vertragsfrist|Pruefungsfrist|Zahlungsfrist|Reaktionsfrist|Verjaehrungsfrist|Vertragsstrafe","folge":"kurze Folge oder leer","prioritaet":"kritisch|hoch|mittel|niedrig"}]`;
     let fristenContent;
@@ -1986,10 +2064,11 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     let fristenItems = [];
     let fristenFailed = false;
     try{
-      const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', 20000);
+      const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', 20000, analysisSignal);
       fristenItems = parseJson(stageFristenRaw);
       setPipelineStep(2,'done');
     }catch(e){
+      if(e.name === 'AbortError') throw e;
       console.error('Fristen-Extraktion fehlgeschlagen – Analyse wird ohne Fristen fortgesetzt', e);
       fristenFailed = true;
       fristenItems = [];
@@ -2020,7 +2099,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
 
 Punkte mit jeweiligem Kontext:
 ${JSON.stringify(itemsWithContext.map(({_referenzTitel, ...rest}) => rest))}`;
-    const stage2Raw = await callClaudeWithRetry(classifyPrompt, 'Bewerte Risiken anhand der Wissensbasis …');
+    const stage2Raw = await callClaudeWithRetry(classifyPrompt, 'Bewerte Risiken anhand der Wissensbasis …', undefined, analysisSignal);
     const classifications = parseJson(stage2Raw);
     items = items.map(it => {
       const c = classifications.find(x => x.id === it.id) || {};
@@ -2041,7 +2120,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
 
 Punkte:
 ${JSON.stringify(critical)}`;
-      const stage3Raw = await callClaudeWithRetry(actionPrompt, 'Erstelle Maßnahmenvorschläge …');
+      const stage3Raw = await callClaudeWithRetry(actionPrompt, 'Erstelle Maßnahmenvorschläge …', undefined, analysisSignal);
       const actions = parseJson(stage3Raw);
       items = items.map(it => {
         const a = actions.find(x => x.id === it.id);
@@ -2054,6 +2133,14 @@ ${JSON.stringify(critical)}`;
     renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, document.getElementById('saveContractCheckbox')?.checked ? extractedText : '');
     saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich);
   }catch(err){
+    if(err.name === 'AbortError'){
+      console.warn('Analyse abgebrochen');
+      const active = document.querySelector('.pipe-step.active');
+      if(active) active.classList.remove('active');
+      setError('');
+      setStatus('Analyse abgebrochen.', undefined);
+      return;
+    }
     console.error(err);
     const stage = document.querySelector('.pipe-step.active');
     const titleEl = stage ? stage.querySelector('.pipe-step-title') : null;
@@ -2061,7 +2148,8 @@ ${JSON.stringify(critical)}`;
     setError(`Analyse fehlgeschlagen in Stufe "${stageLabel}": ${err.message}`);
     setStatus('');
   }finally{
-    btn.disabled = false;
+    analysisAbortController = null;
+    setAnalysisRunning(false);
   }
 }
 
@@ -2088,6 +2176,42 @@ function parseDuration(str){
   else if(unit.includes('werktag') || unit.includes('arbeitstag')){ days = value*1.4; shortUnit='WT'; }
   else { days = value; shortUnit='Tg'; }
   return { days, label: `${value} ${shortUnit}` };
+}
+function inferCriticalDeadline(f){
+  const text = [f.bezeichnung, f.datum, f.bezug, f.kategorie, f.folge].filter(Boolean).join(' ').toLowerCase();
+  if(/gesamtfertigstellung|fertigstellung|31\.12\.2019/.test(text)){
+    return {folge:'Vertragsstrafe, Schadensersatz und Beschleunigungspflicht möglich', prioritaet:'kritisch'};
+  }
+  if(/vertragsstrafe|0,1|0\.1|werktag|3\s*%/.test(text)){
+    return {folge:'Vertragsstrafe bis max. 3% der Auftragssumme', prioritaet:'hoch'};
+  }
+  if(/schlussdokumentation|dokumentationsfrist|dokumentationseinbehalt|100\.?000|100\s*000/.test(text)){
+    return {folge:'100.000€ Dokumentationseinbehalt bis vollständiger Dokumentation', prioritaet:'kritisch'};
+  }
+  if(/fertigstellungsanzeige|7\s*wochen/.test(text)){
+    return {folge:'Verzögerung des Abnahmeverfahrens möglich', prioritaet:'kritisch'};
+  }
+  if(/abnahme|abnahmebegehung|mangelprotokoll|wiederholungsbegehung/.test(text)){
+    return {folge:'Auswirkung auf Schlusszahlung, Gewährleistung und Verjährung', prioritaet:'hoch'};
+  }
+  if(/schlussrechnung|6\s*wochen/.test(text)){
+    return {folge:'Verzögerte Schlusszahlung möglich', prioritaet:'hoch'};
+  }
+  if(/nachtrag|nachtragsangebot|stellungnahme|2\s*wochen/.test(text)){
+    return {folge:'Verlust oder Streit von Nachtragsansprüchen möglich', prioritaet:'hoch'};
+  }
+  return null;
+}
+function enrichCriticalDeadlines(fristenItems){
+  return (fristenItems || []).map(f => {
+    const inferred = inferCriticalDeadline(f);
+    if(!inferred) return f;
+    return {
+      ...f,
+      folge: f.folge && f.folge.trim() ? f.folge : inferred.folge,
+      prioritaet: (PRIO_ORDER[f.prioritaet] ?? 9) <= (PRIO_ORDER[inferred.prioritaet] ?? 9) ? f.prioritaet : inferred.prioritaet
+    };
+  });
 }
 const FRIST_KAT_LABELS = {
   Vertragsfrist: "Vertragsfristen (Bauzeit)",
@@ -2174,8 +2298,16 @@ function applyConstructionAxisCalibration(items, axisScores){
     if(/(cost.?plus|cost plus|fee|open.?book|open book|preisprüfung|preispruefung|gu-zuschlag|eigenleistung|festpreis|gläserne taschen|glaeserne taschen|nachunternehmervergabe)/i.test(text)){
       axisScores.Marge += Math.max(1, Math.min(weight, 2));
     }
-    if(/(vorauszahlungsbürgschaft|vorauszahlungsbuergschaft|vertragserfüllungssicherheit|gewaehrleistungssicherheit|gewährleistungssicherheit|dokumentationseinbehalt|einbehalt)/i.test(text)){
+    if(/(vorauszahlungsbürgschaft|vorauszahlungsbuergschaft|zahlungsbürgschaft|zahlungsbuergschaft|vertragserfüllungssicherheit|gewaehrleistungssicherheit|gewährleistungssicherheit|dokumentationseinbehalt|einbehalt)/i.test(text)){
       axisScores.Liquidität += Math.max(1, Math.min(weight, 2));
+    }
+    if(/(vertragsstrafe|beschleunigung|schadensersatz.*vertragsstrafe|0,1|0\.1|werktag)/i.test(text)){
+      axisScores.Termin += Math.max(1, Math.min(weight, 2));
+      axisScores.Marge += 1;
+    }
+    if(/(abnahmevoraussetzung|schlussdokumentation|funktionsprüfung|funktionspruefung|einweisung|bescheinigung|abnahme)/i.test(text)){
+      axisScores.Termin += Math.max(1, Math.min(weight, 2));
+      axisScores.Liquidität += 1;
     }
     if(/(planungsverantwortung.*auftraggeber|ausführungsplanung.*auftraggeber|ausfuehrungsplanung.*auftraggeber|plausibilit[aä]t|werkstattplanung nur soweit)/i.test(text)){
       axisScores.Haftung = Math.max(0, axisScores.Haftung - Math.min(weight, 2));
@@ -2186,10 +2318,12 @@ function applyConstructionAxisCalibration(items, axisScores){
 function getSummaryPriorityScore(it){
   const text = [it.kategorie, it.text, it.begruendung, it.massnahme, ...(it.referenzen||[])].filter(Boolean).join(' ').toLowerCase();
   let score = RISK_WEIGHT[it.risiko] ?? 1;
-  if(/(vorauszahlungsbürgschaft|vorauszahlungsbuergschaft|vertragserfüllungssicherheit|gewährleistungssicherheit|gewaehrleistungssicherheit|dokumentationseinbehalt)/i.test(text)) score += 3.2;
+  if(/(vorauszahlungsbürgschaft|vorauszahlungsbuergschaft|zahlungsbürgschaft|zahlungsbuergschaft|vertragserfüllungssicherheit|gewährleistungssicherheit|gewaehrleistungssicherheit|dokumentationseinbehalt)/i.test(text)) score += 3.2;
+  if(/(vertragsstrafe|0,1|0\.1|werktag|3\s*%|beschleunigung|schadensersatz.*vertragsstrafe)/i.test(text)) score += 3.1;
   if(/(open.?book|open book|cost.?plus|cost plus|gläserne taschen|glaeserne taschen|kalkulation|nachunternehmer|vergabe|preisprüfung|preispruefung)/i.test(text)) score += 3;
   if(/(ungekl[aä]rte vergütung|ungeklaerte vergütung|ungeklärter vergütung|schriftliche anordnung|§ 650b|650b|650c|leistungsverweiger|zurückbehaltungsrecht|zurueckbehaltungsrecht)/i.test(text)) score += 2.8;
   if(/(schlusszahlung|dokumentationseinbehalt|liquiditätsbindung|liquiditaetsbindung|einbehalt)/i.test(text)) score += 2.3;
+  if(/(abnahmevoraussetzung|schlussdokumentation|funktionsprüfung|funktionspruefung|einweisung|bescheinigung)/i.test(text)) score += 2.4;
   if(/(festpreis|eigenleistung|gu-zuschlag|marge|deckungsbeitrag|cost.?plus|cost plus|fee)/i.test(text)) score += 2.2;
   if(/(lean|taktplanung|last planner|ressourcenverstärkung|ressourcenverstaerkung|schulung)/i.test(text)) score += 1.6;
   if(/(pandemie|corona|lieferengpass|materialalternative)/i.test(text)) score += 1.4;
@@ -2228,7 +2362,7 @@ function buildManagementSummary(items){
 }
 
 function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext){
-  fristenItems = fristenItems || [];
+  fristenItems = enrichCriticalDeadlines(fristenItems || []);
   marktvergleich = marktvergleich || {};
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
   items.sort((a,b) => (order[a.risiko]??2) - (order[b.risiko]??2));
