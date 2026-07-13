@@ -205,7 +205,7 @@
   .btn-check.show{ opacity:1; transform:translateY(-50%) scale(1); }
 
   .pipeline{ display:flex; flex-direction:column; gap:0; margin:6px 0 4px; }
-  .pipe-step{ display:flex; align-items:flex-start; gap:12px; padding:8px 0; font-size:13.5px; color:var(--text-muted); }
+  .pipe-step{ display:flex; align-items:flex-start; gap:12px; padding:5px 0; font-size:13.5px; color:var(--text-muted); }
   .pipe-step .dot{
     width:20px; height:20px; border-radius:50%; border:1.5px solid var(--border);
     display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;
@@ -218,7 +218,7 @@
   .pipe-step.done{ color:var(--text); }
   .pipe-step.warn .dot{ border-color:var(--amber); background:var(--amber); color:#fff; }
   .pipe-step.warn{ color:var(--text); }
-  .pipe-line{ width:1.5px; height:20px; background:var(--border); margin-left:9.5px; }
+  .pipe-line{ width:1.5px; height:10px; background:var(--border); margin-left:9.5px; }
 
   .kb-item{
     border:1px solid var(--border); border-radius:6px; padding:10px 12px; margin-bottom:8px;
@@ -299,6 +299,18 @@
     background:var(--red-bg); color:var(--red); border-radius:6px; padding:10px 12px;
     font-size:12.5px; margin-top:10px;
   }
+  .upload-notices{ display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+  .upload-notice{
+    border:1px solid var(--border); border-left:4px solid var(--gold);
+    border-radius:6px; padding:9px 10px; background:#fffaf0;
+    color:var(--text); font-size:12px; line-height:1.45;
+  }
+  .upload-notice.warn{ border-left-color:var(--amber); background:var(--amber-bg); }
+  .upload-notice button{
+    margin-top:7px; border:1px solid var(--border); background:#fff; color:var(--navy);
+    border-radius:5px; padding:5px 8px; font-family:inherit; font-size:11.5px; font-weight:bold; cursor:pointer;
+  }
+  .upload-notice button:hover{ border-color:var(--gold); background:var(--gold-light); }
   .frist-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
   .frist-list li{
     display:flex; align-items:flex-start; gap:12px;
@@ -573,6 +585,7 @@
           <input type="file" id="fileInput" accept=".pdf,.docx,.txt">
         </div>
         <div id="fileInfo"></div>
+        <div id="uploadNotices" class="upload-notices"></div>
         <label style="display:flex; align-items:flex-start; gap:8px; font-size:12px; color:var(--text-muted); margin:10px 0; cursor:pointer;">
           <input type="checkbox" id="saveContractCheckbox" style="margin-top:2px;">
           <span>Vertragstext mit im Verlauf speichern (erhöht den lokalen Speicherbedarf, Standard: aus)</span>
@@ -585,13 +598,13 @@
         <h2><span class="card-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="m3 6 1 1 2-2"/><path d="m3 12 1 1 2-2"/><path d="m3 18 1 1 2-2"/></svg></span>Analyse-Pipeline</h2>
         <p class="hint">Mehrstufiger Ablauf je Prüfung</p>
         <div class="pipeline" id="pipeline">
-          <div class="pipe-step" data-step="1"><div class="dot">1</div><div><div class="pipe-step-title">Extraktion relevanter Klauseln</div><div class="pipe-step-desc">KI liest den Vertrag und identifiziert die wichtigsten Risikopunkte.</div></div></div>
+          <div class="pipe-step" data-step="1"><div class="dot">1</div><div><div class="pipe-step-title">Klausel- und Vertragsstruktur erfassen</div><div class="pipe-step-desc">KI liest den Vertrag vollständig und identifiziert Risiko-, Pflicht- und Vertragsregelungen.</div></div></div>
           <div class="pipe-line"></div>
-          <div class="pipe-step" data-step="2"><div class="dot">2</div><div><div class="pipe-step-title">Fristen-Extraktion</div><div class="pipe-step-desc">Alle Termine und Fristen werden vollständig und unabhängig erfasst.</div></div></div>
+          <div class="pipe-step" data-step="2"><div class="dot">2</div><div><div class="pipe-step-title">Fristen &amp; Folgen extrahieren</div><div class="pipe-step-desc">Alle Termine und Fristen werden einschließlich rechtlicher oder wirtschaftlicher Folgen erfasst.</div></div></div>
           <div class="pipe-line"></div>
-          <div class="pipe-step" data-step="3"><div class="dot">3</div><div><div class="pipe-step-title">Risiko-Klassifikation</div><div class="pipe-step-desc">Jeder Punkt wird bewertet und der Wissensbasis gegenübergestellt.</div></div></div>
+          <div class="pipe-step" data-step="3"><div class="dot">3</div><div><div class="pipe-step-title">Risiko-Klassifikation</div><div class="pipe-step-desc">Jeder Punkt wird bewertet, wirtschaftlich eingeordnet und mit der Wissensbasis abgeglichen.</div></div></div>
           <div class="pipe-line"></div>
-          <div class="pipe-step" data-step="4"><div class="dot">4</div><div><div class="pipe-step-title">Maßnahmenvorschläge</div><div class="pipe-step-desc">Für kritische/hohe Punkte werden konkrete Empfehlungen erstellt.</div></div></div>
+          <div class="pipe-step" data-step="4"><div class="dot">4</div><div><div class="pipe-step-title">Maßnahmenvorschläge</div><div class="pipe-step-desc">Für kritische und hohe Risiken werden Verhandlungs- und Handlungsempfehlungen erstellt.</div></div></div>
         </div>
         <button class="btn secondary small" id="abortAnalysisBtn" type="button" style="width:100%; margin-top:12px; display:none;">Analyse abbrechen</button>
         <div class="status-line" id="statusLine"></div>
@@ -792,7 +805,7 @@ const HELP_CONTENT = [
       <li><b>Opus 4.8:</b> Für besonders wichtige Entscheidungen, sehr komplexe GU-/NU-Verträge, Open-Book-/Cost-plus-Regelungen, ungewöhnliche Haftungs- oder Sicherheitenkonstruktionen und Fälle, in denen ein übersehener Punkt teuer werden kann.</li>
       <li><b>Haiku 4.5:</b> Für kurze Vorprüfungen, Testläufe, Demo-Dokumente oder wenn du zunächst schnell sehen willst, ob sich eine tiefergehende Analyse lohnt.</li>
     </ul>
-    <p><b>Kostenlogik:</b> Die App rechnet nicht selbst ab. Jede Analyse wird direkt über dein eigenes Anthropic-Konto abgerechnet. Kosten entstehen, weil der Vertragstext und die erzeugten Antworten als Token verarbeitet werden. Lange Verträge, viele erkannte Klauseln und ausführliche Maßnahmenvorschläge erhöhen die Tokenmenge.</p>
+    <p><b>Kostenlogik:</b> Die App rechnet nicht selbst ab. Jede Analyse wird direkt über dein eigenes Anthropic-Konto abgerechnet. Kosten entstehen, weil der Vertragstext und die erzeugten Antworten als Token verarbeitet werden. Lange Verträge, viele erkannte Klauseln und ausführliche Maßnahmenvorschläge erhöhen die Tokenmenge. Bei gescannten PDFs kommen Bildseiten hinzu: Die App verarbeitet alle Seiten in Paketen, was fachlich vollständiger ist, aber länger dauern und deutlich mehr API-Nutzung auslösen kann als ein PDF mit sauberem Textlayer.</p>
     <p><b>Kosten-Gegenüberstellung</b> (Anthropic-Preise pro Million Token, Stand Juli 2026; die Abrechnung erfolgt direkt über dein eigenes Anthropic-Konto):</p>
     <table class="help-kitable">
       <thead><tr><th>Modell</th><th>Input</th><th>Output</th></tr></thead>
@@ -822,7 +835,7 @@ const HELP_CONTENT = [
       <li><b>API-Key eintragen</b> – in der Anthropic Console erstellen, im Bereich „API-Zugang" einfügen und speichern (Einrichtung & Zugang, Punkt b).</li>
       <li><b>Vertragsgrundlage und Rolle wählen</b> – im Bereich „Dokument": VOB/B, BGB, HOAI oder Sonstige.</li>
       <li><b>Dokument hochladen</b> – per Klick oder Drag & Drop in das grüne Upload-Feld (PDF, DOCX oder TXT).</li>
-      <li><b>„Analyse starten" klicken</b> – die vier Analysestufen laufen automatisch nacheinander, der Fortschritt ist live sichtbar.</li>
+      <li><b>„Analyse starten" klicken</b> – die vier Analysestufen laufen automatisch nacheinander, der Fortschritt ist live sichtbar. Bei gescannten PDFs werden vorher alle Seiten als Bilder vorbereitet und anschließend in Seitenpaketen geprüft.</li>
       <li><b>Ergebnis prüfen</b> – zuerst die Management Summary lesen (Top-5-Risiken, wirtschaftliche Auswirkung, ggf. Marktvergleich), dann bei Bedarf in die drei Tabs wechseln.</li>
       <li><b>Exportieren oder weiterverwenden</b> – als PDF exportieren (Querformat, druckoptimiert) oder automatisch im Verlauf gespeichert, jederzeit über „Weitere Bereiche" wieder abrufbar.</li>
     </ol>
@@ -832,9 +845,9 @@ const HELP_CONTENT = [
     <p><b>Obere Zeile – vier Karten zur Einrichtung und Steuerung:</b></p>
     <ul>
       <li><b>API-Zugang</b> – API-Key eintragen (mit Ein-/Ausblenden- und Lösch-Funktion), Modell wählen (Sonnet 5 / Opus 4.8 / Haiku 4.5), Verbindung testen. Ein farbiger Status zeigt den aktuellen Zustand: grau = kein Key, navy = Key gespeichert, grün = Verbindung erfolgreich getestet.</li>
-      <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) wählen, Datei per Klick oder Drag & Drop hochladen und Analyse starten. Nach dem Upload zeigt die App Zeichenzahl und geschätzte Seitenzahl an.</li>
-      <li><b>Analyse-Pipeline</b> – zeigt den Live-Fortschritt der vier Analysestufen mit kurzer Erklärung, was jede Stufe tut. Während einer laufenden Prüfung kann die Analyse hier abgebrochen werden.</li>
-      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, der letzten Analyse zum direkten Öffnen, Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei sowie Zurücksetzen des aktuellen Arbeitsbereichs.</li>
+      <li><b>Dokument</b> – Vertragsgrundlage (VOB/B, BGB, HOAI, Sonstige) wählen, Datei per Klick oder Drag & Drop hochladen und Analyse starten. Bei Text-PDFs/DOCX zeigt die App Zeichenzahl und geschätzte Seitenzahl; bei Scan-PDFs zeigt sie, wie viele Seiten für die Bilderkennung vorbereitet wurden.</li>
+      <li><b>Analyse-Pipeline</b> – zeigt den Live-Fortschritt der vier Analysestufen mit kurzer Erklärung, was jede Stufe tut. Während einer laufenden Prüfung kann die Analyse hier abgebrochen werden; bereits begonnene API-Anfragen werden gestoppt und es wird kein Teilergebnis gespeichert.</li>
+      <li><b>Weitere Bereiche</b> – Zugriff auf Wissensbasis und Verlauf, inkl. Anzahl eigener Wissensbasis-Einträge, der letzten Analyse zum direkten Öffnen, Speichern/Wiederherstellen des gesamten Verlaufs als JSON-Datei sowie Zurücksetzen des aktuellen Arbeitsbereichs. „Arbeitsbereich zurücksetzen" leert aktuelle Datei, Ergebnis und Status; Wissensbasis und Verlauf bleiben erhalten.</li>
     </ul>
     <p><b>Ergebnisbereich (erscheint nach der ersten Analyse):</b></p>
     <ul>
@@ -859,15 +872,15 @@ const HELP_CONTENT = [
         <tr><td>Marktvergleich (Vertragswerte werden von der KI erkannt)</td><td class="yes">Ja</td></tr>
       </tbody>
     </table>
-    <p>Die eigentliche Risikoanalyse ist also vollständig KI-gestützt; Verwaltung und Organisation (Wissensbasis, Verlauf, Dokumentenvorschau) funktionieren auch ohne API-Key. Die Markt-Richtwerte selbst sind fest in der App hinterlegt und werden nicht von der KI erfunden – bei Bauverträgen z. B. VOB/B-/BGB-typische Werte, bei HOAI-Planungsverträgen praxisübliche Einordnung zu Honorar, Stufenbeauftragung, Kostensteuerung, Nutzungsrechten, BIM, Freigaben und Zahlungs-/Prüffristen. Nur die tatsächlichen Werte deines Vertrags werden von der KI erkannt und gegenübergestellt.</p>
+    <p>Die eigentliche Risikoanalyse ist vollständig KI-gestützt; Verwaltung und Organisation (Wissensbasis, Verlauf, Dokumentenvorschau) funktionieren auch ohne API-Key. Text-PDFs, DOCX und TXT werden als Vertragstext verarbeitet. Gescannte PDFs ohne Textlayer werden vollständig seitenweise als Bilder vorbereitet und in Seitenpaketen analysiert, damit spätere Vertragsseiten nicht unter den Tisch fallen. Die Markt-Richtwerte selbst sind fest in der App hinterlegt und werden nicht von der KI erfunden – bei Bauverträgen z. B. VOB/B-/BGB-typische Werte, bei HOAI-Planungsverträgen praxisübliche Einordnung zu Honorar, Stufenbeauftragung, Kostensteuerung, Nutzungsrechten, BIM, Freigaben und Zahlungs-/Prüffristen. Nur die tatsächlichen Werte deines Vertrags werden von der KI erkannt und gegenübergestellt.</p>
     <p>Weitere Funktionen im Überblick: Auge-/Papierkorb-Symbol zur Verwaltung des API-Keys, farbiger Verbindungsstatus, druckoptimierter PDF-Export im Querformat, Schnellzugriff auf die letzte Analyse direkt in der Kachel „Weitere Bereiche".</p>
   `},
   { id:"workflow", title:"Typischer Workflow", body:`
     <h3>Typischer Workflow</h3>
     <ol>
       <li>Vertragsgrundlage und Rolle festlegen – das steuert, welche Wissensbasis-Einträge einbezogen werden und aus welcher Rechtsgrundlage heraus bewertet wird.</li>
-      <li>Vertrag hochladen. Bei sehr langen Dokumenten zeigt die App eine Seitenschätzung und ggf. einen Hinweis, falls das Analyse-Limit überschritten wird. Beim Laden einer neuen Datei wird der aktuelle Arbeitsbereich für diese neue Prüfung vorbereitet; gespeicherte Verläufe bleiben erhalten.</li>
-      <li>Analyse starten – die vier Stufen (Klausel-Extraktion, Fristen-Extraktion, Risiko-Klassifikation, Maßnahmenvorschläge) laufen automatisch nacheinander.</li>
+      <li>Vertrag hochladen. Bei sehr langen Textdokumenten zeigt die App eine Seitenschätzung und ggf. einen Hinweis, falls das Zeichenlimit überschritten wird. Bei Scan-PDFs werden alle Seiten als Bilder vorbereitet und später paketweise analysiert. Beim Laden einer neuen Datei wird der aktuelle Arbeitsbereich für diese neue Prüfung vorbereitet; gespeicherte Verläufe bleiben erhalten.</li>
+      <li>Analyse starten – die vier Stufen (Klausel- und Vertragsstruktur, Fristen & Folgen, Risiko-Klassifikation, Maßnahmenvorschläge) laufen automatisch nacheinander. Bei Scan-PDFs kann dieser Vorgang wegen der Bilderkennung deutlich länger dauern.</li>
       <li>Management Summary zuerst lesen für den Überblick, dann bei Bedarf den Marktvergleich prüfen, anschließend gezielt in die drei Tabs wechseln.</li>
       <li>Bei kritischen/hohen Punkten die vorgeschlagenen Maßnahmen als Verhandlungsgrundlage nutzen – sie sind bewusst als Verhandlungsrahmen formuliert, nicht als starre Zielvorgabe.</li>
       <li>Terminkritische Klauseln und den Fristen-Zeitstrahl für die Projektsteuerung im Blick behalten.</li>
@@ -877,7 +890,9 @@ const HELP_CONTENT = [
   { id:"eingaben", title:"Eingaben & Daten", body:`
     <h3>Eingaben & Daten</h3>
     <p><b>Unterstützte Dateiformate:</b> PDF (auch gescannt, dann automatisch vollständig seitenweise per Bilderkennung statt Textauslesung), Word (.docx), Text (.txt).</p>
-    <p><b>Größenrahmen:</b> Es werden bis zu ca. 300.000 Zeichen (grob 100–110 Seiten, je nach Zeichendichte) je Vertrag analysiert. Längere Dokumente werden nach dem Erreichen dieses Limits mit einem Hinweis versehen; der überschüssige Teil fließt nicht in die Analyse ein.</p>
+    <p><b>Größenrahmen bei Textdokumenten:</b> Text-PDFs, DOCX und TXT werden bis zu ca. 300.000 Zeichen (grob 100–110 Seiten, je nach Zeichendichte) analysiert. Längere Dokumente werden nach dem Erreichen dieses Limits mit einem Hinweis versehen; der überschüssige Textteil fließt nicht in die Analyse ein.</p>
+    <p><b>Gescannte PDFs:</b> Scan-PDFs ohne Textlayer werden nicht nach dem Zeichenlimit behandelt, sondern vollständig als Seitenbilder vorbereitet und in Seitenpaketen an die KI gesendet. Das verbessert die Vollständigkeit, dauert aber länger und kann wegen der Bildverarbeitung höhere Anthropic-Kosten verursachen.</p>
+    <p><b>Empfehlung bei Scan-PDFs:</b> Die vollständige Bilderkennung ist fachlich sinnvoll, kann aber länger dauern und höhere API-Kosten verursachen. Wenn möglich, sollte stattdessen ein durchsuchbares OCR-PDF, eine Word-Datei oder eine Textfassung hochgeladen werden. Reine Anlagen oder technische Nachweise können vorab entfernt werden, sofern sie keine Vertragsbedingungen, Fristen, Sicherheiten, Vertragsstrafen oder Abnahmeregelungen enthalten.</p>
     <p><b>Wird der Vertrag selbst gespeichert? Standardmäßig nein, optional ja.</b> Im Normalfall liegt der hochgeladene Vertragstext nur temporär im Arbeitsspeicher deines Browsers, solange die Analyse läuft bzw. das Ergebnis auf dem Bildschirm angezeigt wird. Er wird nicht lokal gespeichert und nicht an einen Server dieser App übertragen – lediglich für die Dauer der Analyse an die Anthropic-API gesendet. Schließt oder lädst du die Seite neu, ist der Originaltext weg.</p>
     <p>Über die Checkbox <b>„Vertragstext mit im Verlauf speichern"</b> im Bereich „Dokument" (Standard: <b>aus</b>) kannst du das bewusst ändern: Ist sie beim Start der Analyse aktiviert, wird der Vertragstext zusätzlich im Verlaufseintrag abgelegt und lässt sich dort später über „Vertragstext anzeigen" wieder einsehen – praktisch für die erneute Analyse oder den schnellen Abgleich, erhöht aber den lokalen Speicherbedarf spürbar (Verträge können mehrere hunderttausend Zeichen umfassen) und vergrößert die Menge an potenziell sensiblen Daten, die dauerhaft in deinem Browser liegen. Ist der verfügbare Speicherplatz knapp, speichert die App das Analyseergebnis trotzdem, lässt in diesem Fall aber automatisch nur den Vertragstext weg und informiert dich darüber.</p>
     <p><b>Was wird dann im Verlauf gespeichert?</b> Standardmäßig nur das <b>Analyseergebnis</b>: Dateiname, Datum, die erkannten Risikopunkte samt Bewertung und Maßnahmen, die erkannten Fristen, die Projektzusammenfassung und der Marktvergleich. Das reicht aus, um ein früheres Ergebnis jederzeit wieder anzusehen, als PDF zu exportieren oder als JSON zu sichern. War beim Speichern zusätzlich die Checkbox „Vertragstext mit im Verlauf speichern" aktiviert, wird auch der Vertragstext selbst mit abgelegt und lässt sich über „Vertragstext anzeigen" im Ergebnis wieder aufrufen.</p>
@@ -899,6 +914,7 @@ const HELP_CONTENT = [
     <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – das Dokument ist für diesen Analyseschritt sehr umfangreich. Erneut versuchen; bei wiederholtem Auftreten hilft manchmal ein Wechsel auf ein leistungsfähigeres Modell (z. B. Opus 4.8) oder ein kürzeres Dokument.</p>
     <p><b>„Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden"</b> – die übrige Analyse (Klauseln, Risikobewertung, Maßnahmen) bleibt davon unberührt und vollständig nutzbar; nur das Fristenmodul konnte in diesem Lauf nicht abgeschlossen werden. Ein erneuter Analyselauf kann helfen.</p>
     <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs ohne durchsuchbaren Text, bereitet alle Seiten als Bilder vor und analysiert sie in Seitenpaketen. Das dauert länger und kann höhere API-Kosten verursachen, verhindert aber, dass spätere Vertragsseiten unberücksichtigt bleiben.</p>
+    <p><b>„Analyse abgebrochen"</b> – die laufende Prüfung wurde gestoppt. Es wird kein neues Analyseergebnis gespeichert. Der Arbeitsbereich kann anschließend zurückgesetzt oder mit derselben bzw. einer neuen Datei erneut gestartet werden.</p>
     <p><b>„Modellantwort war kein gültiges JSON"</b> – tritt selten bei kurzzeitigen API-Störungen auf. Die App versucht automatisch bis zu zwei weitere Male; hält der Fehler an, hilft meist ein erneuter Versuch nach kurzer Wartezeit.</p>
     <p><b>„API antwortete mit Status 401/403"</b> – der API-Key ist ungültig, abgelaufen oder wurde in der Anthropic Console widerrufen; einen neuen Key erstellen und in der App aktualisieren.</p>
     <p><b>„Nicht unterstütztes Dateiformat"</b> – nur PDF, DOCX und TXT werden unterstützt; andere Formate (z. B. gescannte Bilder als JPG/PNG, ZIP-Archive) müssen vorher in eines dieser Formate umgewandelt werden.</p>
@@ -972,7 +988,7 @@ const ROLE_MAP = {
   sonstige: {contractType:"sonstige", perspective:"auftraggeber", roleLabel:"bestellende Partei",
              hint:"Vertragsgrundlage nicht festgelegt – die Wissensbasis wird ungefiltert genutzt, breite/neutrale Bewertung."}
 };
-function applyRole(){
+function applyRole(refreshUploadNotice = true){
   const sel = document.getElementById('roleSelect');
   const cfg = ROLE_MAP[sel.value] || ROLE_MAP.sonstige;
   currentContractType = cfg.contractType;
@@ -980,9 +996,10 @@ function applyRole(){
   currentRoleLabel = cfg.roleLabel;
   const hint = document.getElementById('roleHint');
   if(hint) hint.textContent = cfg.hint;
+  if(refreshUploadNotice) updateUploadNotices();
 }
 document.getElementById('roleSelect').onchange = applyRole;
-applyRole();
+applyRole(false);
 
 const MARKET_BENCHMARKS_BY_TYPE = {
   bauvertrag: [
@@ -1708,6 +1725,41 @@ function setAnalysisRunning(running){
   if(abortBtn) abortBtn.style.display = running ? 'block' : 'none';
   if(newBtn) newBtn.disabled = running;
 }
+function looksLikePlanningContract(text){
+  const hay = normalizeDedupeText(text).slice(0, 120000);
+  const terms = [
+    'hoai', 'leistungsphase', 'leistungsphasen', 'grundleistungen', 'besondere leistungen',
+    'fachplaner', 'fachplanervertrag', 'architekt', 'ingenieurvertrag', 'technische ausrustung',
+    'honorarzone', 'honorar', 'planungsleistungen', 'objektplanung', 'projektplattform',
+    'ifc', 'bim', 'kostensteuerung'
+  ];
+  const hits = terms.filter(term => hay.includes(term)).length;
+  return hits >= 3 || hay.includes('fachplanervertrag') || hay.includes('hoai');
+}
+function updateUploadNotices(){
+  const el = document.getElementById('uploadNotices');
+  if(!el) return;
+  const notices = [];
+  if(isScanned && documentImages.length){
+    notices.push(`
+      <div class="upload-notice warn">
+        <b>Hinweis zu gescannten PDFs:</b> Die vollständige Bilderkennung ist fachlich sinnvoll, kann aber länger dauern und höhere API-Kosten verursachen. Wenn möglich, sollte stattdessen ein durchsuchbares OCR-PDF, eine Word-Datei oder eine Textfassung hochgeladen werden. Reine Anlagen oder technische Nachweise können vorab entfernt werden, sofern sie keine Vertragsbedingungen, Fristen, Sicherheiten, Vertragsstrafen oder Abnahmeregelungen enthalten.
+      </div>`);
+  }
+  if(extractedText.trim() && currentContractType !== 'planung' && looksLikePlanningContract(extractedText)){
+    notices.push(`
+      <div class="upload-notice warn">
+        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält mehrere Hinweise auf einen Planungs-/HOAI-Vertrag. Die aktuell gewählte Vertragsgrundlage ist jedoch nicht „Planungsvertrag / HOAI“. Bitte prüfen, ob die Vertragsgrundlage angepasst werden sollte, damit Marktvergleich, Fristenlogik und Risikogewichtung fachlich passen.
+        <br><button type="button" onclick="switchToPlanningContract()">Auf Planungsvertrag / HOAI umstellen</button>
+      </div>`);
+  }
+  el.innerHTML = notices.join('');
+}
+window.switchToPlanningContract = function(){
+  const sel = document.getElementById('roleSelect');
+  if(sel) sel.value = 'planung';
+  applyRole();
+};
 function resetWorkspace(){
   if(isAnalysisRunning && analysisAbortController) analysisAbortController.abort();
   analysisAbortController = null;
@@ -1720,6 +1772,7 @@ function resetWorkspace(){
   latestReportSnapshot = null;
   fileInput.value = "";
   document.getElementById('fileInfo').innerHTML = "";
+  document.getElementById('uploadNotices').innerHTML = "";
   document.getElementById('analyzeBtn').disabled = true;
   document.getElementById('abortAnalysisBtn').style.display = 'none';
   document.getElementById('topActions').style.display = 'none';
@@ -1756,6 +1809,8 @@ async function handleFile(file){
   document.getElementById('resultsArea').innerHTML = emptyResultsHtml();
   isScanned = false;
   documentImages = [];
+  scannedPageCount = 0;
+  document.getElementById('uploadNotices').innerHTML = "";
   const ext = file.name.split('.').pop().toLowerCase();
   try{
     if(ext === 'pdf'){
@@ -1768,8 +1823,8 @@ async function handleFile(file){
         isScanned = true;
         document.getElementById('fileInfo').innerHTML = `
           <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
-          <span>Scan · ${result.totalPages} Seite${result.totalPages===1?'':'n'} · alle Seiten vorbereitet</span></div>
-          <p class="hint" style="color:var(--amber);">Gescanntes PDF: Die Analyse erfolgt in Seitenpaketen per Bilderkennung. Das kann länger dauern und zusätzliche Anthropic-Kosten verursachen.</p>`;
+          <span>Scan · ${result.totalPages} Seite${result.totalPages===1?'':'n'} · alle Seiten vorbereitet</span></div>`;
+        updateUploadNotices();
         document.getElementById('analyzeBtn').disabled = documentImages.length === 0;
         setStatus(documentImages.length ? `Gescanntes Dokument erkannt. ${documentImages.length} von ${result.totalPages} Seiten bereit zur vollständigen Analyse.` : 'Konnte keine Seiten rendern.', documentImages.length ? 'done' : undefined);
         return;
@@ -1788,6 +1843,7 @@ async function handleFile(file){
       <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
       <span>${Math.round(charCount/1000)} Tsd. Zeichen · ca. ${estPages} Seiten</span></div>
       ${overLimit ? `<p class="hint" style="color:var(--amber);">Sehr langes Dokument – nur die ersten ca. ${Math.round(DOC_CHAR_LIMIT/2800)} Seiten werden analysiert, der Rest wird nicht berücksichtigt.</p>` : ''}`;
+    updateUploadNotices();
     document.getElementById('analyzeBtn').disabled = extractedText.trim().length < 20;
     setStatus(extractedText.trim().length < 20 ? 'Kein auswertbarer Text gefunden.' : 'Bereit zur Analyse.', extractedText.trim().length < 20 ? undefined : 'done');
   }catch(err){
