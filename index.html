@@ -1825,14 +1825,30 @@ function setAnalysisRunning(running){
 }
 function looksLikePlanningContract(text){
   const hay = normalizeDedupeText(text).slice(0, 120000);
-  const terms = [
-    'hoai', 'leistungsphase', 'leistungsphasen', 'grundleistungen', 'besondere leistungen',
-    'fachplaner', 'fachplanervertrag', 'architekt', 'ingenieurvertrag', 'technische ausrustung',
-    'honorarzone', 'honorar', 'planungsleistungen', 'objektplanung', 'projektplattform',
-    'ifc', 'bim', 'kostensteuerung'
+  const strongPlanningTerms = [
+    'fachplanervertrag', 'architektenvertrag', 'ingenieurvertrag', 'planungsvertrag',
+    'vertrag uber planungsleistungen', 'vertrag über planungsleistungen'
   ];
-  const hits = terms.filter(term => hay.includes(term)).length;
-  return hits >= 3 || hay.includes('fachplanervertrag') || hay.includes('hoai');
+  const planningTerms = [
+    'hoai', 'leistungsphase', 'leistungsphasen', 'grundleistungen', 'besondere leistungen',
+    'fachplaner', 'architekt', 'ingenieur', 'technische ausrustung', 'technische ausrüstung',
+    'honorarzone', 'honorartafel', 'honorarordnung', 'planungsleistungen', 'objektplanung',
+    'tragwerksplanung', 'projektplattform', 'ifc', 'bim', 'kostensteuerung'
+  ];
+  const constructionTerms = [
+    'gu-vertrag', 'gu vertrag', 'generalunternehmervertrag', 'generalunternehmer',
+    'bauvertrag', 'vob b', 'vob/b', 'vob teil b', 'bauleistung', 'bauleistungen',
+    'abnahme', 'vertragsstrafe', 'bauzeit', 'fertigstellung', 'schlussrechnung',
+    'abschlagszahlung', 'sicherheitseinbehalt', 'vertragserfuellungssicherheit',
+    'gewährleistung', 'gewaehrleistung', 'behinderungsanzeige'
+  ];
+  const strongPlanningHits = strongPlanningTerms.filter(term => hay.includes(term)).length;
+  const planningHits = planningTerms.filter(term => hay.includes(term)).length;
+  const constructionHits = constructionTerms.filter(term => hay.includes(term)).length;
+
+  if(strongPlanningHits >= 1 && planningHits >= 3 && constructionHits < 5) return true;
+  if(planningHits >= 6 && constructionHits < 4) return true;
+  return false;
 }
 function looksLikeConstructionContract(text){
   const hay = normalizeDedupeText(text).slice(0, 120000);
