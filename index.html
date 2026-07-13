@@ -506,9 +506,23 @@
     margin:0; max-height:560px; overflow-y:auto;
   }
   .vt-text::selection{ background:var(--gold-light); }
+  .scan-preview{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px;
+    padding:14px; background:var(--bg); max-height:680px; overflow-y:auto;
+  }
+  .scan-page{
+    background:#fff; border:1px solid var(--border); border-radius:7px; overflow:hidden;
+    box-shadow:0 2px 8px rgba(15,42,74,0.06);
+  }
+  .scan-page-label{
+    padding:7px 9px; border-bottom:1px solid var(--border); font-size:11.5px;
+    font-weight:bold; color:var(--text-muted); background:#fff;
+  }
+  .scan-page img{ display:block; width:100%; height:auto; }
   @media(max-width:760px){
     .vt-toolbar{ flex-direction:column; }
     .vt-text{ padding:18px 16px; font-size:13px; }
+    .scan-preview{ grid-template-columns:1fr; }
   }
   .disclaimer-text{ font-size:12px; line-height:1.6; color:var(--text); }
   .disclaimer-text b{ color:var(--amber); }
@@ -893,6 +907,7 @@ const HELP_CONTENT = [
     <p><b>Größenrahmen bei Textdokumenten:</b> Text-PDFs, DOCX und TXT werden bis zu ca. 300.000 Zeichen (grob 100–110 Seiten, je nach Zeichendichte) analysiert. Längere Dokumente werden nach dem Erreichen dieses Limits mit einem Hinweis versehen; der überschüssige Textteil fließt nicht in die Analyse ein.</p>
     <p><b>Gescannte PDFs:</b> Scan-PDFs ohne Textlayer werden nicht nach dem Zeichenlimit behandelt, sondern vollständig als Seitenbilder vorbereitet und in Seitenpaketen an die KI gesendet. Das verbessert die Vollständigkeit, dauert aber länger und kann wegen der Bildverarbeitung höhere Anthropic-Kosten verursachen.</p>
     <p><b>Empfehlung bei Scan-PDFs:</b> Die vollständige Bilderkennung ist fachlich sinnvoll, kann aber länger dauern und höhere API-Kosten verursachen. Wenn möglich, sollte stattdessen ein durchsuchbares OCR-PDF, eine Word-Datei oder eine Textfassung hochgeladen werden. Reine Anlagen oder technische Nachweise können vorab entfernt werden, sofern sie keine Vertragsbedingungen, Fristen, Sicherheiten, Vertragsstrafen oder Abnahmeregelungen enthalten.</p>
+    <p><b>Scan-Vorschau:</b> Bei gescannten PDFs kann nach der Analyse eine Scan-Vorschau geöffnet werden. Sie zeigt die für die Analyse vorbereiteten Seitenbilder und dient dem visuellen Abgleich. Diese Bildvorschau wird aus Datenschutz- und Speichergründen nicht im Verlauf gespeichert und ist nur in der aktuellen Sitzung verfügbar.</p>
     <p><b>Wird der Vertrag selbst gespeichert? Standardmäßig nein, optional ja.</b> Im Normalfall liegt der hochgeladene Vertragstext nur temporär im Arbeitsspeicher deines Browsers, solange die Analyse läuft bzw. das Ergebnis auf dem Bildschirm angezeigt wird. Er wird nicht lokal gespeichert und nicht an einen Server dieser App übertragen – lediglich für die Dauer der Analyse an die Anthropic-API gesendet. Schließt oder lädst du die Seite neu, ist der Originaltext weg.</p>
     <p>Über die Checkbox <b>„Vertragstext mit im Verlauf speichern"</b> im Bereich „Dokument" (Standard: <b>aus</b>) kannst du das bewusst ändern: Ist sie beim Start der Analyse aktiviert, wird der Vertragstext zusätzlich im Verlaufseintrag abgelegt und lässt sich dort später über „Vertragstext anzeigen" wieder einsehen – praktisch für die erneute Analyse oder den schnellen Abgleich, erhöht aber den lokalen Speicherbedarf spürbar (Verträge können mehrere hunderttausend Zeichen umfassen) und vergrößert die Menge an potenziell sensiblen Daten, die dauerhaft in deinem Browser liegen. Ist der verfügbare Speicherplatz knapp, speichert die App das Analyseergebnis trotzdem, lässt in diesem Fall aber automatisch nur den Vertragstext weg und informiert dich darüber.</p>
     <p><b>Was wird dann im Verlauf gespeichert?</b> Standardmäßig nur das <b>Analyseergebnis</b>: Dateiname, Datum, die erkannten Risikopunkte samt Bewertung und Maßnahmen, die erkannten Fristen, die Projektzusammenfassung und der Marktvergleich. Das reicht aus, um ein früheres Ergebnis jederzeit wieder anzusehen, als PDF zu exportieren oder als JSON zu sichern. War beim Speichern zusätzlich die Checkbox „Vertragstext mit im Verlauf speichern" aktiviert, wird auch der Vertragstext selbst mit abgelegt und lässt sich über „Vertragstext anzeigen" im Ergebnis wieder aufrufen.</p>
@@ -1390,7 +1405,7 @@ window.openHistoryEntry = function(id){
   }
   document.getElementById('topActions').style.display = 'flex';
   closeModal();
-  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '', entry.marktvergleich || {}, entry.vertragstext || '');
+  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '', entry.marktvergleich || {}, entry.vertragstext || '', []);
   document.getElementById('resultsArea').scrollIntoView({behavior:'smooth', block:'start'});
 };
 window.deleteHistoryEntry = function(id){
@@ -2395,7 +2410,7 @@ ${JSON.stringify(critical)}`;
     setPipelineStep(4,'done');
     setStatus(fristenFailed ? 'Analyse abgeschlossen (Fristen-Erkennung übersprungen, siehe Fristen-Tab).' : 'Analyse abgeschlossen.', fristenFailed ? undefined : 'done');
 
-    renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, document.getElementById('saveContractCheckbox')?.checked ? extractedText : '');
+    renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, document.getElementById('saveContractCheckbox')?.checked ? extractedText : '', isScanned ? documentImages : []);
     saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich);
   }catch(err){
     if(err.name === 'AbortError'){
@@ -2626,7 +2641,7 @@ function buildManagementSummary(items){
   return { top5, axisScores };
 }
 
-function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext){
+function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext, scanPreviewImages = []){
   fristenItems = enrichCriticalDeadlines(fristenItems || []);
   marktvergleich = marktvergleich || {};
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
@@ -2636,6 +2651,29 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
   const contractTextChars = vertragstext ? vertragstext.length : 0;
   const contractTextPages = contractTextChars ? Math.max(1, Math.round(contractTextChars / 2800)) : 0;
+  const scanPreviewHtml = (scanPreviewImages && scanPreviewImages.length) ? `
+    <div class="card no-print">
+      <details>
+        <summary class="vt-summary">Scan-Vorschau anzeigen (${scanPreviewImages.length.toLocaleString('de-DE')} Seite${scanPreviewImages.length===1?'':'n'})</summary>
+        <p class="hint" style="margin-top:10px;">Diese Vorschau zeigt die für die Analyse vorbereiteten Scan-Seiten der aktuellen Sitzung. Sie wird nicht im Verlauf gespeichert und ersetzt keine sichere Vertragsablage.</p>
+        <div class="vt-panel">
+          <div class="vt-toolbar">
+            <div>
+              <div class="vt-title">${escapeHtml(currentFileName || 'Gescanntes PDF')}</div>
+              <div class="vt-meta">${scanPreviewImages.length.toLocaleString('de-DE')} gerenderte Seite${scanPreviewImages.length===1?'':'n'} · nur in der aktuellen Sitzung verfügbar</div>
+            </div>
+            <span class="vt-badge">Scan-Vorschau</span>
+          </div>
+          <div class="scan-preview">
+            ${scanPreviewImages.map((b64, index) => `
+              <div class="scan-page">
+                <div class="scan-page-label">Seite ${index + 1}</div>
+                <img loading="lazy" src="data:image/jpeg;base64,${b64}" alt="Scan-Seite ${index + 1}">
+              </div>`).join('')}
+          </div>
+        </div>
+      </details>
+    </div>` : '';
 
   const CONTRACT_TYPE_LABELS = {vob:"Bauvertrag nach VOB/B", bgb:"Bauvertrag nach BGB", planung:"Planungsvertrag / HOAI", sonstige:"Vertrag"};
   const introText = (projektKontext && projektKontext.trim())
@@ -2822,6 +2860,7 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
         </div>
       </details>
     </div>` : ''}
+    ${scanPreviewHtml}
     <div class="card disclaimer-card">
       <div class="disclaimer-text">
         <b>Hinweis:</b> Diese Auswertung wurde KI-gestützt erstellt (Modell: ${escapeHtml(MODEL)}) und dient
