@@ -1748,6 +1748,27 @@ function looksLikeConstructionContract(text){
   const hits = terms.filter(term => hay.includes(term)).length;
   return hits >= 4 || hay.includes('vob b') || hay.includes('vob teil b') || hay.includes('generalunternehmervertrag');
 }
+function looksLikeVobContract(text){
+  const hay = normalizeDedupeText(text).slice(0, 120000);
+  const terms = [
+    'vob b', 'vob teil b', 'vob/b', 'teil b der vob', ' 6 vob', ' 8 vob',
+    ' 12 vob', ' 13 vob', ' 14 vob', ' 16 vob', ' 17 vob',
+    'behinderungsanzeige', 'vob ist vereinbart', 'vob gilt'
+  ];
+  return terms.some(term => hay.includes(term));
+}
+function looksLikeBgbConstructionContract(text){
+  const hay = normalizeDedupeText(text).slice(0, 120000);
+  const positiveTerms = [
+    'bgb bauvertrag', ' 650a bgb', ' 650b bgb', ' 650c bgb', ' 648 bgb',
+    ' 631 bgb', ' 632a bgb', ' 640 bgb', 'werkvertragsrecht', 'anordnungsrecht',
+    'verbraucherbauvertrag'
+  ];
+  const negativeTerms = ['vob b', 'vob teil b', 'vob/b', 'teil b der vob'];
+  const positive = positiveTerms.some(term => hay.includes(term));
+  const negative = negativeTerms.some(term => hay.includes(term));
+  return positive && !negative;
+}
 function updateUploadNotices(){
   const el = document.getElementById('uploadNotices');
   if(!el) return;
@@ -1766,9 +1787,26 @@ function updateUploadNotices(){
       </div>`);
   }
   if(extractedText.trim() && currentContractType === 'planung' && looksLikeConstructionContract(extractedText)){
+    const suggestedButton = looksLikeBgbConstructionContract(extractedText)
+      ? '<br><button type="button" onclick="switchToBgbContract()">Auf Bauvertrag nach BGB umstellen</button>'
+      : '<br><button type="button" onclick="switchToVobContract()">Auf Bauvertrag nach VOB/B umstellen</button>';
     notices.push(`
       <div class="upload-notice warn">
         <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält mehrere Hinweise auf einen Bauvertrag, etwa Bauleistung, Abnahme, VOB/B, Vertragsstrafe, Sicherheiten, Bauzeit oder Schlussrechnung. Die aktuell gewählte Vertragsgrundlage ist jedoch „Planungsvertrag / HOAI“. Bitte prüfen, ob „Bauvertrag nach VOB/B“ oder „Bauvertrag nach BGB“ passender ist.
+        ${suggestedButton}
+      </div>`);
+  }
+  if(extractedText.trim() && currentContractType === 'vob' && looksLikeBgbConstructionContract(extractedText)){
+    notices.push(`
+      <div class="upload-notice warn">
+        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält Hinweise auf einen BGB-Bauvertrag oder reines BGB-Werkvertragsrecht, aber keine eindeutige VOB/B-Einbeziehung. Die aktuell gewählte Vertragsgrundlage ist „Bauvertrag nach VOB/B“. Bitte prüfen, ob „Bauvertrag nach BGB“ passender ist.
+        <br><button type="button" onclick="switchToBgbContract()">Auf Bauvertrag nach BGB umstellen</button>
+      </div>`);
+  }
+  if(extractedText.trim() && currentContractType === 'bgb' && looksLikeVobContract(extractedText)){
+    notices.push(`
+      <div class="upload-notice warn">
+        <b>Plausibilitäts-Hinweis:</b> Der hochgeladene Text enthält deutliche Hinweise auf eine VOB/B-Einbeziehung. Die aktuell gewählte Vertragsgrundlage ist „Bauvertrag nach BGB“. Bitte prüfen, ob „Bauvertrag nach VOB/B“ passender ist.
         <br><button type="button" onclick="switchToVobContract()">Auf Bauvertrag nach VOB/B umstellen</button>
       </div>`);
   }
@@ -1782,6 +1820,11 @@ window.switchToPlanningContract = function(){
 window.switchToVobContract = function(){
   const sel = document.getElementById('roleSelect');
   if(sel) sel.value = 'vob';
+  applyRole();
+};
+window.switchToBgbContract = function(){
+  const sel = document.getElementById('roleSelect');
+  if(sel) sel.value = 'bgb';
   applyRole();
 };
 function resetWorkspace(){
