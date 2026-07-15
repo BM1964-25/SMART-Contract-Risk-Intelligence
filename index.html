@@ -23,10 +23,12 @@
     --red:#8b1e1e; --red-bg:#f4dbdb;
   }
   *{box-sizing:border-box;}
+  html{ min-height:100%; }
   body{
     margin:0; background:var(--bg); color:var(--text);
     font-family: Arial, "Segoe UI", sans-serif;
     font-size:15px; line-height:1.5;
+    min-height:100vh; display:flex; flex-direction:column;
   }
   h1,h2,h3{ font-family: Georgia, "Times New Roman", serif; font-weight:normal; margin:0; }
   header{
@@ -45,7 +47,7 @@
     padding:9px 16px; border-radius:6px; font-size:13.5px; font-family:inherit; cursor:pointer;
   }
   .help-btn:hover{ background:rgba(255,255,255,0.18); }
-  .container{ max-width:1320px; margin:0 auto; padding:28px 24px 44px; }
+  .container{ max-width:1320px; width:100%; margin:0 auto; padding:28px 24px 44px; flex:1 0 auto; }
   .setup-row{
     display:grid;
     grid-template-columns: minmax(220px,1fr) minmax(270px,1.4fr) minmax(220px,1fr) minmax(220px,1fr);
@@ -56,7 +58,7 @@
   .setup-row > .card{ margin-top:0 !important; display:flex; flex-direction:column; }
 
   .site-footer{
-    border-top:1px solid var(--border);
+    border-top:1px solid var(--border); background:#fff; flex-shrink:0;
     padding:22px 32px 24px;
     display:flex; align-items:flex-start; justify-content:space-between;
     gap:18px; flex-wrap:wrap;
