@@ -3342,6 +3342,8 @@ async function callClaudeWithRetry(content, statusPrefix, maxTokens, signal){
           setStatus(statusPrefix + ' (' + suffix + ')', 'loading');
         }
         await new Promise(r => setTimeout(r, delay));
+      } else {
+        throw err;
       }
     }
   }
@@ -3720,6 +3722,37 @@ async function extractScannedDeadlinesInBatches(fristenInstruction, signal){
   }
   return dedupeDeadlineItems(allDeadlines);
 }
+async function extractTextDeadlineChunkRecursive(fristenInstruction, textChunk, signal, label){
+  const prompt = fristenInstruction + `\n\nDu siehst nur ${label}. Erfasse die Fristen dieses Abschnitts vollständig. Andere Abschnitte werden separat geprüft.\n\nVertragstext-Abschnitt:\n` + textChunk;
+  try{
+    const raw = await callClaudeWithRetry(prompt, `Extrahiere Fristen aus ${label} …`, CLAUDE_DEADLINES_MAX_TOKENS, signal);
+    const parsed = parseJson(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(err){
+    if(err.name === 'AbortError') throw err;
+    if(shouldSplitExtractionChunk(err) && textChunk.length > 2500){
+      const mid = Math.ceil(textChunk.length / 2);
+      let splitAt = textChunk.lastIndexOf('\n', mid);
+      if(splitAt < Math.floor(textChunk.length * 0.35)) splitAt = mid;
+      setStatus(`${label} erzeugt zu viel Fristen-Ausgabe, teile in kleinere Textpakete …`, 'loading');
+      const first = await extractTextDeadlineChunkRecursive(fristenInstruction, textChunk.slice(0, splitAt), signal, `${label} Teil A`);
+      const second = await extractTextDeadlineChunkRecursive(fristenInstruction, textChunk.slice(splitAt), signal, `${label} Teil B`);
+      return [...first, ...second];
+    }
+    throw err;
+  }
+}
+async function extractTextDeadlinesInBatches(fristenInstruction, text, signal){
+  const chunks = chunkTextForAnalysis(text, TEXT_STAGE_CHUNK_SIZE);
+  const allDeadlines = [];
+  for(let i=0;i<chunks.length;i++){
+    const label = chunks.length > 1 ? `Textabschnitt ${i+1}/${chunks.length}` : 'den Vertragstext';
+    setStatus(`Extrahiere Fristen aus ${label} …`, 'loading');
+    const parsed = await extractTextDeadlineChunkRecursive(fristenInstruction, chunks[i], signal, label);
+    allDeadlines.push(...parsed.map(item => ({...item, quelle:label})));
+  }
+  return dedupeDeadlineItems(allDeadlines);
+}
 function isInvalidRequestSizeError(err){
   if(!err || err.status !== 400) return false;
   const detail = `${err.message || ''} ${err.bodyText || ''}`.toLowerCase();
@@ -3760,6 +3793,24 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
 Punkte mit jeweiligem Kontext:
 ${JSON.stringify(itemsBatch.map(({_referenzTitel, ...rest}) => rest))}`;
 }
+function fallbackClassifyItem(item){
+  const text = [item?.kategorie, item?.text, item?.kontext].filter(Boolean).join(' ').toLowerCase();
+  let risiko = 'mittel';
+  if(/vertragsstrafe|einbehalt|bürgschaft|buergschaft|kündigung|kuendigung|rechtsverlust|abnahme|haftung|schadensersatz|gewährleistung|gewaehrleistung/.test(text)) risiko = 'hoch';
+  if(/unbegrenzt|fristlos|zahlungsstopp|zahlungssperre|ausschluss|verfall|10\s*%|100\.?000/.test(text)) risiko = 'hoch';
+  let auswirkung = 'Sonstiges';
+  if(/zahlung|einbehalt|bürgschaft|buergschaft|sicherheit|liquidität|liquiditaet/.test(text)) auswirkung = 'Liquidität';
+  else if(/frist|termin|verzug|vertragsstrafe|bauzeit|fertigstellung/.test(text)) auswirkung = 'Termin';
+  else if(/nachtrag|änderung|aenderung|anordnung|vergütung|verguetung/.test(text)) auswirkung = 'Nachtrag';
+  else if(/haftung|gewährleistung|gewaehrleistung|schadensersatz|mangel/.test(text)) auswirkung = 'Haftung';
+  else if(/preis|kosten|marge|pauschal|open-book|zuschlag|lohn|material/.test(text)) auswirkung = 'Marge';
+  return {
+    id: String(item?.id || ''),
+    risiko,
+    auswirkung,
+    begruendung: 'Fallback-Einstufung nach Schlüsselmerkmalen.'
+  };
+}
 async function classifyBatchRecursive(itemsBatch, options, signal, batchLabel){
   const prompt = buildClassificationPrompt(itemsBatch, options);
   try{
@@ -3775,6 +3826,10 @@ async function classifyBatchRecursive(itemsBatch, options, signal, batchLabel){
       const left = await classifyBatchRecursive(itemsBatch.slice(0, mid), options, signal, batchLabel + ' · Teil A');
       const right = await classifyBatchRecursive(itemsBatch.slice(mid), options, signal, batchLabel + ' · Teil B');
       return [...left, ...right];
+    }
+    if(shouldSplitAiBatch(err) && itemsBatch.length === 1){
+      console.warn('Einzelklassifikation fehlgeschlagen, nutze Fallback:', err.message);
+      return [fallbackClassifyItem(itemsBatch[0])];
     }
     throw err;
   }
@@ -3815,6 +3870,10 @@ async function actionBatchRecursive(itemsBatch, signal, batchLabel){
       const left = await actionBatchRecursive(itemsBatch.slice(0, mid), signal, batchLabel + ' · Teil A');
       const right = await actionBatchRecursive(itemsBatch.slice(mid), signal, batchLabel + ' · Teil B');
       return [...left, ...right];
+    }
+    if(shouldSplitAiBatch(err) && itemsBatch.length === 1){
+      console.warn('Einzelmaßnahme fehlgeschlagen, nutze Fallback:', err.message);
+      return [{id:String(itemsBatch[0]?.id || ''), massnahme:'Klausel fachlich prüfen und Verhandlungsrahmen mit Jurist oder Projektleitung abstimmen.'}];
     }
     throw err;
   }
@@ -3945,9 +4004,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
         if(isScanned && documentImages.length){
           fristenItems = await extractScannedDeadlinesInBatches(fristenInstruction, analysisSignal);
         } else {
-          const fristenContent = fristenInstruction + "\n\nVertragstext:\n" + docExcerpt;
-          const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', CLAUDE_DEADLINES_MAX_TOKENS, analysisSignal);
-          fristenItems = parseJson(stageFristenRaw);
+          fristenItems = await extractTextDeadlinesInBatches(fristenInstruction, docExcerpt, analysisSignal);
         }
         writeAnalysisCache('deadlines', {fristenItems, fristenFailed:false});
       }
