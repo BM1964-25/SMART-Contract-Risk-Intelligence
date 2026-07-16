@@ -421,6 +421,11 @@
     border-radius:6px; padding:8px 9px; color:var(--text-muted); font-size:11.5px; line-height:1.4;
   }
   .summary-explain b{ color:var(--navy); }
+  .index-scale{ margin-top:8px; display:flex; flex-direction:column; gap:4px; }
+  .index-scale-row{ display:grid; grid-template-columns:68px 1fr; gap:7px; align-items:center; font-size:10.5px; }
+  .index-scale-band{ height:6px; border-radius:999px; background:var(--border); }
+  .index-scale-band.active{ outline:2px solid rgba(15,42,74,0.16); outline-offset:1px; }
+  .index-scale-label{ color:var(--text-muted); }
   @media (max-width:1040px){
     .risk-profile-grid{ grid-template-columns:1fr; }
     .risk-profile-card{ grid-template-columns:96px 1fr; }
@@ -1011,8 +1016,8 @@ const HELP_CONTENT = [
     <p><b>Belegtreue:</b> Vertragsstrafen, Sicherheiten-Kumulationen, Paragraphenverweise und konkrete Rechtsfolgen werden nur dann als Vertragsinhalt behandelt, wenn sie im Vertrag ausdrücklich angelegt sind. Marktwerte, Risikoindex, Wirkungsindex, Risikostufen und Maßnahmen sind KI-gestützte Einordnungen der App und keine aus dem Vertrag übernommenen Tatsachen.</p>
     <p><b>BGB mit modifizierter VOB/B:</b> Ein Bauvertrag kann die VOB/B erwähnen oder einbeziehen und trotzdem kein unverändert privilegierter VOB/B-Vertrag sein. Wenn der Vertrag die VOB/B in wesentlichen Punkten ändert, ausschließt oder durch vorrangige Individualregelungen verdrängt, ist dies als eigener Prüfpunkt darzustellen. Dann sind vorformulierte belastende Klauseln besonders auf AGB-Kontrolle nach § 307 BGB und den Wegfall der VOB/B-Privilegierung nach § 310 Abs. 1 Satz 3 BGB hinzuweisen.</p>
     <p><b>Risikoprofil:</b> Die Management Summary zeigt zuerst die Anzahl der erkannten Risikopunkte nach Stufe. „20 Risiken" bedeutet nicht automatisch gut oder schlecht, sondern: Es wurden 20 bewertungsrelevante Punkte erkannt. Entscheidend ist die Mischung aus kritisch/hoch/mittel/niedrig und ob einzelne Punkte marktüblich, ungewöhnlich oder klar abweichend sind.</p>
-    <p><b>Management-Einschätzung und Risikoindex:</b> Die Ampel übersetzt Anzahl und Schwere der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Der Risikoindex ist ein gewichteter Orientierungswert aus den Risikostufen; er ist keine Schulnote und keine Rechtsbewertung. Ein hoher Wert bedeutet erhöhten Prüf- und Verhandlungsbedarf, nicht automatisch einen schlechten Vertrag.</p>
-    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Der Wirkungsindex ist ein gewichteter Orientierungswert: höher bedeutet stärkeren wirtschaftlichen Druck, nicht automatisch einen „schlechten Vertrag". Donut und Balkendiagramm nutzen dieselbe Datenbasis; der Donut zeigt den Überblick, die Balken zeigen die Rangfolge der wirtschaftlichen Schwerpunkte. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
+    <p><b>Management-Einschätzung und Risikoindex:</b> Die Ampel übersetzt Anzahl und Schwere der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Der Risikoindex ist ein gewichteter Orientierungswert aus den Risikostufen (kritisch zählt stärker als hoch, hoch stärker als mittel). Er ist kein Prozentwert, keine Schulnote und nicht auf 100 begrenzt. Orientierung: 0-6 gering, 7-15 moderat, 16-31 erhöht, ab 32 kritisch.</p>
+    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Der Wirkungsindex ist ein gewichteter Orientierungswert für wirtschaftlichen Druck, ebenfalls ohne feste 100er-Obergrenze. Orientierung: 0-34 gering, 35-69 moderat, 70-99 erhöht, ab 100 sehr hoch. Donut und Balkendiagramm nutzen dieselbe Datenbasis; der Donut zeigt den Überblick, die Balken zeigen die Rangfolge der wirtschaftlichen Schwerpunkte. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
     <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – je nach Vertragsgrundlage unterschiedlich. Bei Bauverträgen werden z. B. Gewährleistung, Vertragsstrafe, Zahlungsziel, Skonto, VOB/B-Einbeziehung, Vertragserfüllungssicherheit, Mängelsicherheit, kumulierte Einbehalte, Abnahme, Nachträge und Schlussdokumentation getrennt betrachtet; bei Planungsverträgen/HOAI stehen Honorar-/Leistungsumfang, stufenweise Beauftragung, Kostensteuerung, Nutzungsrechte, BIM-/Projektplattformpflichten, Freigaben und Zahlungs-/Prüffristen im Vordergrund.</p>
     <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge erkannt wurde, priorisiert nach Schwere, Unmittelbarkeit und Steuerbarkeit. „Kritisch" ist Fristen mit harter unmittelbarer Sanktion vorbehalten, z. B. ausdrücklich vereinbarter Vertragsstrafe, konkretem Schadensersatzmechanismus, hohem Einbehalt, Rechtsverlust oder blockierter Abnahme/Schlusszahlung. Zielsetzungen, Ordnungstermine und nicht ausdrücklich strafbewehrte Zwischentermine dürfen nicht als Vertragsstrafenfristen dargestellt werden.</p>
     <p><b>Fristen:</b> zweigeteilt – oben ein chronologischer Zeitstrahl für erkannte Fristen mit einem echten Kalenderdatum, darunter die nach Kategorie gruppierte Liste der erkannten Fristen (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine). Relative Fristen (z. B. „12 Werktage nach Erhalt der Ausführungsplanung") zeigen zusätzlich eine Dauer-Kennzeichnung und den hervorgehobenen Bezugspunkt.</p>
@@ -2983,12 +2988,37 @@ function renderDonutCard(title, entries, totalLabel, note = ''){
       </div>
     </div>`;
 }
-function getImpactIndexAssessment(value){
+const RISK_INDEX_BANDS = [
+  {min:0, max:6, label:'Gering', color:'#2f7a4f', desc:'geringe Risikodichte'},
+  {min:7, max:15, label:'Moderat', color:'#a5750f', desc:'überschaubarer Prüfbedarf'},
+  {min:16, max:31, label:'Erhöht', color:'#b0512a', desc:'relevanter Prüf- und Verhandlungsbedarf'},
+  {min:32, max:Infinity, label:'Kritisch', color:'#8b1e1e', desc:'hoher Prüf- und Eskalationsbedarf'}
+];
+const IMPACT_INDEX_BANDS = [
+  {min:0, max:34, label:'Gering', color:'#2f7a4f', desc:'geringer wirtschaftlicher Druck'},
+  {min:35, max:69, label:'Moderat', color:'#a5750f', desc:'moderater wirtschaftlicher Druck'},
+  {min:70, max:99, label:'Erhöht', color:'#b0512a', desc:'erhöhter wirtschaftlicher Druck'},
+  {min:100, max:Infinity, label:'Sehr hoch', color:'#8b1e1e', desc:'sehr hoher wirtschaftlicher Druck'}
+];
+function getBand(value, bands){
   const score = Number(value) || 0;
-  if(score >= 100) return 'sehr hoher wirtschaftlicher Druck';
-  if(score >= 70) return 'erhöhter wirtschaftlicher Druck';
-  if(score >= 35) return 'moderater wirtschaftlicher Druck';
-  return 'geringer wirtschaftlicher Druck';
+  return bands.find(b => score >= b.min && score <= b.max) || bands[0];
+}
+function formatBandRange(band){
+  return band.max === Infinity ? `ab ${band.min}` : `${band.min}-${band.max}`;
+}
+function getImpactIndexAssessment(value){
+  return getBand(value, IMPACT_INDEX_BANDS).desc;
+}
+function renderIndexScale(value, bands){
+  const active = getBand(value, bands);
+  return `<div class="index-scale" aria-label="Index-Einordnung">
+    ${bands.map(band => `
+      <div class="index-scale-row">
+        <span class="index-scale-label">${formatBandRange(band)} ${escapeHtml(band.label)}</span>
+        <span class="index-scale-band${band === active ? ' active' : ''}" style="background:${band.color}"></span>
+      </div>`).join('')}
+  </div>`;
 }
 function getOverallRiskAssessment(summary){
   const counts = summary.riskCounts || {};
@@ -3001,7 +3031,8 @@ function getOverallRiskAssessment(summary){
       color:'#8b1e1e',
       text:'Mehrere wesentliche Risiken. Vor Freigabe/Unterschrift fachkundig prüfen und zentrale Punkte verhandeln.',
       totalRisks,
-      weightedRisk
+      weightedRisk,
+      band:getBand(weightedRisk, RISK_INDEX_BANDS)
     };
   }
   if((counts.kritisch || 0) >= 1 || criticalHigh >= 5 || weightedRisk >= 16){
@@ -3010,7 +3041,8 @@ function getOverallRiskAssessment(summary){
       color:'#b0512a',
       text:'Relevante Risiken vorhanden. Kritische und hohe Punkte gezielt prüfen, priorisieren und verhandeln.',
       totalRisks,
-      weightedRisk
+      weightedRisk,
+      band:getBand(weightedRisk, RISK_INDEX_BANDS)
     };
   }
   if(weightedRisk >= 7 || totalRisks >= 10){
@@ -3019,7 +3051,8 @@ function getOverallRiskAssessment(summary){
       color:'#a5750f',
       text:'Überschaubares Risikoprofil. Einzelpunkte prüfen; Standardrisiken bleiben möglich.',
       totalRisks,
-      weightedRisk
+      weightedRisk,
+      band:getBand(weightedRisk, RISK_INDEX_BANDS)
     };
   }
   return {
@@ -3027,7 +3060,8 @@ function getOverallRiskAssessment(summary){
     color:'#2f7a4f',
     text:'Aktuell geringe Risikodichte. Ergebnis trotzdem fachlich plausibilisieren.',
     totalRisks,
-    weightedRisk
+    weightedRisk,
+    band:getBand(weightedRisk, RISK_INDEX_BANDS)
   };
 }
 function renderOverallRiskCard(summary){
@@ -3036,7 +3070,8 @@ function renderOverallRiskCard(summary){
     .map(axis => ({axis, score:summary.axisScores[axis] || 0}))
     .sort((a,b) => b.score - a.score)[0] || {axis:'-', score:0};
   const impactTotal = AUSWIRKUNG_ACHSEN.reduce((sum, axis) => sum + (Number(summary.axisScores[axis]) || 0), 0);
-  const impactLabel = getImpactIndexAssessment(impactTotal);
+  const impactBand = getBand(impactTotal, IMPACT_INDEX_BANDS);
+  const impactLabel = impactBand.desc;
   return `
     <div class="risk-profile-card summary">
       <div class="risk-profile-title">Management-Einschätzung</div>
@@ -3045,7 +3080,7 @@ function renderOverallRiskCard(summary){
       <div class="summary-meta">
         <div class="summary-meta-item">
           <span class="summary-meta-value">${assessment.weightedRisk}</span>
-          <span class="summary-meta-label">Risikoindex</span>
+          <span class="summary-meta-label">Risikoindex · ${escapeHtml(assessment.band.label)}</span>
         </div>
         <div class="summary-meta-item">
           <span class="summary-meta-value">${escapeHtml(strongestAxis.axis)}</span>
@@ -3053,8 +3088,10 @@ function renderOverallRiskCard(summary){
         </div>
       </div>
       <div class="summary-explain">
-        <b>Einordnung:</b> Risikoindex ${assessment.weightedRisk} beschreibt die Schwere der erkannten Risikopunkte.
-        Wirkungsindex ${Math.round(impactTotal)} bedeutet ${escapeHtml(impactLabel)}. Das ist ein Priorisierungssignal, kein pauschales Urteil über die Vertragsqualität.
+        <b>Einordnung:</b> Risikoindex ${assessment.weightedRisk} Punkte liegt im Bereich <b>${escapeHtml(assessment.band.label)}</b>
+        (${escapeHtml(formatBandRange(assessment.band))}). Wirkungsindex ${Math.round(impactTotal)} Punkte liegt im Bereich
+        <b>${escapeHtml(impactBand.label)}</b> (${escapeHtml(formatBandRange(impactBand))}). Beide Werte sind nicht auf 100 begrenzt und kein pauschales Urteil über die Vertragsqualität.
+        ${renderIndexScale(assessment.weightedRisk, RISK_INDEX_BANDS)}
       </div>
     </div>`;
 }
@@ -3074,7 +3111,7 @@ function renderRiskProfileCharts(summary){
   return `
     <div class="risk-profile-grid">
       ${renderDonutCard('Geschätzte Risikoverteilung', riskEntries, 'Risiken', 'Erkannte Risikopunkte nach Schweregrad. Entscheidend ist die Mischung der Stufen.')}
-      ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Index', `Wirkungsindex ${Math.round(impactTotal)}: ${impactLabel}. Höher bedeutet mehr wirtschaftlichen Druck, nicht automatisch einen schlechteren Vertrag.`)}
+      ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Punkte', `Wirkungsindex ${Math.round(impactTotal)} Punkte: ${impactLabel}. Orientierungswert ohne feste 100er-Obergrenze.`)}
       ${renderOverallRiskCard(summary)}
     </div>`;
 }
