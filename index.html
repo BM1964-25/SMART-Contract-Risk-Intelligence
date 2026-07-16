@@ -584,7 +584,13 @@
   .kb-form-card h3{ font-family:inherit; font-size:14px; color:var(--navy); margin:0 0 8px; }
   .kb-form-card .hint{ margin-bottom:12px; }
   .kb-field-label{ font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; font-weight:bold; margin:9px 0 5px; display:block; }
-  .kb-checkline{ display:flex; align-items:center; gap:7px; margin-top:10px; font-size:12.5px; color:var(--text-muted); }
+  .kb-typ-row{ display:grid; grid-template-columns:repeat(4, minmax(0, auto)); justify-content:start; gap:12px 18px; margin-bottom:10px; font-size:12.5px; }
+  .kb-typ-row label, .kb-checkline{ display:flex; align-items:center; gap:7px; line-height:1.35; }
+  .kb-checkline{
+    margin-top:8px; padding:9px 10px; border:1px solid var(--border); border-radius:6px;
+    background:#fff; font-size:12.5px; color:var(--text-muted);
+  }
+  .kb-checkline span{ display:block; }
   .kb-list-head{ display:flex; justify-content:space-between; gap:12px; align-items:flex-end; margin-bottom:8px; }
   .kb-list-head h3{ font-family:inherit; margin:0; color:var(--navy); font-size:14px; }
   .kb-list-meta{ color:var(--text-muted); font-size:12px; }
@@ -1467,13 +1473,13 @@ Hier folgt der Analysebericht:
                 </div>
               </div>
               <label class="kb-field-label">Gilt für Vertragstyp(en)</label>
-              <div class="kb-typ-row" style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px; font-size:12.5px;">
-                <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="vob" checked>VOB/B</label>
-                <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="bgb">BGB</label>
-                <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="planung">Planung</label>
-                <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="sonstige">Sonstige</label>
+              <div class="kb-typ-row">
+                <label><input type="checkbox" class="kbTypCheck" value="vob" checked>VOB/B</label>
+                <label><input type="checkbox" class="kbTypCheck" value="bgb">BGB</label>
+                <label><input type="checkbox" class="kbTypCheck" value="planung">Planung</label>
+                <label><input type="checkbox" class="kbTypCheck" value="sonstige">Sonstige</label>
               </div>
-              <label class="kb-checkline"><input type="checkbox" id="kbActiveInput" checked> Regel ist aktiv und darf in Analysen einfließen</label>
+              <label class="kb-checkline"><input type="checkbox" id="kbActiveInput" checked><span>Regel ist aktiv und darf in Analysen einfließen</span></label>
               <button class="btn small" id="kbSaveBtn" style="margin-top:12px;">Wissensbasis-Eintrag speichern</button>
             </div>
           </div>
