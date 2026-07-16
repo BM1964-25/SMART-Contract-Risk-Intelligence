@@ -1782,7 +1782,9 @@ document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape' && document.getElementById('internalOverlay').style.display === 'flex') closeInternal();
 });
 
-let MODEL = "claude-sonnet-5";
+const DEFAULT_MODEL = "claude-sonnet-5";
+const ALLOWED_MODELS = new Set(["claude-sonnet-5", "claude-opus-4-8", "claude-haiku-4-5-20251001"]);
+let MODEL = DEFAULT_MODEL;
 const DOC_CHAR_LIMIT = 300000; // ca. 100-110 Seiten bei ~2800 Zeichen/Seite
 const TEXT_STAGE_CHUNK_SIZE = 24000; // kleinere Einstiegspakete verhindern zu große Anthropic-Requests
 const CLAUDE_DEFAULT_MAX_TOKENS = 8000;
@@ -1950,23 +1952,38 @@ function updateKeyStatus(state){
   const text = el.querySelector('.key-status-text');
   text.textContent = state === 'tested' ? 'Key gespeichert, Verbindung besteht.' : state === 'saved' ? 'Key gespeichert, Verbindung nicht getestet.' : 'Kein API-Key hinterlegt.';
 }
+function normalizeSelectedModel(value){
+  return ALLOWED_MODELS.has(value) ? value : DEFAULT_MODEL;
+}
+function syncModelFromSelect(){
+  const select = document.getElementById('modelSelect');
+  MODEL = normalizeSelectedModel(select.value || MODEL);
+  select.value = MODEL;
+  localStorage.setItem('scri-model', MODEL);
+  return MODEL;
+}
 function loadApiKey(){
   apiKey = localStorage.getItem('scri-api-key') || "";
   const testedKey = localStorage.getItem('scri-api-tested-key') || "";
   const savedModel = localStorage.getItem('scri-model');
-  if(savedModel) MODEL = savedModel;
+  MODEL = normalizeSelectedModel(savedModel || MODEL);
+  if(savedModel && savedModel !== MODEL) localStorage.setItem('scri-model', MODEL);
   document.getElementById('apiKeyInput').value = apiKey;
   document.getElementById('modelSelect').value = MODEL;
+  if(document.getElementById('modelSelect').value !== MODEL) document.getElementById('modelSelect').value = DEFAULT_MODEL;
   updateKeyStatus(apiKey ? (testedKey === apiKey ? 'tested' : 'saved') : 'none');
 }
 document.getElementById('saveKeyBtn').onclick = () => {
   const previousTestedKey = localStorage.getItem('scri-api-tested-key') || "";
   apiKey = document.getElementById('apiKeyInput').value.trim();
-  MODEL = document.getElementById('modelSelect').value;
+  syncModelFromSelect();
   localStorage.setItem('scri-api-key', apiKey);
-  localStorage.setItem('scri-model', MODEL);
   if(previousTestedKey && previousTestedKey !== apiKey) localStorage.removeItem('scri-api-tested-key');
   updateKeyStatus(apiKey ? (previousTestedKey === apiKey ? 'tested' : 'saved') : 'none');
+};
+document.getElementById('modelSelect').onchange = () => {
+  syncModelFromSelect();
+  if(apiKey) updateKeyStatus('saved');
 };
 document.getElementById('clearKeyBtn').onclick = () => {
   apiKey = '';
@@ -3135,7 +3152,7 @@ function getClaudeErrorMessage(status, type, requestId){
     return 'Der Anthropic-API-Key wurde abgelehnt. Bitte API-Key prüfen, speichern und Verbindung erneut testen.';
   }
   if(status === 400 && type === 'invalid_request_error'){
-    return 'Anthropic hat eine Anfrage als zu groß oder formal nicht verarbeitbar abgelehnt. Die App verarbeitet die Analyse in kleineren Paketen und versucht, große Text- und Scanabschnitte automatisch zu verkleinern. Falls der Fehler bestehen bleibt, bitte die Analyse erneut starten; bei wiederholtem Auftreten liegt meist ein zu großer einzelner Scan, eine instabile Browser-Verbindung oder eine temporäre API-Störung vor.';
+    return 'Anthropic hat den API-Request formal abgelehnt. Die App zeigt nach Möglichkeit die genaue technische Ursache an.';
   }
   return 'API antwortete mit Status ' + status + (type ? ' (' + type + ')' : '') + (requestId ? ' · Anfrage: ' + requestId : '');
 }
@@ -3154,6 +3171,9 @@ async function callClaude(content, maxTokens, signal){
   if(!apiKey){
     throw new Error('Kein API-Key hinterlegt. Bitte oben im Feld "API-Zugang" deinen Anthropic-API-Key eintragen und speichern.');
   }
+  MODEL = normalizeSelectedModel(MODEL);
+  const modelSelect = document.getElementById('modelSelect');
+  if(modelSelect && modelSelect.value !== MODEL) modelSelect.value = MODEL;
   let response;
   try{
     response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -3181,10 +3201,18 @@ async function callClaude(content, maxTokens, signal){
     let parsed = null;
     try{ parsed = bodyText ? JSON.parse(bodyText) : null; }catch(e){}
     const apiType = parsed && parsed.error ? parsed.error.type : '';
+    const apiMessage = parsed && parsed.error && parsed.error.message ? parsed.error.message : '';
     const requestId = parsed && parsed.request_id ? parsed.request_id : (response.headers.get('request-id') || '');
     let userMessage = getClaudeErrorMessage(response.status, apiType, requestId);
-    if(response.status === 400 && /max[_-]?tokens/i.test(bodyText || '')){
+    if(response.status === 400 && /model/i.test(apiMessage)){
+      userMessage = `Anthropic hat das ausgewählte Modell abgelehnt (${MODEL}). Die App setzt die Modellwahl auf Claude Sonnet 5 zurück. Bitte erneut starten. Technische Meldung: ${apiMessage}`;
+      MODEL = DEFAULT_MODEL;
+      localStorage.setItem('scri-model', MODEL);
+      if(modelSelect) modelSelect.value = MODEL;
+    } else if(response.status === 400 && /max[_-]?tokens/i.test(bodyText || '')){
       userMessage = 'Anthropic hat die angeforderte Antwortlänge für dieses Modell abgelehnt. Die App nutzt jetzt kleinere Antwortbudgets pro Analyseschritt; bitte die Analyse erneut starten.';
+    } else if(response.status === 400 && apiMessage){
+      userMessage = `Anthropic hat den API-Request abgelehnt. Technische Meldung: ${apiMessage}`;
     }
     throw new ClaudeApiError(userMessage, {
       status: response.status,
@@ -3276,7 +3304,7 @@ async function callClaudeWithRetry(content, statusPrefix, maxTokens, signal){
     }catch(err){
       if(err.name === 'AbortError') throw err;
       lastErr = err;
-      const retryable = !isInvalidRequestSizeError(err) && (isTemporaryClaudeError(err) || attempt < 2);
+      const retryable = isTemporaryClaudeError(err) || (!(err instanceof ClaudeApiError) && !isInvalidRequestSizeError(err) && attempt < 2);
       if(attempt < maxRetries && retryable){
         const delay = retryDelayMs(attempt, err);
         console.warn('Versuch ' + (attempt+1) + ' fehlgeschlagen, wiederhole …', err.message);
@@ -3536,7 +3564,10 @@ async function extractScannedDeadlinesInBatches(fristenInstruction, signal){
   return dedupeDeadlineItems(allDeadlines);
 }
 function isInvalidRequestSizeError(err){
-  return err && (err.status === 400 || err.type === 'invalid_request_error' || /invalid_request_error|status 400/i.test(err.message || ''));
+  if(!err || err.status !== 400) return false;
+  const detail = `${err.message || ''} ${err.bodyText || ''}`.toLowerCase();
+  if(/model|max[_-]?tokens|parameter|header|permission|api key/.test(detail)) return false;
+  return /(too large|exceed|exceeds|maximum|input.*long|prompt.*long|request.*large|message.*large|image.*large|context.*length|tokens.*exceed)/i.test(detail);
 }
 function buildClassificationPrompt(itemsBatch, {typText, perspectiveText, classificationCalibration, guReviewRules}){
   return `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
@@ -3631,6 +3662,8 @@ async function createActionsInBatches(criticalItems, signal){
 document.getElementById('analyzeBtn').onclick = runAnalysis;
 
 document.getElementById('testBtn').onclick = async () => {
+  apiKey = document.getElementById('apiKeyInput').value.trim();
+  syncModelFromSelect();
   setError('');
   setStatus('Teste API-Verbindung …', 'loading');
   try{
@@ -3647,6 +3680,8 @@ document.getElementById('testBtn').onclick = async () => {
 };
 
 async function runAnalysis(){
+  apiKey = document.getElementById('apiKeyInput').value.trim() || apiKey;
+  syncModelFromSelect();
   analysisAbortController = new AbortController();
   const analysisSignal = analysisAbortController.signal;
   setAnalysisRunning(true);
