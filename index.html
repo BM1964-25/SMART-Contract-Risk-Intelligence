@@ -575,6 +575,9 @@
     width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px;
     font-family:inherit; font-size:13px; background:#fff;
   }
+  .kb-form input[type="checkbox"]{
+    width:auto; padding:0; margin:0; border:0; border-radius:0; flex:0 0 auto;
+  }
   .kb-form textarea{ min-height:132px; resize:vertical; }
   .kb-form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
   .kb-form-card{
@@ -590,7 +593,7 @@
     margin-top:8px; padding:9px 10px; border:1px solid var(--border); border-radius:6px;
     background:#fff; font-size:12.5px; color:var(--text-muted);
   }
-  .kb-checkline span{ display:block; }
+  .kb-checkline span{ display:block; flex:1; }
   .kb-list-head{ display:flex; justify-content:space-between; gap:12px; align-items:flex-end; margin-bottom:8px; }
   .kb-list-head h3{ font-family:inherit; margin:0; color:var(--navy); font-size:14px; }
   .kb-list-meta{ color:var(--text-muted); font-size:12px; }
