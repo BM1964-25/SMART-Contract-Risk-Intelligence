@@ -388,13 +388,16 @@
   }
   .summary-section-subtitle{ margin:-4px 0 12px; color:var(--text-muted); font-size:12.5px; line-height:1.45; }
   .risk-profile-grid{
-    display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin:18px 0 4px;
+    display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; margin:18px 0 4px;
   }
   .risk-profile-card{
     border:1px solid var(--border); border-radius:8px; padding:13px;
     display:grid; grid-template-columns:118px 1fr; gap:13px; align-items:center; background:#fffdf8;
   }
-  .risk-profile-card.summary{ display:flex; flex-direction:column; gap:9px; align-items:stretch; }
+  .risk-profile-card.summary{
+    grid-column:1 / -1; display:grid; grid-template-columns:minmax(220px,.55fr) minmax(260px,.8fr) minmax(360px,1.3fr);
+    gap:14px; align-items:center;
+  }
   .donut-chart{
     width:112px; height:112px; border-radius:50%; position:relative; flex-shrink:0;
     background:conic-gradient(var(--border) 0 360deg);
@@ -430,9 +433,21 @@
   }
   .summary-explain b{ color:var(--navy); }
   .index-scale{ margin-top:8px; display:flex; flex-direction:column; gap:4px; }
-  .index-scale-row{ display:grid; grid-template-columns:68px 1fr; gap:7px; align-items:center; font-size:10.5px; }
-  .index-scale-band{ height:6px; border-radius:999px; background:var(--border); }
-  .index-scale-band.active{ outline:2px solid rgba(15,42,74,0.16); outline-offset:1px; }
+  .index-scale-head{ display:flex; justify-content:space-between; gap:8px; font-size:10.5px; color:var(--text-muted); }
+  .index-scale-current{ color:var(--navy); font-weight:bold; }
+  .index-meter{ position:relative; height:10px; border-radius:999px; overflow:visible; background:var(--bg); }
+  .index-meter-segment{ position:absolute; top:0; bottom:0; }
+  .index-meter-segment:first-child{ border-radius:999px 0 0 999px; }
+  .index-meter-segment:last-of-type{ border-radius:0 999px 999px 0; }
+  .index-marker{
+    position:absolute; top:50%; width:13px; height:13px; border-radius:50%; background:#fff;
+    border:3px solid var(--navy); transform:translate(-50%,-50%); box-shadow:0 1px 4px rgba(0,0,0,.22);
+  }
+  .index-scale-labels{ display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-muted); }
+  @media(max-width:980px){
+    .risk-profile-grid{ grid-template-columns:1fr; }
+    .risk-profile-card.summary{ grid-template-columns:1fr; }
+  }
   .index-scale-label{ color:var(--text-muted); }
   @media (max-width:1040px){
     .risk-profile-grid{ grid-template-columns:1fr; }
@@ -3233,14 +3248,29 @@ function formatBandRange(band){
 function getImpactIndexAssessment(value){
   return getBand(value, IMPACT_INDEX_BANDS).desc;
 }
-function renderIndexScale(value, bands){
+function renderIndexScale(value, bands, title, cap){
   const active = getBand(value, bands);
-  return `<div class="index-scale" aria-label="Index-Einordnung">
-    ${bands.map(band => `
-      <div class="index-scale-row">
-        <span class="index-scale-label">${formatBandRange(band)} ${escapeHtml(band.label)}</span>
-        <span class="index-scale-band${band === active ? ' active' : ''}" style="background:${band.color}"></span>
-      </div>`).join('')}
+  const scaleMax = cap || Math.max(value, bands[bands.length - 1].min) || 1;
+  const pct = Math.max(0, Math.min(100, (Number(value) || 0) / scaleMax * 100));
+  const labels = ['0', ...bands.slice(1).map(b => String(b.min)), `${scaleMax}+`];
+  const segments = bands.map((band, index) => {
+    const start = Math.max(0, Math.min(100, band.min / scaleMax * 100));
+    const endValue = band.max === Infinity ? scaleMax : Math.min(band.max + 1, scaleMax);
+    const end = Math.max(start, Math.min(100, endValue / scaleMax * 100));
+    return `<span class="index-meter-segment" style="left:${start}%; width:${Math.max(0,end-start)}%; background:${band.color};" title="${escapeHtml(formatBandRange(band) + ' ' + band.label)}"></span>`;
+  }).join('');
+  return `<div class="index-scale" aria-label="${escapeHtml(title)}-Einordnung">
+    <div class="index-scale-head">
+      <span>${escapeHtml(title)}</span>
+      <span class="index-scale-current">${Number(value) || 0} Punkte · ${escapeHtml(active.label)}</span>
+    </div>
+    <div class="index-meter">
+      ${segments}
+      <span class="index-marker" style="left:${pct}%; border-color:${active.color};" title="${escapeHtml(title + ': ' + value + ' Punkte')}"></span>
+    </div>
+    <div class="index-scale-labels">
+      ${labels.map(label => `<span>${escapeHtml(label)}</span>`).join('')}
+    </div>
   </div>`;
 }
 function getOverallRiskAssessment(summary){
@@ -3313,8 +3343,9 @@ function renderOverallRiskCard(summary){
       <div class="summary-explain">
         <b>Einordnung:</b> Risikoindex ${assessment.weightedRisk} Punkte liegt im Bereich <b>${escapeHtml(assessment.band.label)}</b>
         (${escapeHtml(formatBandRange(assessment.band))}). Wirkungsindex ${Math.round(impactTotal)} Punkte liegt im Bereich
-        <b>${escapeHtml(impactBand.label)}</b> (${escapeHtml(formatBandRange(impactBand))}). Beide Werte sind nicht auf 100 begrenzt und kein pauschales Urteil über die Vertragsqualität.
-        ${renderIndexScale(assessment.weightedRisk, RISK_INDEX_BANDS)}
+        <b>${escapeHtml(impactBand.label)}</b> (${escapeHtml(formatBandRange(impactBand))}). Beide Werte sind nicht auf 100 begrenzt, kein pauschales Urteil über die Vertragsqualität und mit älteren Läufen nur eingeschränkt vergleichbar, wenn sich Analyseumfang oder Extraktionslogik geändert haben.
+        ${renderIndexScale(assessment.weightedRisk, RISK_INDEX_BANDS, 'Risikoindex', 50)}
+        ${renderIndexScale(Math.round(impactTotal), IMPACT_INDEX_BANDS, 'Wirkungsindex', 130)}
       </div>
     </div>`;
 }
@@ -3333,9 +3364,9 @@ function renderRiskProfileCharts(summary){
   const impactLabel = getImpactIndexAssessment(impactTotal);
   return `
     <div class="risk-profile-grid">
+      ${renderOverallRiskCard(summary)}
       ${renderDonutCard('Geschätzte Risikoverteilung', riskEntries, 'Risiken', 'Erkannte Risikopunkte nach Schweregrad. Entscheidend ist die Mischung der Stufen.')}
       ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Punkte', `Wirkungsindex ${Math.round(impactTotal)} Punkte: ${impactLabel}. Orientierungswert ohne feste 100er-Obergrenze.`)}
-      ${renderOverallRiskCard(summary)}
     </div>`;
 }
 function buildManagementSummary(items){
