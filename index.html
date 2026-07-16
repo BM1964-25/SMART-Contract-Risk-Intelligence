@@ -1460,7 +1460,7 @@ const HELP_CONTENT = [
     <p><b>„Kein API-Key hinterlegt"</b> – API-Key im Bereich „API-Zugang" eintragen und speichern.</p>
     <p><b>„Anthropic ist momentan überlastet" / Status 529</b> – der Anthropic-Dienst ist temporär ausgelastet. Das ist kein Hinweis auf verbrauchte API-Tokens und kein Fehler des Vertrags. Die App startet automatisch mehrere Wiederholungsversuche mit kurzer Wartezeit. Wenn der Fehler bestehen bleibt, bitte einige Minuten warten und die Analyse erneut starten.</p>
     <p><b>„Rate Limit" / Status 429</b> – es wurden zu viele Anfragen in kurzer Zeit gestellt oder das Konto ist aktuell begrenzt. Kurz warten, ggf. ein kleineres Dokument testen oder das Anthropic-Konto prüfen.</p>
-    <p><b>„invalid_request_error" / Status 400</b> – die Anfrage war für Anthropic zu groß oder formal nicht verarbeitbar. Das ist kein Token-Guthabenproblem. Die App verarbeitet Risiko-Klassifikation und Maßnahmen nun paketweise und teilt zu große Pakete automatisch weiter auf, damit umfangreiche Verträge mit vielen Klauselpunkten robuster analysiert werden.</p>
+    <p><b>„invalid_request_error" / Status 400</b> – die Anfrage war für Anthropic zu groß oder formal nicht verarbeitbar. Das ist kein Token-Guthabenproblem. Die App verarbeitet Klausel-Extraktion, Risiko-Klassifikation und Maßnahmen paketweise und teilt zu große Pakete automatisch weiter auf, damit umfangreiche Verträge mit vielen Seiten oder vielen Klauselpunkten robuster analysiert werden.</p>
     <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – der betroffene Analyseschritt hat zu viel JSON erzeugt. Lange Textdokumente werden nun automatisch in Abschnitten ausgewertet und anschließend konsolidiert; bei wiederholtem Auftreten kann ein Wechsel auf Opus 4.8 oder eine reduzierte Anlagenfassung helfen.</p>
     <p><b>„Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden"</b> – die übrige Analyse (Klauseln, Risikobewertung, Maßnahmen) bleibt davon unberührt und vollständig nutzbar; nur das Fristenmodul konnte in diesem Lauf nicht abgeschlossen werden. Ein erneuter Analyselauf kann helfen.</p>
     <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs ohne durchsuchbaren Text, bereitet alle Seiten als Bilder vor und analysiert sie in Seitenpaketen. Das dauert länger und kann höhere API-Kosten verursachen, verhindert aber, dass spätere Vertragsseiten unberücksichtigt bleiben.</p>
@@ -2805,7 +2805,7 @@ function getClaudeErrorMessage(status, type, requestId){
     return 'Der Anthropic-API-Key wurde abgelehnt. Bitte API-Key prüfen, speichern und Verbindung erneut testen.';
   }
   if(status === 400 && type === 'invalid_request_error'){
-    return 'Anthropic hat die Anfrage als zu groß oder formal nicht verarbeitbar abgelehnt. Die App teilt große Klassifikations- und Maßnahmenpakete automatisch in kleinere Teile; falls der Fehler bestehen bleibt, bitte Analyse erneut starten oder ein kleineres Dokument testen.';
+    return 'Anthropic hat die Anfrage als zu groß oder formal nicht verarbeitbar abgelehnt. Die App teilt große Klausel-, Klassifikations- und Maßnahmenpakete automatisch in kleinere Teile; falls der Fehler bestehen bleibt, bitte Analyse erneut starten oder ein kleineres Dokument testen.';
   }
   return 'API antwortete mit Status ' + status + (type ? ' (' + type + ')' : '') + (requestId ? ' · Anfrage: ' + requestId : '');
 }
@@ -2942,7 +2942,7 @@ async function callClaudeWithRetry(content, statusPrefix, maxTokens, signal){
     }catch(err){
       if(err.name === 'AbortError') throw err;
       lastErr = err;
-      const retryable = isTemporaryClaudeError(err) || attempt < 2;
+      const retryable = !isInvalidRequestSizeError(err) && (isTemporaryClaudeError(err) || attempt < 2);
       if(attempt < maxRetries && retryable){
         const delay = retryDelayMs(attempt, err);
         console.warn('Versuch ' + (attempt+1) + ' fehlgeschlagen, wiederhole …', err.message);
@@ -3037,23 +3037,48 @@ function chunkTextForAnalysis(text, size){
   }
   return chunks.filter(chunk => chunk.trim());
 }
+function buildTextStageOneChunkInstruction(extractInstruction, indexLabel){
+  return `${extractInstruction}
+
+Du siehst nur ${indexLabel}. Analysiere diesen Abschnitt vollständig, aber gib nur die wirtschaftlich oder rechtlich wesentlichen Punkte dieses Abschnitts zurück. Andere Abschnitte werden separat geprüft und anschließend zusammengeführt.`;
+}
+async function extractTextClauseChunkRecursive(extractInstruction, textChunk, signal, label){
+  const statusLabel = label === 'den Vertragstext' ? 'dem Vertragstext' : label;
+  const prompt = buildTextStageOneChunkInstruction(extractInstruction, label) + "\n\nVertragstext-Abschnitt:\n" + textChunk;
+  try{
+    const raw = await callClaudeWithRetry(prompt, `Extrahiere relevante Klauseln aus ${statusLabel} …`, 16000, signal);
+    return parseStageOneResult(parseJson(raw));
+  }catch(err){
+    if(err.name === 'AbortError') throw err;
+    if(isInvalidRequestSizeError(err) && textChunk.length > 9000){
+      const mid = Math.ceil(textChunk.length / 2);
+      let splitAt = textChunk.lastIndexOf('\n', mid);
+      if(splitAt < Math.floor(textChunk.length * 0.35)) splitAt = mid;
+      setStatus(`${label} ist zu groß, teile in kleinere Textpakete …`, 'loading');
+      const first = await extractTextClauseChunkRecursive(extractInstruction, textChunk.slice(0, splitAt), signal, `${label} Teil A`);
+      const second = await extractTextClauseChunkRecursive(extractInstruction, textChunk.slice(splitAt), signal, `${label} Teil B`);
+      return {
+        projektkontext: first.projektkontext || second.projektkontext || '',
+        marktvergleich: mergeMarketComparisons([first.marktvergleich, second.marktvergleich]),
+        items: [...(first.items || []), ...(second.items || [])]
+      };
+    }
+    throw err;
+  }
+}
 async function extractTextClausesInBatches(extractInstruction, text, signal){
   const chunks = chunkTextForAnalysis(text, TEXT_STAGE_CHUNK_SIZE);
   if(chunks.length <= 1){
-    const raw = await callClaudeWithRetry(extractInstruction + "\n\nVertragstext:\n" + text, 'Extrahiere relevante Klauseln …', 24000, signal);
-    return parseStageOneResult(parseJson(raw));
+    return extractTextClauseChunkRecursive(extractInstruction, text, signal, 'den Vertragstext');
   }
   const allItems = [];
   const contexts = [];
   const markets = [];
   for(let i=0;i<chunks.length;i++){
-    const prefix = `Extrahiere relevante Klauseln aus Textabschnitt ${i+1}/${chunks.length} …`;
+    const label = `Textabschnitt ${i+1}/${chunks.length}`;
+    const prefix = `Extrahiere relevante Klauseln aus ${label} …`;
     setStatus(prefix, 'loading');
-    const chunkInstruction = `${extractInstruction}
-
-Du siehst nur Textabschnitt ${i+1} von ${chunks.length}. Analysiere diesen Abschnitt vollständig, aber gib nur die wirtschaftlich oder rechtlich wesentlichen Punkte dieses Abschnitts zurück. Spätere Abschnitte werden separat geprüft und anschließend zusammengeführt.`;
-    const raw = await callClaudeWithRetry(chunkInstruction + "\n\nVertragstext-Abschnitt:\n" + chunks[i], prefix, 16000, signal);
-    const parsed = parseStageOneResult(parseJson(raw));
+    const parsed = await extractTextClauseChunkRecursive(extractInstruction, chunks[i], signal, label);
     allItems.push(...parsed.items.map(item => ({...item, quelle:`Textabschnitt ${i+1}/${chunks.length}`})));
     if(parsed.projektkontext) contexts.push(parsed.projektkontext);
     if(parsed.marktvergleich) markets.push(parsed.marktvergleich);
@@ -3088,6 +3113,29 @@ ${JSON.stringify(dedupedItems)}`;
     return {items:dedupedItems, projektkontext:contexts[0] || '', marktvergleich:mergeMarketComparisons(markets)};
   }
 }
+async function extractScannedClauseBatchRecursive(extractInstruction, images, startPage, totalPages, signal, label){
+  const endPage = startPage + images.length - 1;
+  const statusLabel = label || `Scan-Seiten ${startPage}-${endPage}`;
+  const content = buildImageBatchContent(images, extractInstruction, startPage, endPage, totalPages);
+  try{
+    const raw = await callClaudeWithRetry(content, `Extrahiere relevante Klauseln aus ${statusLabel} …`, 16000, signal);
+    return parseStageOneResult(parseJson(raw));
+  }catch(err){
+    if(err.name === 'AbortError') throw err;
+    if(isInvalidRequestSizeError(err) && images.length > 1){
+      const mid = Math.ceil(images.length / 2);
+      setStatus(`${statusLabel} ist zu groß, teile in kleinere Scan-Pakete …`, 'loading');
+      const first = await extractScannedClauseBatchRecursive(extractInstruction, images.slice(0, mid), startPage, totalPages, signal, `${statusLabel} Teil A`);
+      const second = await extractScannedClauseBatchRecursive(extractInstruction, images.slice(mid), startPage + mid, totalPages, signal, `${statusLabel} Teil B`);
+      return {
+        projektkontext: first.projektkontext || second.projektkontext || '',
+        marktvergleich: mergeMarketComparisons([first.marktvergleich, second.marktvergleich]),
+        items: [...(first.items || []), ...(second.items || [])]
+      };
+    }
+    throw err;
+  }
+}
 async function extractScannedClausesInBatches(extractInstruction, signal){
   const batches = chunkArray(documentImages, SCAN_BATCH_SIZE);
   const allItems = [];
@@ -3098,9 +3146,7 @@ async function extractScannedClausesInBatches(extractInstruction, signal){
     const endPage = Math.min(startPage + batches[i].length - 1, documentImages.length);
     const prefix = `Extrahiere relevante Klauseln aus Scan-Seiten ${startPage}-${endPage} (${i+1}/${batches.length}) …`;
     setStatus(prefix, 'loading');
-    const content = buildImageBatchContent(batches[i], extractInstruction, startPage, endPage, documentImages.length);
-    const raw = await callClaudeWithRetry(content, prefix, undefined, signal);
-    const parsed = parseStageOneResult(parseJson(raw));
+    const parsed = await extractScannedClauseBatchRecursive(extractInstruction, batches[i], startPage, documentImages.length, signal, `Scan-Seiten ${startPage}-${endPage} (${i+1}/${batches.length})`);
     allItems.push(...parsed.items.map(item => ({...item, quelle:`Seiten ${startPage}-${endPage}`})));
     if(parsed.projektkontext) contexts.push(parsed.projektkontext);
     if(parsed.marktvergleich) markets.push(parsed.marktvergleich);
