@@ -186,6 +186,11 @@
   }
   .btn:hover{ background:var(--navy-light); }
   .btn:disabled{ background:#a9a9a9; cursor:not-allowed; }
+  .btn.working:disabled{ background:var(--navy); color:#fff; opacity:1; }
+  .btn .btn-spinner{
+    width:15px; height:15px; border:2px solid rgba(255,255,255,.45); border-top-color:#fff;
+    border-radius:50%; display:inline-block; flex-shrink:0; animation:sc-spin .8s linear infinite;
+  }
   .btn.secondary{ background:transparent; color:var(--navy); border:1px solid var(--border); }
   .btn.secondary:hover{ background:var(--bg); }
   .btn.small{ width:auto; padding:7px 14px; font-size:12.5px; margin-top:0; }
@@ -1943,6 +1948,10 @@ function hasAnalyzableDocument(){
 function updateAnalyzeButtonState(){
   const analyzeBtn = document.getElementById('analyzeBtn');
   if(!analyzeBtn) return;
+  analyzeBtn.classList.toggle('working', isAnalysisRunning);
+  analyzeBtn.innerHTML = isAnalysisRunning
+    ? '<span class="btn-spinner" aria-hidden="true"></span><span>KI analysiert …</span>'
+    : 'Analyse starten';
   analyzeBtn.disabled = isAnalysisRunning || !hasAnalyzableDocument() || (!!currentBasisIssue && !contractBasisConfirmed);
 }
 function looksLikePlanningContract(text){
