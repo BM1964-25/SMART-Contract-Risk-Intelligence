@@ -659,6 +659,16 @@
   .internal-shot .line{ height:7px; border-radius:999px; background:var(--gold-light); margin-top:9px; }
   .internal-shot .line:nth-child(3){ width:72%; background:#e8e3d5; }
   .internal-shot .line:nth-child(4){ width:88%; background:#e8e3d5; }
+  .internal-software-shot{
+    border:1px solid var(--border); border-radius:10px; background:#fff; padding:10px;
+    box-shadow:0 10px 24px rgba(15,42,74,.10);
+  }
+  .internal-software-shot img{
+    display:block; width:100%; border-radius:7px; border:1px solid #d8d2c4;
+  }
+  .internal-software-shot figcaption{
+    margin-top:8px; color:var(--text-muted); font-size:12px; text-align:center;
+  }
   .internal-steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px; position:relative; }
   .internal-steps:before{ content:""; position:absolute; left:7%; right:7%; top:28px; height:2px; background:linear-gradient(90deg, var(--gold), rgba(201,162,39,.18)); }
   .internal-step{
@@ -1051,14 +1061,10 @@
             <li>E-Mail-Support</li>
           </ul>
         </div>
-        <div class="internal-shot" style="min-height:260px;">
-          <b>Screenshot der Software</b>
-          <div class="line"></div><div class="line"></div><div class="line"></div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:18px;">
-            <div class="internal-card"><b>Risiko</b><span>Management Summary</span></div>
-            <div class="internal-card"><b>Fristen</b><span>Terminübersicht</span></div>
-          </div>
-        </div>
+        <figure class="internal-software-shot">
+          <img src="assets/software-dashboard-screenshot.png" alt="Screenshot der SMART Contract & Risk Intelligence Oberfläche">
+          <figcaption>Softwareoberfläche mit API-Zugang, Dokument-Upload, Analyse-Pipeline und Wissensbasis.</figcaption>
+        </figure>
       </section>
 
       <section class="internal-page">
