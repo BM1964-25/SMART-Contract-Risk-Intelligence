@@ -1791,6 +1791,8 @@ const ALLOWED_MODELS = new Set(["claude-sonnet-5", "claude-opus-4-8", "claude-ha
 let MODEL = DEFAULT_MODEL;
 const DOC_CHAR_LIMIT = 300000; // ca. 100-110 Seiten bei ~2800 Zeichen/Seite
 const TEXT_STAGE_CHUNK_SIZE = 24000; // kleinere Einstiegspakete verhindern zu große Anthropic-Requests
+const CLASSIFICATION_BATCH_SIZE = 10;
+const ACTION_BATCH_SIZE = 10;
 const CLAUDE_DEFAULT_MAX_TOKENS = 8000;
 const CLAUDE_STAGE1_MAX_TOKENS = 6000;
 const CLAUDE_CONSOLIDATION_MAX_TOKENS = 8000;
@@ -3664,6 +3666,11 @@ function isInvalidRequestSizeError(err){
   if(/model|max[_-]?tokens|parameter|header|permission|api key/.test(detail)) return false;
   return /(too large|exceed|exceeds|maximum|input.*long|prompt.*long|request.*large|message.*large|image.*large|context.*length|tokens.*exceed)/i.test(detail);
 }
+function shouldSplitAiBatch(err){
+  const detail = `${err?.message || ''} ${err?.bodyText || ''}`.toLowerCase();
+  return isInvalidRequestSizeError(err)
+    || /kein gültiges json|ungueltiges json|unvollständiges json|unvollstaendiges json|max_tokens|token-limit|token limit|antwort.*abgeschnitten|output.*long|response.*long/.test(detail);
+}
 function buildClassificationPrompt(itemsBatch, {typText, perspectiveText, classificationCalibration, guReviewRules}){
   return `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
 Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch echte Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere ausdrücklich strafbewehrte Termine, oder das Zusammenwirken von Vollständigkeitsklausel + funktionaler Leistungsbeschreibung + fehlender Detailbeschreibung). Kumulation nur annehmen, wenn Belastungen tatsächlich gleichzeitig oder ohne vollständige Anrechnung wirken. Wenn der Vertrag Anrechnung, Austausch, Zug-um-Zug-Mechanik, Bedingungen oder Ausnahmen vorsieht, muss dies die Einstufung mindern oder präzisieren. Wenn zwei oder mehr Punkte inhaltlich unmittelbar zusammenhängen (z.B. Leistungsverweigerungsrecht und Anordnungsrecht), benenne diesen Zusammenhang explizit in der Begründung beider Punkte als Kombinationsrisiko.
@@ -3689,10 +3696,10 @@ async function classifyBatchRecursive(itemsBatch, options, signal, batchLabel){
     return Array.isArray(parsed) ? parsed : [];
   }catch(err){
     if(err.name === 'AbortError') throw err;
-    if(isInvalidRequestSizeError(err) && itemsBatch.length > 1){
+    if(shouldSplitAiBatch(err) && itemsBatch.length > 1){
       const mid = Math.ceil(itemsBatch.length / 2);
       console.warn('Klassifikationspaket zu groß, teile weiter auf:', itemsBatch.length, err.message);
-      setStatus(`${batchLabel} (Paket zu groß, teile in kleinere Pakete …)`, 'loading');
+      setStatus(`${batchLabel} (Antwort/Paket zu groß, teile in kleinere Pakete …)`, 'loading');
       const left = await classifyBatchRecursive(itemsBatch.slice(0, mid), options, signal, batchLabel + ' · Teil A');
       const right = await classifyBatchRecursive(itemsBatch.slice(mid), options, signal, batchLabel + ' · Teil B');
       return [...left, ...right];
@@ -3701,7 +3708,7 @@ async function classifyBatchRecursive(itemsBatch, options, signal, batchLabel){
   }
 }
 async function classifyItemsWithContextInBatches(itemsWithContext, options, signal){
-  const batches = chunkArray(itemsWithContext, 20);
+  const batches = chunkArray(itemsWithContext, CLASSIFICATION_BATCH_SIZE);
   const classifications = [];
   for(let i=0;i<batches.length;i++){
     const label = batches.length > 1
@@ -3729,10 +3736,10 @@ async function actionBatchRecursive(itemsBatch, signal, batchLabel){
     return Array.isArray(parsed) ? parsed : [];
   }catch(err){
     if(err.name === 'AbortError') throw err;
-    if(isInvalidRequestSizeError(err) && itemsBatch.length > 1){
+    if(shouldSplitAiBatch(err) && itemsBatch.length > 1){
       const mid = Math.ceil(itemsBatch.length / 2);
       console.warn('Maßnahmenpaket zu groß, teile weiter auf:', itemsBatch.length, err.message);
-      setStatus(`${batchLabel} (Paket zu groß, teile in kleinere Pakete …)`, 'loading');
+      setStatus(`${batchLabel} (Antwort/Paket zu groß, teile in kleinere Pakete …)`, 'loading');
       const left = await actionBatchRecursive(itemsBatch.slice(0, mid), signal, batchLabel + ' · Teil A');
       const right = await actionBatchRecursive(itemsBatch.slice(mid), signal, batchLabel + ' · Teil B');
       return [...left, ...right];
@@ -3741,7 +3748,7 @@ async function actionBatchRecursive(itemsBatch, signal, batchLabel){
   }
 }
 async function createActionsInBatches(criticalItems, signal){
-  const batches = chunkArray(criticalItems, 20);
+  const batches = chunkArray(criticalItems, ACTION_BATCH_SIZE);
   const actions = [];
   for(let i=0;i<batches.length;i++){
     const label = batches.length > 1
