@@ -1030,7 +1030,7 @@ const HELP_CONTENT = [
   { id:"fehler", title:"Fehler & Lösungen", body:`
     <h3>Fehler & Lösungen</h3>
     <p><b>„Kein API-Key hinterlegt"</b> – API-Key im Bereich „API-Zugang" eintragen und speichern.</p>
-    <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – das Dokument ist für diesen Analyseschritt sehr umfangreich. Erneut versuchen; bei wiederholtem Auftreten hilft manchmal ein Wechsel auf ein leistungsfähigeres Modell (z. B. Opus 4.8) oder ein kürzeres Dokument.</p>
+    <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – der betroffene Analyseschritt hat zu viel JSON erzeugt. Lange Textdokumente werden nun automatisch in Abschnitten ausgewertet und anschließend konsolidiert; bei wiederholtem Auftreten kann ein Wechsel auf Opus 4.8 oder eine reduzierte Anlagenfassung helfen.</p>
     <p><b>„Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden"</b> – die übrige Analyse (Klauseln, Risikobewertung, Maßnahmen) bleibt davon unberührt und vollständig nutzbar; nur das Fristenmodul konnte in diesem Lauf nicht abgeschlossen werden. Ein erneuter Analyselauf kann helfen.</p>
     <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs ohne durchsuchbaren Text, bereitet alle Seiten als Bilder vor und analysiert sie in Seitenpaketen. Das dauert länger und kann höhere API-Kosten verursachen, verhindert aber, dass spätere Vertragsseiten unberücksichtigt bleiben.</p>
     <p><b>„Analyse abgebrochen"</b> – die laufende Prüfung wurde gestoppt. Es wird kein neues Analyseergebnis gespeichert. Der Arbeitsbereich kann anschließend zurückgesetzt oder mit derselben bzw. einer neuen Datei erneut gestartet werden.</p>
@@ -1090,6 +1090,7 @@ document.addEventListener('keydown', (e) => {
 
 let MODEL = "claude-sonnet-5";
 const DOC_CHAR_LIMIT = 300000; // ca. 100-110 Seiten bei ~2800 Zeichen/Seite
+const TEXT_STAGE_CHUNK_SIZE = 55000; // hält JSON-Antworten bei langen Textverträgen stabil
 let apiKey = "";
 let currentContractType = "vob";
 let currentPerspective = "auftragnehmer";
@@ -2345,7 +2346,7 @@ async function callClaude(content, maxTokens, signal){
   }
   const textBlock = (data.content||[]).find(c => c.type === 'text');
   if(data.stop_reason === 'max_tokens'){
-    throw new Error('Antwort wurde wegen Erreichen des Token-Limits abgeschnitten' + (textBlock ? ' (unvollständiges JSON)' : ' (kein Text mehr erzeugt)') + '. Das Dokument ist vermutlich zu umfangreich für diesen Analyseschritt. Bitte erneut versuchen; bei wiederholtem Auftreten ein kürzeres Dokument testen oder Claude informieren.');
+    throw new Error('Antwort wurde wegen Erreichen des Token-Limits abgeschnitten' + (textBlock ? ' (unvollständiges JSON)' : ' (kein Text mehr erzeugt)') + '. Der Analyseschritt hat zu viel Ausgabe erzeugt. Die App versucht lange Text- und Scan-Dokumente abschnittsweise zu prüfen; bei wiederholtem Auftreten bitte Opus 4.8 oder eine reduzierte Anlagenfassung testen.');
   }
   if(!textBlock){
     const usage = data.usage ? ` (Input-Tokens: ${data.usage.input_tokens}, Output-Tokens: ${data.usage.output_tokens})` : '';
@@ -2488,6 +2489,71 @@ Du siehst nur den Seitenabschnitt ${startPage}-${endPage} von insgesamt ${totalP
   });
   return content;
 }
+function chunkTextForAnalysis(text, size){
+  const chunks = [];
+  let pos = 0;
+  while(pos < text.length){
+    let end = Math.min(pos + size, text.length);
+    if(end < text.length){
+      const boundary = text.lastIndexOf('\n', end);
+      if(boundary > pos + Math.floor(size * 0.65)) end = boundary;
+    }
+    chunks.push(text.slice(pos, end));
+    pos = end;
+  }
+  return chunks.filter(chunk => chunk.trim());
+}
+async function extractTextClausesInBatches(extractInstruction, text, signal){
+  const chunks = chunkTextForAnalysis(text, TEXT_STAGE_CHUNK_SIZE);
+  if(chunks.length <= 1){
+    const raw = await callClaudeWithRetry(extractInstruction + "\n\nVertragstext:\n" + text, 'Extrahiere relevante Klauseln …', 24000, signal);
+    return parseStageOneResult(parseJson(raw));
+  }
+  const allItems = [];
+  const contexts = [];
+  const markets = [];
+  for(let i=0;i<chunks.length;i++){
+    const prefix = `Extrahiere relevante Klauseln aus Textabschnitt ${i+1}/${chunks.length} …`;
+    setStatus(prefix, 'loading');
+    const chunkInstruction = `${extractInstruction}
+
+Du siehst nur Textabschnitt ${i+1} von ${chunks.length}. Analysiere diesen Abschnitt vollständig, aber gib nur die wirtschaftlich oder rechtlich wesentlichen Punkte dieses Abschnitts zurück. Spätere Abschnitte werden separat geprüft und anschließend zusammengeführt.`;
+    const raw = await callClaudeWithRetry(chunkInstruction + "\n\nVertragstext-Abschnitt:\n" + chunks[i], prefix, 16000, signal);
+    const parsed = parseStageOneResult(parseJson(raw));
+    allItems.push(...parsed.items.map(item => ({...item, quelle:`Textabschnitt ${i+1}/${chunks.length}`})));
+    if(parsed.projektkontext) contexts.push(parsed.projektkontext);
+    if(parsed.marktvergleich) markets.push(parsed.marktvergleich);
+  }
+  const dedupedItems = dedupeClauseItems(allItems);
+  const consolidationPrompt = `Du konsolidierst Teilergebnisse einer vollständig geprüften Vertragsdatei. Alle Textabschnitte wurden berücksichtigt. Fasse doppelte oder sehr ähnliche Punkte zusammen, erhalte aber alle wirtschaftlich oder rechtlich wesentlichen Risiken. Kritische Themen wie Vertragsstrafe, Sicherheiten, Abnahme, Dokumentation, Fristen, Zahlung, Nachträge, Haftung, Kündigung, BIM/Planung und Projektziele dürfen nicht verloren gehen.
+Gib typischerweise 12 bis 25 eindeutige Punkte zurück; bei sehr umfangreichen Verträgen auch mehr, wenn fachlich erforderlich. Entferne nur echte Dubletten.
+Nutze vorhandene Projektkontexte und Marktvergleichswerte, soweit sie belastbar sind.
+Antworte AUSSCHLIESSLICH mit JSON im Format:
+{"projektkontext":"kurzer Satz","marktvergleich":{},"items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze konkrete Paraphrase"}]}
+
+Projektkontexte:
+${JSON.stringify(contexts)}
+
+Marktvergleich:
+${JSON.stringify(mergeMarketComparisons(markets))}
+
+Teilergebnisse:
+${JSON.stringify(dedupedItems)}`;
+  try{
+    setStatus('Führe Text-Teilergebnisse zu einer Gesamtauswertung zusammen …', 'loading');
+    const raw = await callClaudeWithRetry(consolidationPrompt, 'Führe Text-Teilergebnisse zusammen …', 20000, signal);
+    const parsed = parseStageOneResult(parseJson(raw));
+    return {
+      items: dedupeClauseItems(parsed.items),
+      projektkontext: parsed.projektkontext || contexts[0] || '',
+      marktvergleich: Object.keys(parsed.marktvergleich || {}).length ? parsed.marktvergleich : mergeMarketComparisons(markets)
+    };
+  }catch(err){
+    if(err.name === 'AbortError') throw err;
+    console.warn('Konsolidierung der Text-Klauseln fehlgeschlagen, nutze deduplizierte Teilergebnisse', err);
+    return {items:dedupedItems, projektkontext:contexts[0] || '', marktvergleich:mergeMarketComparisons(markets)};
+  }
+}
 async function extractScannedClausesInBatches(extractInstruction, signal){
   const batches = chunkArray(documentImages, SCAN_BATCH_SIZE);
   const allItems = [];
@@ -2621,12 +2687,10 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       projektKontext = scannedStage1.projektkontext;
       marktvergleich = scannedStage1.marktvergleich;
     } else {
-      const extractContent = extractInstruction + "\n\nVertragstext:\n" + docExcerpt;
-      const stage1Raw = await callClaudeWithRetry(extractContent, 'Extrahiere relevante Klauseln …', undefined, analysisSignal);
-      const stage1Parsed = parseJson(stage1Raw);
-      items = Array.isArray(stage1Parsed) ? stage1Parsed : (stage1Parsed.items || []);
-      projektKontext = Array.isArray(stage1Parsed) ? '' : (stage1Parsed.projektkontext || '');
-      marktvergleich = Array.isArray(stage1Parsed) ? {} : (stage1Parsed.marktvergleich || {});
+      const textStage1 = await extractTextClausesInBatches(extractInstruction, docExcerpt, analysisSignal);
+      items = textStage1.items;
+      projektKontext = textStage1.projektkontext;
+      marktvergleich = textStage1.marktvergleich;
     }
     setPipelineStep(1,'done');
 
