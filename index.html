@@ -1791,8 +1791,8 @@ const ALLOWED_MODELS = new Set(["claude-sonnet-5", "claude-opus-4-8", "claude-ha
 let MODEL = DEFAULT_MODEL;
 const DOC_CHAR_LIMIT = 300000; // ca. 100-110 Seiten bei ~2800 Zeichen/Seite
 const TEXT_STAGE_CHUNK_SIZE = 24000; // kleinere Einstiegspakete verhindern zu große Anthropic-Requests
-const CLASSIFICATION_BATCH_SIZE = 10;
-const ACTION_BATCH_SIZE = 10;
+const CLASSIFICATION_BATCH_SIZE = 5;
+const ACTION_BATCH_SIZE = 8;
 const CLAUDE_DEFAULT_MAX_TOKENS = 8000;
 const CLAUDE_STAGE1_MAX_TOKENS = 6000;
 const CLAUDE_CONSOLIDATION_MAX_TOKENS = 8000;
@@ -3262,6 +3262,10 @@ function parseJson(raw){
     throw new Error('Modellantwort war kein gültiges JSON (' + e.message + '). Ausschnitt: ' + cleaned.slice(0,150));
   }
 }
+function isOutputLimitError(err){
+  const detail = `${err?.message || ''} ${err?.bodyText || ''}`.toLowerCase();
+  return /token-limit|token limit|erreichen des token-limits|max_tokens|antwort.*abgeschnitten|kein text mehr erzeugt|zu viel ausgabe|ausgabelimit|output.*long|response.*long/.test(detail);
+}
 
 // ---------- pipeline UI ----------
 function setPipelineStep(step, state){
@@ -3315,7 +3319,7 @@ async function callClaudeWithRetry(content, statusPrefix, maxTokens, signal){
     }catch(err){
       if(err.name === 'AbortError') throw err;
       lastErr = err;
-      const retryable = isTemporaryClaudeError(err) || (!(err instanceof ClaudeApiError) && !isInvalidRequestSizeError(err) && attempt < 2);
+      const retryable = isTemporaryClaudeError(err) || (!(err instanceof ClaudeApiError) && !isInvalidRequestSizeError(err) && !isOutputLimitError(err) && attempt < 2);
       if(attempt < maxRetries && retryable){
         const delay = retryDelayMs(attempt, err);
         console.warn('Versuch ' + (attempt+1) + ' fehlgeschlagen, wiederhole …', err.message);
@@ -3669,7 +3673,19 @@ function isInvalidRequestSizeError(err){
 function shouldSplitAiBatch(err){
   const detail = `${err?.message || ''} ${err?.bodyText || ''}`.toLowerCase();
   return isInvalidRequestSizeError(err)
-    || /kein gültiges json|ungueltiges json|unvollständiges json|unvollstaendiges json|max_tokens|token-limit|token limit|antwort.*abgeschnitten|output.*long|response.*long/.test(detail);
+    || isOutputLimitError(err)
+    || /kein gültiges json|ungueltiges json|unvollständiges json|unvollstaendiges json/.test(detail);
+}
+function compactClassificationContext(matches){
+  if(!matches.length) return 'keine spezifische Referenz in der Wissensbasis gefunden';
+  let total = 0;
+  return matches.slice(0, 3).map(k => {
+    const title = String(k.title || '').trim();
+    const text = String(k.text || '').replace(/\s+/g, ' ').trim().slice(0, 420);
+    const part = `${title}: ${text}`;
+    total += part.length;
+    return total > 1400 ? part.slice(0, Math.max(120, part.length - (total - 1400))) : part;
+  }).filter(Boolean).join(' | ');
 }
 function buildClassificationPrompt(itemsBatch, {typText, perspectiveText, classificationCalibration, guReviewRules}){
   return `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
@@ -3683,7 +3699,7 @@ ${classificationCalibration}
 ${guReviewRules}
 Ordne zusätzlich jedem Punkt im Feld "auswirkung" die primäre wirtschaftliche Auswirkungsebene zu (nur einen Wert wählen, den treffendsten): "Liquidität" (Zahlungsflüsse, Vorleistungspflicht, Einbehalte, Bürgschaften), "Termin" (Bauzeit, Verzug, Fristen), "Haftung" (Gewährleistung, Schadensersatz, Prüf-/Sorgfaltspflichten), "Nachtrag" (Leistungsänderung, Vergütungsanpassung, Anordnungsrecht), "Marge" (Kostenrisiko, Deckungsbeitrag, Pauschalierungsrisiko, Festpreis-/Gleitklauselrisiko) oder "Sonstiges".
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-[{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","auswirkung":"Liquidität|Termin|Haftung|Nachtrag|Marge|Sonstiges","begruendung":"max 20 Wörter"}]
+[{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","auswirkung":"Liquidität|Termin|Haftung|Nachtrag|Marge|Sonstiges","begruendung":"max 12 Wörter"}]
 
 Punkte mit jeweiligem Kontext:
 ${JSON.stringify(itemsBatch.map(({_referenzTitel, ...rest}) => rest))}`;
@@ -3886,7 +3902,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       const matches = retrieveContextForItem(it, 3);
       return {
         ...it,
-        kontext: matches.length ? matches.map(k => `${k.title}: ${k.text}`).join(' | ') : 'keine spezifische Referenz in der Wissensbasis gefunden',
+        kontext: compactClassificationContext(matches),
         _referenzTitel: matches.map(k => k.title)
       };
     });
