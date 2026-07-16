@@ -1403,6 +1403,7 @@ const HELP_CONTENT = [
     <p><b>„Kein API-Key hinterlegt"</b> – API-Key im Bereich „API-Zugang" eintragen und speichern.</p>
     <p><b>„Anthropic ist momentan überlastet" / Status 529</b> – der Anthropic-Dienst ist temporär ausgelastet. Das ist kein Hinweis auf verbrauchte API-Tokens und kein Fehler des Vertrags. Die App startet automatisch mehrere Wiederholungsversuche mit kurzer Wartezeit. Wenn der Fehler bestehen bleibt, bitte einige Minuten warten und die Analyse erneut starten.</p>
     <p><b>„Rate Limit" / Status 429</b> – es wurden zu viele Anfragen in kurzer Zeit gestellt oder das Konto ist aktuell begrenzt. Kurz warten, ggf. ein kleineres Dokument testen oder das Anthropic-Konto prüfen.</p>
+    <p><b>„invalid_request_error" / Status 400</b> – die Anfrage war für Anthropic zu groß oder formal nicht verarbeitbar. Das ist kein Token-Guthabenproblem. Die App verarbeitet Risiko-Klassifikation und Maßnahmen nun paketweise und teilt zu große Pakete automatisch weiter auf, damit umfangreiche Verträge mit vielen Klauselpunkten robuster analysiert werden.</p>
     <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – der betroffene Analyseschritt hat zu viel JSON erzeugt. Lange Textdokumente werden nun automatisch in Abschnitten ausgewertet und anschließend konsolidiert; bei wiederholtem Auftreten kann ein Wechsel auf Opus 4.8 oder eine reduzierte Anlagenfassung helfen.</p>
     <p><b>„Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden"</b> – die übrige Analyse (Klauseln, Risikobewertung, Maßnahmen) bleibt davon unberührt und vollständig nutzbar; nur das Fristenmodul konnte in diesem Lauf nicht abgeschlossen werden. Ein erneuter Analyselauf kann helfen.</p>
     <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs ohne durchsuchbaren Text, bereitet alle Seiten als Bilder vor und analysiert sie in Seitenpaketen. Das dauert länger und kann höhere API-Kosten verursachen, verhindert aber, dass spätere Vertragsseiten unberücksichtigt bleiben.</p>
@@ -2746,6 +2747,9 @@ function getClaudeErrorMessage(status, type, requestId){
   if(status === 401 || status === 403){
     return 'Der Anthropic-API-Key wurde abgelehnt. Bitte API-Key prüfen, speichern und Verbindung erneut testen.';
   }
+  if(status === 400 && type === 'invalid_request_error'){
+    return 'Anthropic hat die Anfrage als zu groß oder formal nicht verarbeitbar abgelehnt. Die App teilt große Klassifikations- und Maßnahmenpakete automatisch in kleinere Teile; falls der Fehler bestehen bleibt, bitte Analyse erneut starten oder ein kleineres Dokument testen.';
+  }
   return 'API antwortete mit Status ' + status + (type ? ' (' + type + ')' : '') + (requestId ? ' · Anfrage: ' + requestId : '');
 }
 function isTemporaryClaudeError(err){
@@ -3094,6 +3098,98 @@ async function extractScannedDeadlinesInBatches(fristenInstruction, signal){
   }
   return dedupeDeadlineItems(allDeadlines);
 }
+function isInvalidRequestSizeError(err){
+  return err && (err.status === 400 || err.type === 'invalid_request_error' || /invalid_request_error|status 400/i.test(err.message || ''));
+}
+function buildClassificationPrompt(itemsBatch, {typText, perspectiveText, classificationCalibration, guReviewRules}){
+  return `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
+Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch echte Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere ausdrücklich strafbewehrte Termine, oder das Zusammenwirken von Vollständigkeitsklausel + funktionaler Leistungsbeschreibung + fehlender Detailbeschreibung). Kumulation nur annehmen, wenn Belastungen tatsächlich gleichzeitig oder ohne vollständige Anrechnung wirken. Wenn der Vertrag Anrechnung, Austausch, Zug-um-Zug-Mechanik, Bedingungen oder Ausnahmen vorsieht, muss dies die Einstufung mindern oder präzisieren. Wenn zwei oder mehr Punkte inhaltlich unmittelbar zusammenhängen (z.B. Leistungsverweigerungsrecht und Anordnungsrecht), benenne diesen Zusammenhang explizit in der Begründung beider Punkte als Kombinationsrisiko.
+Kalibrierung der Risikoverteilung: Verteile die Einstufungen realistisch und nicht zu gleichmäßig. "kritisch" ist die Ausnahme und gehört nur den wenigen wirklich gravierendsten Punkten im gesamten Vertrag. "hoch" ist eine kleinere bis mittlere Gruppe. Die Mehrheit der Punkte sollte "mittel" oder "niedrig" sein. Vermeide, dass am Ende ungefähr gleich viele Punkte in jeder Stufe landen.
+Konsolidierungsregel: Bewerte echte Einzelrisiken, aber vermeide künstliche Verschlechterung durch doppelte oder sehr ähnliche Punkte. Wenn mehrere Klauseln dasselbe Risikothema betreffen (z.B. Sicherheiten/Einbehalte, Abnahme/Dokumentation, Vertragsstrafe/Termine, Open-Book/Marge), dürfen sie nur dann mehrfach "hoch" oder "kritisch" sein, wenn jede Klausel eine eigenständige zusätzliche Belastung mit eigener Folge erzeugt. Andernfalls stufe Nebenpunkte niedriger ein und benenne in der Begründung den Zusammenhang zum Hauptrisiko.
+Bewertungskriterien: Beurteile jeden Punkt nach (1) Schwere der rechtlichen/wirtschaftlichen Folge, (2) Eintrittsnähe und Steuerbarkeit, (3) Abweichung vom marktüblichen Standard, (4) Kumulation mit anderen Klauseln und (5) absoluter wirtschaftlicher Wirkung. Eine marktübliche, klar begrenzte, austauschbare oder befristete Regelung ist nicht automatisch "kritisch", auch wenn sie wirtschaftlich relevant ist. Nutze "kritisch" nur bei unmittelbarer erheblicher Belastung, ungewöhnlicher Einseitigkeit, fehlender Begrenzung, konkreter Zahlungs-/Abnahmeblockade, Rechtsverlust oder starker Kumulation.
+Sicherheiten-Regel: Bürgschaften um ca. 10% der Auftragssumme oder übliche Sicherheitseinbehalte sind regelmäßig "hoch", wenn sie Liquidität/Avalrahmen spürbar belasten. "Kritisch" nur bei zusätzlicher Kumulation, außergewöhnlicher absoluter Höhe, fehlender Rückgabe-/Austauschmöglichkeit, sehr kurzer Stellungfrist, Zahlungssperre, Abnahmeblockade oder besonderer Existenz-/Projektwirkung.
+Margen-Regel: Ein vereinbarter Festpreis OHNE Gleitklausel für Lohn-, Material-, Geräte- oder Stoffkosten überträgt Preissteigerungsrisiken vollständig auf den AN. Ordne einen solchen Punkt der Auswirkung "Marge" zu und bewerte ihn mindestens als "mittel", bei längerer Bauzeit oder volatilen Materialpreisen als "hoch" – nicht als reines Formalie ohne wirtschaftliche Bedeutung.
+${classificationCalibration}
+${guReviewRules}
+Ordne zusätzlich jedem Punkt im Feld "auswirkung" die primäre wirtschaftliche Auswirkungsebene zu (nur einen Wert wählen, den treffendsten): "Liquidität" (Zahlungsflüsse, Vorleistungspflicht, Einbehalte, Bürgschaften), "Termin" (Bauzeit, Verzug, Fristen), "Haftung" (Gewährleistung, Schadensersatz, Prüf-/Sorgfaltspflichten), "Nachtrag" (Leistungsänderung, Vergütungsanpassung, Anordnungsrecht), "Marge" (Kostenrisiko, Deckungsbeitrag, Pauschalierungsrisiko, Festpreis-/Gleitklauselrisiko) oder "Sonstiges".
+Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
+[{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","auswirkung":"Liquidität|Termin|Haftung|Nachtrag|Marge|Sonstiges","begruendung":"max 20 Wörter"}]
+
+Punkte mit jeweiligem Kontext:
+${JSON.stringify(itemsBatch.map(({_referenzTitel, ...rest}) => rest))}`;
+}
+async function classifyBatchRecursive(itemsBatch, options, signal, batchLabel){
+  const prompt = buildClassificationPrompt(itemsBatch, options);
+  try{
+    const raw = await callClaudeWithRetry(prompt, batchLabel, 12000, signal);
+    const parsed = parseJson(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(err){
+    if(err.name === 'AbortError') throw err;
+    if(isInvalidRequestSizeError(err) && itemsBatch.length > 1){
+      const mid = Math.ceil(itemsBatch.length / 2);
+      console.warn('Klassifikationspaket zu groß, teile weiter auf:', itemsBatch.length, err.message);
+      setStatus(`${batchLabel} (Paket zu groß, teile in kleinere Pakete …)`, 'loading');
+      const left = await classifyBatchRecursive(itemsBatch.slice(0, mid), options, signal, batchLabel + ' · Teil A');
+      const right = await classifyBatchRecursive(itemsBatch.slice(mid), options, signal, batchLabel + ' · Teil B');
+      return [...left, ...right];
+    }
+    throw err;
+  }
+}
+async function classifyItemsWithContextInBatches(itemsWithContext, options, signal){
+  const batches = chunkArray(itemsWithContext, 20);
+  const classifications = [];
+  for(let i=0;i<batches.length;i++){
+    const label = batches.length > 1
+      ? `Bewerte Risiken Paket ${i+1}/${batches.length} …`
+      : 'Bewerte Risiken anhand der Wissensbasis …';
+    setStatus(label, 'loading');
+    const batchResult = await classifyBatchRecursive(batches[i], options, signal, label);
+    classifications.push(...batchResult);
+  }
+  return classifications;
+}
+function buildActionPrompt(itemsBatch){
+  return `Erstelle für die folgenden hoch/kritisch eingestuften vertraglichen Punkte konkrete, umsetzbare Maßnahmenvorschläge (max 18 Wörter je Punkt).
+Wichtig: Formuliere Maßnahmen als Verhandlungsrahmen, nicht als konkreten Zielwert. Beispiel: "Vertragsstrafe hinsichtlich Höhe, Bezugsgröße und Obergrenze verhandeln" statt "Vertragsstrafe auf 0,1% reduzieren" – der Vertragspartner wird einen konkret vorgegebenen Zielwert selten einfach akzeptieren, ein Verhandlungsrahmen ist realistischer und umsetzbarer.
+Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
+[{"id":"1","massnahme":"..."}]
+
+Punkte:
+${JSON.stringify(itemsBatch)}`;
+}
+async function actionBatchRecursive(itemsBatch, signal, batchLabel){
+  try{
+    const raw = await callClaudeWithRetry(buildActionPrompt(itemsBatch), batchLabel, 10000, signal);
+    const parsed = parseJson(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(err){
+    if(err.name === 'AbortError') throw err;
+    if(isInvalidRequestSizeError(err) && itemsBatch.length > 1){
+      const mid = Math.ceil(itemsBatch.length / 2);
+      console.warn('Maßnahmenpaket zu groß, teile weiter auf:', itemsBatch.length, err.message);
+      setStatus(`${batchLabel} (Paket zu groß, teile in kleinere Pakete …)`, 'loading');
+      const left = await actionBatchRecursive(itemsBatch.slice(0, mid), signal, batchLabel + ' · Teil A');
+      const right = await actionBatchRecursive(itemsBatch.slice(mid), signal, batchLabel + ' · Teil B');
+      return [...left, ...right];
+    }
+    throw err;
+  }
+}
+async function createActionsInBatches(criticalItems, signal){
+  const batches = chunkArray(criticalItems, 20);
+  const actions = [];
+  for(let i=0;i<batches.length;i++){
+    const label = batches.length > 1
+      ? `Erstelle Maßnahmen Paket ${i+1}/${batches.length} …`
+      : 'Erstelle Maßnahmenvorschläge …';
+    setStatus(label, 'loading');
+    const batchResult = await actionBatchRecursive(batches[i], signal, label);
+    actions.push(...batchResult);
+  }
+  return actions;
+}
 
 document.getElementById('analyzeBtn').onclick = runAnalysis;
 
@@ -3218,23 +3314,12 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       };
     });
     const classificationCalibration = getClassificationCalibration(currentContractType);
-    const classifyPrompt = `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
-Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch echte Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere ausdrücklich strafbewehrte Termine, oder das Zusammenwirken von Vollständigkeitsklausel + funktionaler Leistungsbeschreibung + fehlender Detailbeschreibung). Kumulation nur annehmen, wenn Belastungen tatsächlich gleichzeitig oder ohne vollständige Anrechnung wirken. Wenn der Vertrag Anrechnung, Austausch, Zug-um-Zug-Mechanik, Bedingungen oder Ausnahmen vorsieht, muss dies die Einstufung mindern oder präzisieren. Wenn zwei oder mehr Punkte inhaltlich unmittelbar zusammenhängen (z.B. Leistungsverweigerungsrecht und Anordnungsrecht), benenne diesen Zusammenhang explizit in der Begründung beider Punkte als Kombinationsrisiko.
-Kalibrierung der Risikoverteilung: Verteile die Einstufungen realistisch und nicht zu gleichmäßig. "kritisch" ist die Ausnahme und gehört nur den wenigen wirklich gravierendsten Punkten im gesamten Vertrag. "hoch" ist eine kleinere bis mittlere Gruppe. Die Mehrheit der Punkte sollte "mittel" oder "niedrig" sein. Vermeide, dass am Ende ungefähr gleich viele Punkte in jeder Stufe landen.
-Konsolidierungsregel: Bewerte echte Einzelrisiken, aber vermeide künstliche Verschlechterung durch doppelte oder sehr ähnliche Punkte. Wenn mehrere Klauseln dasselbe Risikothema betreffen (z.B. Sicherheiten/Einbehalte, Abnahme/Dokumentation, Vertragsstrafe/Termine, Open-Book/Marge), dürfen sie nur dann mehrfach "hoch" oder "kritisch" sein, wenn jede Klausel eine eigenständige zusätzliche Belastung mit eigener Folge erzeugt. Andernfalls stufe Nebenpunkte niedriger ein und benenne in der Begründung den Zusammenhang zum Hauptrisiko.
-Bewertungskriterien: Beurteile jeden Punkt nach (1) Schwere der rechtlichen/wirtschaftlichen Folge, (2) Eintrittsnähe und Steuerbarkeit, (3) Abweichung vom marktüblichen Standard, (4) Kumulation mit anderen Klauseln und (5) absoluter wirtschaftlicher Wirkung. Eine marktübliche, klar begrenzte, austauschbare oder befristete Regelung ist nicht automatisch "kritisch", auch wenn sie wirtschaftlich relevant ist. Nutze "kritisch" nur bei unmittelbarer erheblicher Belastung, ungewöhnlicher Einseitigkeit, fehlender Begrenzung, konkreter Zahlungs-/Abnahmeblockade, Rechtsverlust oder starker Kumulation.
-Sicherheiten-Regel: Bürgschaften um ca. 10% der Auftragssumme oder übliche Sicherheitseinbehalte sind regelmäßig "hoch", wenn sie Liquidität/Avalrahmen spürbar belasten. "Kritisch" nur bei zusätzlicher Kumulation, außergewöhnlicher absoluter Höhe, fehlender Rückgabe-/Austauschmöglichkeit, sehr kurzer Stellungfrist, Zahlungssperre, Abnahmeblockade oder besonderer Existenz-/Projektwirkung.
-Margen-Regel: Ein vereinbarter Festpreis OHNE Gleitklausel für Lohn-, Material-, Geräte- oder Stoffkosten überträgt Preissteigerungsrisiken vollständig auf den AN. Ordne einen solchen Punkt der Auswirkung "Marge" zu und bewerte ihn mindestens als "mittel", bei längerer Bauzeit oder volatilen Materialpreisen als "hoch" – nicht als reines Formalie ohne wirtschaftliche Bedeutung.
-${classificationCalibration}
-${guReviewRules}
-Ordne zusätzlich jedem Punkt im Feld "auswirkung" die primäre wirtschaftliche Auswirkungsebene zu (nur einen Wert wählen, den treffendsten): "Liquidität" (Zahlungsflüsse, Vorleistungspflicht, Einbehalte, Bürgschaften), "Termin" (Bauzeit, Verzug, Fristen), "Haftung" (Gewährleistung, Schadensersatz, Prüf-/Sorgfaltspflichten), "Nachtrag" (Leistungsänderung, Vergütungsanpassung, Anordnungsrecht), "Marge" (Kostenrisiko, Deckungsbeitrag, Pauschalierungsrisiko, Festpreis-/Gleitklauselrisiko) oder "Sonstiges".
-Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-[{"id":"1","risiko":"niedrig|mittel|hoch|kritisch","auswirkung":"Liquidität|Termin|Haftung|Nachtrag|Marge|Sonstiges","begruendung":"max 20 Wörter"}]
-
-Punkte mit jeweiligem Kontext:
-${JSON.stringify(itemsWithContext.map(({_referenzTitel, ...rest}) => rest))}`;
-    const stage2Raw = await callClaudeWithRetry(classifyPrompt, 'Bewerte Risiken anhand der Wissensbasis …', undefined, analysisSignal);
-    const classifications = parseJson(stage2Raw);
+    const classifications = await classifyItemsWithContextInBatches(itemsWithContext, {
+      typText,
+      perspectiveText,
+      classificationCalibration,
+      guReviewRules
+    }, analysisSignal);
     items = items.map(it => {
       const c = classifications.find(x => x.id === it.id) || {};
       const withCtx = itemsWithContext.find(x => x.id === it.id);
@@ -3247,15 +3332,7 @@ ${JSON.stringify(itemsWithContext.map(({_referenzTitel, ...rest}) => rest))}`;
     setStatus('Erstelle Maßnahmenvorschläge …', 'loading');
     const critical = items.filter(it => it.risiko === 'hoch' || it.risiko === 'kritisch');
     if(critical.length){
-      const actionPrompt = `Erstelle für die folgenden hoch/kritisch eingestuften vertraglichen Punkte konkrete, umsetzbare Maßnahmenvorschläge (max 18 Wörter je Punkt).
-Wichtig: Formuliere Maßnahmen als Verhandlungsrahmen, nicht als konkreten Zielwert. Beispiel: "Vertragsstrafe hinsichtlich Höhe, Bezugsgröße und Obergrenze verhandeln" statt "Vertragsstrafe auf 0,1% reduzieren" – der Vertragspartner wird einen konkret vorgegebenen Zielwert selten einfach akzeptieren, ein Verhandlungsrahmen ist realistischer und umsetzbarer.
-Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
-[{"id":"1","massnahme":"..."}]
-
-Punkte:
-${JSON.stringify(critical)}`;
-      const stage3Raw = await callClaudeWithRetry(actionPrompt, 'Erstelle Maßnahmenvorschläge …', undefined, analysisSignal);
-      const actions = parseJson(stage3Raw);
+      const actions = await createActionsInBatches(critical, analysisSignal);
       items = items.map(it => {
         const a = actions.find(x => x.id === it.id);
         return a ? {...it, massnahme: a.massnahme} : it;
