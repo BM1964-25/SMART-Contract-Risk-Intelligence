@@ -740,6 +740,25 @@
     font-size:12.5px; color:var(--text-muted);
   }
   .internal-training-quality b{ display:block; color:var(--navy); margin-bottom:3px; }
+  .internal-prompt-card{
+    margin-top:16px; border:1px solid var(--border); border-top:3px solid var(--gold);
+    border-radius:10px; background:#fff; padding:14px; box-shadow:0 8px 18px rgba(15,42,74,.07);
+  }
+  .internal-prompt-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
+  .internal-prompt-head b{ color:var(--navy); display:block; font-size:14px; }
+  .internal-prompt-head span{ color:var(--text-muted); font-size:12.5px; }
+  .internal-copy-btn{
+    width:auto; margin:0; padding:7px 10px; border-radius:6px; border:1px solid var(--border);
+    background:#fff; color:var(--navy); font-family:inherit; font-weight:bold; font-size:12px;
+    display:inline-flex; align-items:center; gap:6px; cursor:pointer; flex-shrink:0;
+  }
+  .internal-copy-btn:hover{ background:var(--bg); }
+  .internal-copy-btn svg{ width:15px; height:15px; }
+  .internal-prompt-text{
+    width:100%; min-height:250px; border:1px solid var(--border); border-radius:8px;
+    padding:12px; resize:vertical; background:#f9f8f4; color:var(--text);
+    font-family:"SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size:12px; line-height:1.5;
+  }
   .internal-compare{ width:100%; border-collapse:collapse; margin-top:14px; font-size:13px; }
   .internal-compare th, .internal-compare td{ border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
   .internal-compare th{ background:var(--bg); color:var(--navy); }
@@ -1156,39 +1175,138 @@
 
       <section class="internal-page">
         <h2 class="internal-page-title">Wie die KI fachlich weiter verbessert wird</h2>
-        <p class="internal-page-subtitle">Die App wird nicht durch ungeprüfte Einzelmeinungen verbessert, sondern durch einen klaren Qualitätsprozess: Analyse prüfen, fachliche Abweichung dokumentieren, Wissensbasis gezielt ergänzen und das Ergebnis erneut testen.</p>
+        <p class="internal-page-subtitle">Die App wird nicht durch ungeprüfte Einzelmeinungen verbessert. Nutzer ohne juristischen oder baubetrieblichen Sachverstand können Auffälligkeiten melden; Wissensbasis-Regeln dürfen aber erst nach fachkundiger Prüfung übernommen werden.</p>
         <div class="internal-training-grid">
           <div class="internal-training-step">
             <span class="num">1</span>
-            <div><b>Analysebericht fachlich prüfen</b><p>Nach jeder wichtigen Vertragsanalyse wird der Bericht mit dem Originalvertrag verglichen. Besonders geprüft werden fehlende Risiken, falsch bewertete Klauseln, übersehene Fristen, Marktvergleich und Management Summary.</p></div>
+            <div><b>Plausibilität durch Nutzer prüfen</b><p>Nutzer prüfen nur offensichtliche Punkte: falscher Vertragstyp, fehlende sichtbare Fristen, falsch übernommene Beträge, unverständliche Aussagen oder Widersprüche im Bericht.</p></div>
           </div>
           <div class="internal-training-step">
             <span class="num">2</span>
-            <div><b>Abweichung konkret festhalten</b><p>Jede Rückmeldung muss eindeutig formuliert werden: Was wurde falsch erkannt, was fehlt, welche Vertragsstelle ist betroffen und wie müsste die fachlich richtige Bewertung lauten?</p></div>
+            <div><b>KI-Zweitprüfung nutzen</b><p>Vertrag und Analysebericht können zusätzlich mit ChatGPT plausibilisiert werden. Diese Zweitprüfung liefert Hinweise auf Lücken, Überbewertungen, fehlende Belege oder mögliche Fehler.</p></div>
           </div>
           <div class="internal-training-step">
             <span class="num">3</span>
-            <div><b>Allgemeine Regel ableiten</b><p>Aus dem Einzelfall wird eine allgemeine Lernregel gebildet. Ziel ist keine Korrektur nur für einen Vertrag, sondern eine wiederverwendbare Regel für ähnliche Bau-, VOB/B-, BGB-, GU-, Pauschal-, Einheitspreis- oder HOAI-Verträge.</p></div>
+            <div><b>Abweichung konkret festhalten</b><p>Jeder Hinweis muss eindeutig formuliert werden: Was wurde falsch erkannt, was fehlt, welche Vertragsstelle ist betroffen und welche fachliche Bewertung wird vorgeschlagen?</p></div>
           </div>
           <div class="internal-training-step">
             <span class="num">4</span>
-            <div><b>Wissensbasis ergänzen</b><p>Die Regel wird als eigener Wissensbasis-Eintrag angelegt: klarer Titel, kurze fachliche Erläuterung, passende Tags und Zuordnung zum Vertragstyp. Je präziser die Tags, desto besser wird die Regel später gefunden.</p></div>
+            <div><b>Fachkundige Freigabe einholen</b><p>Rechtliche oder wirtschaftliche Bewertungen werden nur durch fachkundige Personen freigegeben, z. B. Rechtsanwalt, Vertragsmanager, Projektleiter, Claim-Manager oder Kalkulator.</p></div>
           </div>
           <div class="internal-training-step">
             <span class="num">5</span>
-            <div><b>Analyse erneut testen</b><p>Der gleiche Vertrag wird erneut analysiert. Danach wird geprüft, ob die Korrektur tatsächlich im Bericht ankommt und ob sich keine neuen Überbewertungen oder Doppelzählungen ergeben haben.</p></div>
+            <div><b>Allgemeine Regel ableiten</b><p>Aus dem Einzelfall wird eine wiederverwendbare Lernregel für ähnliche Bau-, VOB/B-, BGB-, GU-, Pauschal-, Einheitspreis- oder HOAI-Verträge gebildet.</p></div>
           </div>
           <div class="internal-training-step">
             <span class="num">6</span>
+            <div><b>Wissensbasis ergänzen</b><p>Die Regel wird als eigener Wissensbasis-Eintrag angelegt: klarer Titel, kurze fachliche Erläuterung, passende Tags und Zuordnung zum Vertragstyp. Je präziser die Tags, desto besser wird die Regel später gefunden.</p></div>
+          </div>
+          <div class="internal-training-step">
+            <span class="num">7</span>
+            <div><b>Analyse erneut testen</b><p>Der gleiche Vertrag wird erneut analysiert. Danach wird geprüft, ob die Korrektur tatsächlich im Bericht ankommt und ob sich keine neuen Überbewertungen oder Doppelzählungen ergeben haben.</p></div>
+          </div>
+          <div class="internal-training-step">
+            <span class="num">8</span>
             <div><b>Freigabe dokumentieren</b><p>Erst wenn die neue Regel fachlich plausibel wirkt, bleibt sie in der Wissensbasis. Bei wichtigen Regeln sollte kurz notiert werden, aus welchem Vertragstyp sie stammt und welches Problem dadurch behoben wurde.</p></div>
           </div>
         </div>
         <div class="internal-training-quality">
-          <div><b>Was eingepflegt wird</b>Allgemeine Prüflogik, typische Klauselrisiken, Fristenfolgen, Marktvergleichswerte, Bewertungsmaßstäbe und wiederkehrende Vertragsmuster.</div>
-          <div><b>Was nicht eingepflegt wird</b>Vertrauliche Namen, personenbezogene Daten, vollständige Vertragsinhalte oder rein einzelfallbezogene Aussagen ohne allgemeinen Nutzen.</div>
-          <div><b>Wann es wirkt</b>Neue Wissensbasis-Einträge fließen bei der nächsten Analyse als Fachkontext ein. Sie ersetzen keine juristische Prüfung, verbessern aber die Trefferquote und Bewertungskonsistenz.</div>
+          <div><b>Rolle des Nutzers</b>Plausibilitätsmeldung: offensichtliche Fehler, fehlende sichtbare Fristen, falsche Zahlen oder unklare Aussagen melden.</div>
+          <div><b>Rolle der Zweit-KI</b>Prüfassistenz: Hinweise auf Lücken, Widersprüche und Belegprobleme erzeugen. Keine automatische Wahrheit und keine Rechtsberatung.</div>
+          <div><b>Rolle der Fachperson</b>Freigabe: Nur fachkundig geprüfte Erkenntnisse werden als allgemeine Wissensbasis-Regel übernommen.</div>
         </div>
-        <div class="internal-final">Praktische Faustregel: Jede fachliche Korrektur sollte so formuliert werden, dass eine andere Person sie ohne Vorwissen versteht und sofort als Wissensbasis-Regel nutzen kann.</div>
+        <div class="internal-prompt-card">
+          <div class="internal-prompt-head">
+            <div>
+              <b>Prompt für ChatGPT-Plausibilitätscheck</b>
+              <span>Vertrag und Analysebericht einfügen. Ergebnis dient nur als Prüfhinweis für die fachkundige Freigabe.</span>
+            </div>
+            <button class="internal-copy-btn" id="copyInternalPromptBtn" type="button" aria-label="Prompt kopieren">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Prompt kopieren
+            </button>
+          </div>
+          <textarea class="internal-prompt-text" id="internalTrainingPrompt" readonly>Du bist fachlicher Prüfassistent für Bau-, VOB/B-, BGB-, GU-, Pauschal-, Einheitspreis- sowie Planer-/HOAI-Verträge. Prüfe den nachfolgenden Vertrag und den dazugehörigen Analysebericht von SMART Contract & Risk Intelligence ausschließlich auf Plausibilität, Belegtreue und fachliche Vollständigkeit.
+
+Wichtig:
+- Erstelle keine verbindliche Rechtsberatung.
+- Erfinde keine Vertragsinhalte, Paragraphen, Fristen, Beträge oder Rechtsfolgen.
+- Bewerte nur, was im Vertrag oder im Analysebericht nachvollziehbar belegt ist.
+- Wenn etwas unsicher ist, formuliere es als Prüfhinweis, nicht als Tatsache.
+- Ziel ist ein Qualitätssicherungsbericht, der einer fachkundigen Person hilft, die Wissensbasis gezielt zu verbessern.
+
+Bitte prüfe strukturiert:
+
+1. Vertragstyp und Prüfgrundlage
+- Passt die gewählte Einordnung zum Vertrag?
+- Handelt es sich eher um VOB/B, BGB-Bauvertrag mit VOB/B-Bezügen, GU-Vertrag, Pauschalvertrag, Einheitspreisvertrag oder HOAI-/Planervertrag?
+- Gibt es Hinweise auf modifizierte VOB/B, Rangfolgeregelungen oder AGB-relevante Abweichungen?
+
+2. Fehlende oder übersehene Risiken
+- Welche wirtschaftlich oder rechtlich relevanten Klauseln fehlen im Analysebericht?
+- Welche Themen müssten zusätzlich geprüft werden, z. B. Sicherheiten, Vertragsstrafe, Abnahme, Zahlung, Nachträge, Haftung, Dokumentation, Open Book, Kündigung, Versicherung, Gewährleistung oder Fristen?
+
+3. Überbewertungen und Unterbewertungen
+- Welche Risiken erscheinen zu hoch oder zu niedrig eingestuft?
+- Bitte begründe dies anhand der konkreten Vertragsregelung.
+- Berücksichtige risikomindernde Bedingungen wie Deckel, Anrechnung, Zug-um-Zug-Austausch, Ausnahmen, AG-Mitwirkung oder Kostenerstattung.
+
+4. Fristen und terminkritische Klauseln
+- Welche Fristen, Termine oder Reaktionspflichten fehlen?
+- Welche Fristen haben eine konkrete finanzielle oder rechtliche Folge?
+- Wurden Vertragsstrafen nur dort genannt, wo sie ausdrücklich vereinbart sind?
+
+5. Belegtreue
+- Gibt es Aussagen im Analysebericht, die nicht oder nur teilweise durch den Vertrag belegt sind?
+- Gibt es falsche Zahlen, Prozentsätze, Beträge, Fristen, Paragraphen, Deckel oder Bezugsgrößen?
+
+6. Marktvergleich und Management Summary
+- Ist der Marktvergleich nachvollziehbar?
+- Sind die fünf größten Risiken sinnvoll priorisiert?
+- Gibt es wichtige Risiken, die in der Management Summary fehlen?
+
+7. Vorschläge für Wissensbasis-Regeln
+Formuliere nur dann neue Wissensbasis-Vorschläge, wenn sie allgemein nutzbar sind. Keine vertraulichen Namen, keine personenbezogenen Daten und keine vollständigen Vertragszitate übernehmen.
+
+Bitte gib das Ergebnis in folgender Struktur aus:
+
+A. Kurzurteil
+- Gesamtplausibilität: hoch / mittel / niedrig
+- Wichtigste Feststellung in 2-3 Sätzen
+
+B. Mögliche Fehler oder Lücken im Analysebericht
+Tabelle mit: Thema | Beobachtung | Vertragsbezug | fachliche Relevanz | Priorität
+
+C. Mögliche Überbewertungen oder Unterbewertungen
+Tabelle mit: Analysepunkt | aktuelle Bewertung | vorgeschlagene Einordnung | Begründung
+
+D. Fehlende Fristen oder terminkritische Punkte
+Tabelle mit: Frist/Termin | Folge | Fundstelle/Bezug | Priorität
+
+E. Aussagen ohne ausreichenden Beleg
+Tabelle mit: Aussage im Bericht | Problem | was geprüft werden sollte
+
+F. Vorschläge für die Wissensbasis
+Für jeden Vorschlag:
+- Titel
+- allgemeine Regel
+- geeignete Tags
+- Vertragstyp
+- warum diese Regel künftig hilft
+
+G. Hinweise, die zwingend fachkundig freigegeben werden müssen
+Liste der Punkte, die nicht automatisch übernommen werden dürfen.
+
+Hier folgt der Vertrag:
+[VERTRAG EINFÜGEN]
+
+Hier folgt der Analysebericht:
+[ANALYSEBERICHT EINFÜGEN]</textarea>
+        </div>
+        <div class="internal-final">Praktische Faustregel: Eine KI-Zweitprüfung ist ein guter Kontrollfilter, aber kein Ersatz für fachkundige Freigabe. In die Wissensbasis gehören nur geprüfte, allgemeine Regeln, keine ungeprüften KI-Aussagen.</div>
       </section>
 
       <section class="internal-page">
@@ -1504,6 +1622,30 @@ function openInternal(){
 function closeInternal(){
   document.getElementById('internalOverlay').style.display = 'none';
 }
+async function copyInternalTrainingPrompt(){
+  const promptEl = document.getElementById('internalTrainingPrompt');
+  const btn = document.getElementById('copyInternalPromptBtn');
+  if(!promptEl || !btn) return;
+  const original = btn.innerHTML;
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(promptEl.value);
+    }else{
+      promptEl.focus();
+      promptEl.select();
+      document.execCommand('copy');
+      promptEl.blur();
+    }
+    btn.innerHTML = '✓ Kopiert';
+    setTimeout(() => { btn.innerHTML = original; }, 1400);
+  }catch(err){
+    console.warn('Prompt konnte nicht kopiert werden', err);
+    promptEl.focus();
+    promptEl.select();
+    btn.innerHTML = 'Bitte manuell kopieren';
+    setTimeout(() => { btn.innerHTML = original; }, 1800);
+  }
+}
 document.getElementById('openHelpBtn').onclick = openHelp;
 document.getElementById('openInternalBtn').onclick = openInternal;
 document.getElementById('modelHelpLink').onclick = () => openHelp('einrichtung');
@@ -1511,6 +1653,7 @@ document.getElementById('helpCloseBtn').onclick = closeHelp;
 document.getElementById('helpOverlay').onclick = (e) => { if(e.target.id === 'helpOverlay') closeHelp(); };
 document.getElementById('internalCloseBtn').onclick = closeInternal;
 document.getElementById('internalOverlay').onclick = (e) => { if(e.target.id === 'internalOverlay') closeInternal(); };
+document.getElementById('copyInternalPromptBtn').onclick = copyInternalTrainingPrompt;
 document.getElementById('helpSearch').oninput = (e) => {
   const q = e.target.value.trim().toLowerCase();
   const nav = document.getElementById('helpNav');
