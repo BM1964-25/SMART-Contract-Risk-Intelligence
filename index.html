@@ -724,6 +724,8 @@
   .internal-compare{ width:100%; border-collapse:collapse; margin-top:14px; font-size:13px; }
   .internal-compare th, .internal-compare td{ border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
   .internal-compare th{ background:var(--bg); color:var(--navy); }
+  .internal-table-scroll{ overflow-x:auto; margin-top:14px; }
+  .internal-table-scroll .internal-compare{ min-width:760px; margin-top:0; }
   .internal-final{ margin-top:18px; padding:16px; border-left:4px solid var(--gold); background:#fff; border-radius:8px; color:var(--navy); font-weight:bold; }
   @media(max-width:900px){
     .internal-hero, .internal-report-layout, .internal-license{ grid-template-columns:1fr; }
@@ -1087,6 +1089,29 @@
         </div>
         <p class="internal-note">Alle Preise verstehen sich zuzüglich der gesetzlichen Mehrwertsteuer. Die Preisstaffel bezieht sich ausschließlich auf den Hauptvertrag. Anlagen wie Leistungsverzeichnisse, Pläne, Zeichnungen, technische Nachweise oder sonstige Vertragsunterlagen sind nicht Bestandteil der Analyse und werden nur nach gesonderter Vereinbarung berücksichtigt.</p>
         <div class="internal-final">Bereits eine einzige erkannte kritische Vertragsklausel kann Mehrkosten verursachen, die den Preis der Analyse um ein Vielfaches übersteigen. Die Vertragsrisikoanalyse unterstützt Sie dabei, Risiken frühzeitig zu erkennen und dient als fundierte Grundlage für eine gezielte rechtliche Prüfung.</div>
+      </section>
+
+      <section class="internal-page">
+        <h2 class="internal-page-title">Interne Modell- und Kostenorientierung</h2>
+        <p class="internal-page-subtitle">Die folgenden Werte dienen der internen Vorkalkulation. Tatsächliche API-Kosten hängen von Vertragslänge, Scan-Qualität, Seitenpaketen, Analyseumfang, Wiederholungsversuchen und Output-Länge ab.</p>
+        <div class="internal-table-scroll"><table class="internal-compare">
+          <thead><tr><th>Modell</th><th>Preisannahme je 1 Mio. Token</th><th>Einsatz in der App</th><th>Kostenhinweis</th></tr></thead>
+          <tbody>
+            <tr><td><b>Claude Haiku 4.5</b></td><td>ca. 1 $ Input / 5 $ Output</td><td>Kurze, klare Texte und erste Vorprüfung</td><td>Günstigste Option; für umfangreiche oder schwer lesbare Scan-PDFs nur bedingt empfohlen.</td></tr>
+            <tr><td><b>Claude Sonnet 5</b></td><td>ca. 2 $ Input / 10 $ Output</td><td>Standardmodell für Vertragsanalysen</td><td>Ausgewogenes Verhältnis aus Qualität, Geschwindigkeit und Kosten; Standard auch für normale Scan-PDFs.</td></tr>
+            <tr><td><b>Claude Opus 4.8</b></td><td>ca. 5 $ Input / 25 $ Output</td><td>Komplexe, wirtschaftlich wichtige oder schwer lesbare Verträge</td><td>Premium-Modell; grob etwa 2,5-mal so teuer wie Sonnet bei gleicher Tokenmenge.</td></tr>
+          </tbody>
+        </table></div>
+        <div class="internal-table-scroll"><table class="internal-compare">
+          <thead><tr><th>Vertragsumfang</th><th>Grobe Tokenannahme Input / Output</th><th>Haiku 4.5</th><th>Sonnet 5</th><th>Opus 4.8</th></tr></thead>
+          <tbody>
+            <tr><td><b>bis 15 Seiten</b></td><td>ca. 120.000 / 20.000 Token</td><td>ca. 0,22 $</td><td>ca. 0,44 $</td><td>ca. 1,10 $</td></tr>
+            <tr><td><b>bis 30 Seiten</b></td><td>ca. 220.000 / 35.000 Token</td><td>ca. 0,40 $</td><td>ca. 0,79 $</td><td>ca. 1,98 $</td></tr>
+            <tr><td><b>bis 60 Seiten</b></td><td>ca. 420.000 / 60.000 Token</td><td>ca. 0,72 $</td><td>ca. 1,44 $</td><td>ca. 3,60 $</td></tr>
+            <tr><td><b>bis 100 Seiten</b></td><td>ca. 700.000 / 90.000 Token</td><td>ca. 1,15 $</td><td>ca. 2,30 $</td><td>ca. 5,75 $</td></tr>
+          </tbody>
+        </table></div>
+        <p class="internal-note">Die Tabelle gilt als grobe Orientierung für durchsuchbare Text-PDFs, Word-Dateien oder Textfassungen. Bei gescannten PDFs können durch Bild-/Vision-Verarbeitung deutlich höhere Kosten entstehen; je nach Auflösung, Lesbarkeit und Seitenpaketen ist ein Zuschlag von etwa 50 % bis 200 % möglich. Maßgeblich ist immer die tatsächliche Abrechnung im Anthropic-Konto.</p>
       </section>
 
       <section class="internal-page internal-license">
