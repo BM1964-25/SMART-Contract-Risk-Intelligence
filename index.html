@@ -3123,9 +3123,13 @@ function retrieveContextForItem(item, topN){
   topN = topN || 2;
   const kategorie = (item.kategorie || '').toLowerCase();
   const text = (item.kategorie + ' ' + item.text).toLowerCase();
-  const pool = knowledgeBase.filter(kb => !kb.typ || !kb.typ.length || currentContractType === 'sonstige' || kb.typ.includes(currentContractType));
+  const pool = knowledgeBase.filter(kb => {
+    if(kb.active === false) return false;
+    if((kb.status || 'freigegeben') !== 'freigegeben') return false;
+    return !kb.typ || !kb.typ.length || currentContractType === 'sonstige' || kb.typ.includes(currentContractType);
+  });
   const scored = pool.map(kb => {
-    const score = kb.tags.reduce((s,t) => {
+    const score = (kb.tags || []).reduce((s,t) => {
       if(kategorie === t) return s + 3;
       if(text.includes(t)) return s + 1;
       return s;
