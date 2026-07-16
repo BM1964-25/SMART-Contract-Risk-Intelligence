@@ -1829,10 +1829,16 @@ function bytesToBase64(bytes){
   return btoa(binary);
 }
 function safeReportFilename(name){
-  const base = safeFileSlug(name, 'analyse');
-  return `scri-bericht-${exportTimestamp()}-${base}.html`;
+  return `${buildReportBaseName(name)}.html`;
 }
-function buildPlainHtmlReport(){
+function safeReportPdfFilename(name){
+  return `${buildReportBaseName(name)}.pdf`;
+}
+function buildReportBaseName(name){
+  const base = safeFileSlug(name, 'analyse');
+  return `SMART-Contract-Risk-Intelligence-Bericht-${exportTimestamp()}-${base}`;
+}
+function buildPlainHtmlReport(reportNames){
   const resultClone = document.getElementById('resultsArea').cloneNode(true);
   resultClone.querySelectorAll('.result-tabs, .result-tab-info').forEach(el => el.classList.remove('no-print'));
   resultClone.querySelectorAll('.result-tab-pane').forEach((el, index) => {
@@ -1857,7 +1863,13 @@ function buildPlainHtmlReport(){
   resultClone.querySelectorAll('details').forEach(el => el.open = true);
   const appStyle = document.querySelector('style')?.textContent || '';
   const reportDate = new Date().toLocaleDateString('de-DE') + ' · ' + new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) + ' Uhr';
+  const reportTitle = (reportNames && reportNames.pdfName ? reportNames.pdfName.replace(/\.pdf$/i, '') : 'SMART Contract & Risk Intelligence Bericht');
   const reportScript = [
+    'const REPORT_PDF_TITLE = ' + JSON.stringify(reportTitle) + ';',
+    'function printReport(){',
+    '  document.title = REPORT_PDF_TITLE;',
+    '  setTimeout(() => window.print(), 0);',
+    '}',
     'document.querySelectorAll(".result-tab").forEach(tab => {',
     '  tab.addEventListener("click", () => {',
     '    document.querySelectorAll(".result-tab").forEach(t => t.classList.remove("active"));',
@@ -1875,7 +1887,7 @@ function buildPlainHtmlReport(){
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMART Contract & Risk Intelligence Bericht</title>
+<title>${escapeHtml(reportTitle)}</title>
 <style>
 ${appStyle}
 body{height:auto;overflow:auto;}
@@ -1926,8 +1938,8 @@ header,.site-footer,.top-actions,.no-print{display:none!important;}
     <div class="report-actionbar-meta">${escapeHtml(currentFileName)} · erstellt ${escapeHtml(reportDate)}</div>
   </div>
   <div class="report-actionbar-actions">
-    <button type="button" onclick="window.print()">Drucken</button>
-    <button type="button" class="primary" onclick="window.print()" title="Im Druckdialog als PDF speichern">PDF speichern</button>
+    <button type="button" onclick="printReport()">Drucken</button>
+    <button type="button" class="primary" onclick="printReport()" title="Im Druckdialog als PDF speichern">PDF speichern</button>
   </div>
 </div>
 ${resultClone.innerHTML}
@@ -2050,7 +2062,9 @@ async function exportEncryptedHtmlReport(){
     alert('Die Passwörter stimmen nicht überein.');
     return;
   }
-  const plainReport = buildPlainHtmlReport();
+  const htmlName = safeReportFilename(latestReportSnapshot.filename);
+  const pdfName = safeReportPdfFilename(latestReportSnapshot.filename);
+  const plainReport = buildPlainHtmlReport({htmlName, pdfName});
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const key = await deriveReportKey(password, salt);
@@ -2072,7 +2086,7 @@ async function exportEncryptedHtmlReport(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = safeReportFilename(latestReportSnapshot.filename);
+  a.download = htmlName;
   document.body.appendChild(a);
   a.click();
   a.remove();
