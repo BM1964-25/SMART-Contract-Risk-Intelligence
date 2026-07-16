@@ -1578,7 +1578,7 @@ const HELP_CONTENT = [
     <p><b>„Kein API-Key hinterlegt"</b> – API-Key im Bereich „API-Zugang" eintragen und speichern.</p>
     <p><b>„Anthropic ist momentan überlastet" / Status 529</b> – der Anthropic-Dienst ist temporär ausgelastet. Das ist kein Hinweis auf verbrauchte API-Tokens und kein Fehler des Vertrags. Die App startet automatisch mehrere Wiederholungsversuche mit kurzer Wartezeit. Wenn der Fehler bestehen bleibt, bitte einige Minuten warten und die Analyse erneut starten.</p>
     <p><b>„Rate Limit" / Status 429</b> – es wurden zu viele Anfragen in kurzer Zeit gestellt oder das Konto ist aktuell begrenzt. Kurz warten, ggf. ein kleineres Dokument testen oder das Anthropic-Konto prüfen.</p>
-    <p><b>„invalid_request_error" / Status 400</b> – die Anfrage war für Anthropic zu groß oder formal nicht verarbeitbar. Das ist kein Token-Guthabenproblem. Die App verarbeitet Klausel-Extraktion, Risiko-Klassifikation und Maßnahmen paketweise und teilt zu große Pakete automatisch weiter auf, damit umfangreiche Verträge mit vielen Seiten oder vielen Klauselpunkten robuster analysiert werden.</p>
+    <p><b>„invalid_request_error" / Status 400</b> – die Anfrage war für Anthropic zu groß oder formal nicht verarbeitbar. Das ist kein Token-Guthabenproblem. Die App verarbeitet Klausel-Extraktion, Risiko-Klassifikation und Maßnahmen paketweise, nutzt kleinere Einstiegspakete und hält die erste Extraktion bewusst schlanker. Dadurch bleiben auch umfangreiche Verträge mit vielen Seiten oder vielen Klauselpunkten stabiler analysierbar.</p>
     <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – der betroffene Analyseschritt hat zu viel JSON erzeugt. Lange Textdokumente werden nun automatisch in Abschnitten ausgewertet und anschließend konsolidiert; bei wiederholtem Auftreten kann ein Wechsel auf Opus 4.8 oder eine reduzierte Anlagenfassung helfen.</p>
     <p><b>„Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden"</b> – die übrige Analyse (Klauseln, Risikobewertung, Maßnahmen) bleibt davon unberührt und vollständig nutzbar; nur das Fristenmodul konnte in diesem Lauf nicht abgeschlossen werden. Ein erneuter Analyselauf kann helfen.</p>
     <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs ohne durchsuchbaren Text, bereitet alle Seiten als Bilder vor und analysiert sie in Seitenpaketen. Das dauert länger und kann höhere API-Kosten verursachen, verhindert aber, dass spätere Vertragsseiten unberücksichtigt bleiben.</p>
@@ -1674,7 +1674,7 @@ document.addEventListener('keydown', (e) => {
 
 let MODEL = "claude-sonnet-5";
 const DOC_CHAR_LIMIT = 300000; // ca. 100-110 Seiten bei ~2800 Zeichen/Seite
-const TEXT_STAGE_CHUNK_SIZE = 55000; // hält JSON-Antworten bei langen Textverträgen stabil
+const TEXT_STAGE_CHUNK_SIZE = 24000; // kleinere Einstiegspakete verhindern zu große Anthropic-Requests
 let apiKey = "";
 let currentContractType = "vob";
 let currentPerspective = "auftragnehmer";
@@ -1798,6 +1798,18 @@ function getRequiredAreas(contractType){
     return 'Folgende Bereiche MÜSSEN bei Planungsverträgen/HOAI aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten klassischer Bauvertragsklauseln: Leistungsphasen und stufenweise Beauftragung, Honorar/Pauschalhonorar und Abgrenzung Grundleistungen/Besondere Leistungen, Kostensteuerungs- und Hinweispflichten (insbesondere KG 400), Projektziele wie DGNB/LEED/Energieeffizienz/Wirtschaftlichkeit/Freihamer Gebäudestandard/maximale Mietflächen/BIM/Schnittstellenkoordination als eigener Risikoblock, BIM-/IFC-/Projektplattformpflichten, Nutzungsrechte an Plänen/digitalen Unterlagen/BIM-Modellen, Freigabe- und Prüffristen je Leistungsphase oder Zwischenergebnis, Koordinationspflichten, Kündigungsrechte, Haftungsregelungen, Zahlungs- und Rechnungsprüfungsfristen, Sicherungsrechte/Sicherungshypothek und deren Ausschluss sowie Nachtrags-/Vergütungsanpassungslogik. Bewerte außerdem die Projektkomplexität mit: Projektgröße, Anzahl der Beteiligten, Nachhaltigkeitsanforderungen, Genehmigungsaufwand, Schnittstellenkoordination und digitale/BIM-Anforderungen. Wende VOB/B-Marktwerte oder GU-Vertragsmuster nur an, wenn der Vertrag sie ausdrücklich enthält.';
   }
   return 'Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: rechtliche Einordnung der Vertragsgrundlage, insbesondere ob die VOB/B unverändert insgesamt einbezogen oder durch vorrangige Vertragsregelungen wesentlich geändert/ausgeschlossen wird, Vertragsstrafe mit exakt benannten Prozentsätzen, Deckeln, strafbewehrten Terminen, Anrechnungen und Bezugsgrößen, Sicherheiten als getrennte Punkte mit eigenem Prozentsatz, Zweck und Rückgabe-/Austauschlogik, Zahlungsbürgschaft des Auftraggebers, kumulierte Sicherheiten nur bei erkennbarer zeitlicher Überschneidung inklusive Vorauszahlungsbürgschaft und Dokumentationseinbehalten, Versicherungen (Betriebshaftpflichtversicherung mit Mindestdeckungssumme, Fortbestehen, erneuter Nachweis auf Verlangen und wer sie trägt; Bauleistungsversicherung), Abnahmevoraussetzungen mit Ausnahmen für vom AN nicht zu beschaffende Unterlagen, gestufte/gesonderte Abnahmen und zurückgestellte Leistungen, Gefahrtragung (insbesondere Abweichungen von § 7 VOB/B), Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen oder ungeklärter Vergütung nach § 650b/650c BGB die Ausführung verlangt wird), Nachtragsmanagement-Anforderungen einschließlich Teilvergütung, unbestrittener Vergütung, Kostenerstattung für Beschleunigungsmaßnahmen und Unterschied zwischen verpflichtendem Inhalt und nur "möglichst" einzuhaltendem Zeitpunkt, Dokumentations-/Berichtspflichten und Dokumentationseinbehalte mit konkreten Beträgen (z.B. 100.000€), Open-Book-/Cost-plus-fee-Mechanismen mit erstattungsfähigen Kosten, AG-Einsicht in Kalkulationen, Angebote, Abrechnungen, Vergaben, Kostenausschlüssen, Abzugspositionen, Nachunternehmer-Informationspflichten und Prozessführungspflichten einschließlich Kostentragungsregel, Lean-Construction-Pflichten (Taktplanung, Last Planner, tägliche Lean-Besprechungen, Ressourcenverstärkung, Schulungen), Pandemie-/Corona-Klauseln mit Bauzeit-, Mehrkosten-, Lieferengpass-, Materialalternativen-, Kündigungs- und Dokumentationsfolgen, Festpreis-/Gleitklausel-Regelung (insbesondere wenn Eigenleistungen als Festpreis oder ohne Gleitklausel geregelt sind – das ist ein Margenrisiko), Preisbindung und Vorhaltekosten bei nachlaufenden Leistungen oder nicht verkauften/vermieteten Einheiten, Vertretungs-/Vollmachtsregelungen des AG für Anordnungen, Nachträge und Vergütungsvereinbarungen, Freistellungspflichten gegenüber Ansprüchen Dritter, risikomindernde Regelungen zur Planungsverantwortung des AG sowie das Zusammenspiel von Vollständigkeitsklausel mit erkennbaren/erforderlichen Leistungen und funktionaler Leistungsbeschreibung. Achte zusätzlich auf häufig übersehene Nebenrisiken: witterungsbedingte Behinderungen ohne Bauzeitverlängerung, Zahlungspausen oder Prüfhemmungen über Feiertage/Jahreswechsel, Abtretungs- und Aufrechnungsbeschränkungen, Fälligkeit von Abschlagsrechnungen nur bei Leistungsstandsnachweis/ordnungsgemäßer Rechnung/kumulierter Rechnungsstellung, Stundenlohnzettel, monatliche Nachunternehmerlisten, Erneuerung/Änderungsanzeige der Freistellungsbescheinigung, unverzügliche Mehrkostenanzeigen sowie zusätzliche Baustelleneinrichtungs-, Logistik- oder Lagerflächen auf Kosten des AN.';
+}
+function getExtractionFocusAreas(contractType){
+  if(contractType === 'planung'){
+    return 'Prüfe bei Planungs-/HOAI-Verträgen besonders: Leistungsumfang, Leistungsphasen, Honorar/Pauschalhonorar, Kostensteuerung, Projektziele, BIM, Koordination, Nutzungsrechte, Freigabe-/Prüffristen, Haftung, Kündigung, Zahlungsfristen, Sicherungsrechte und Nachträge.';
+  }
+  return 'Prüfe bei Bau-/GU-Verträgen besonders: Vertragsgrundlage, VOB/B- oder BGB-Bezug, Vertragsstrafe, Sicherheiten, Zahlung, Nachträge, Abnahme, Dokumentation, Fristen, Haftung, Kündigung, Versicherung, Open Book/Cost+Fee, Preisbindung, Vertretungsregeln, Freistellungen und besondere Organisationspflichten.';
+}
+function getExtractionPrecisionRules(contractType){
+  if(contractType === 'planung'){
+    return 'Wende VOB/B- oder GU-Marktwerte nur an, wenn der Vertrag sie ausdrücklich enthält. Projektziele und Projektkomplexität nur aufnehmen, wenn sie im Vertrag konkret geregelt sind.';
+  }
+  return 'Wenn VOB/B erwähnt wird, erfasse auch Hinweise auf modifizierte VOB/B, Rangfolge, Ausschluss fiktiver Abnahme, geänderte Verjährung, eigene Nachtragslogik oder Abweichungen von § 7 VOB/B. Bei Sicherheiten, Vertragsstrafen und Open Book nur konkrete Vertragsangaben übernehmen.';
 }
 function getGuReviewCorrectionRules(contractType){
   if(contractType === 'planung') return '';
@@ -2046,7 +2058,7 @@ let documentImages = [];
 let scannedPageCount = 0;
 let contractBasisConfirmed = false;
 let currentBasisIssue = null;
-const SCAN_BATCH_SIZE = 8;
+const SCAN_BATCH_SIZE = 2;
 
 // ---------- storage ----------
 async function loadKB(){
@@ -2948,7 +2960,7 @@ function getClaudeErrorMessage(status, type, requestId){
     return 'Der Anthropic-API-Key wurde abgelehnt. Bitte API-Key prüfen, speichern und Verbindung erneut testen.';
   }
   if(status === 400 && type === 'invalid_request_error'){
-    return 'Anthropic hat die Anfrage als zu groß oder formal nicht verarbeitbar abgelehnt. Die App teilt große Klausel-, Klassifikations- und Maßnahmenpakete automatisch in kleinere Teile; falls der Fehler bestehen bleibt, bitte Analyse erneut starten oder ein kleineres Dokument testen.';
+    return 'Anthropic hat eine Anfrage als zu groß oder formal nicht verarbeitbar abgelehnt. Die App verarbeitet die Analyse in kleineren Paketen und versucht, große Text- und Scanabschnitte automatisch zu verkleinern. Falls der Fehler bestehen bleibt, bitte die Analyse erneut starten; bei wiederholtem Auftreten liegt meist ein zu großer einzelner Scan, eine instabile Browser-Verbindung oder eine temporäre API-Störung vor.';
   }
   return 'API antwortete mit Status ' + status + (type ? ' (' + type + ')' : '') + (requestId ? ' · Anfrage: ' + requestId : '');
 }
@@ -3193,7 +3205,7 @@ async function extractTextClauseChunkRecursive(extractInstruction, textChunk, si
     return parseStageOneResult(parseJson(raw));
   }catch(err){
     if(err.name === 'AbortError') throw err;
-    if(isInvalidRequestSizeError(err) && textChunk.length > 9000){
+    if(isInvalidRequestSizeError(err) && textChunk.length > 4500){
       const mid = Math.ceil(textChunk.length / 2);
       let splitAt = textChunk.lastIndexOf('\n', mid);
       if(splitAt < Math.floor(textChunk.length * 0.35)) splitAt = mid;
@@ -3476,22 +3488,17 @@ async function runAnalysis(){
     // Stage 1: Extraktion
     setPipelineStep(1,'active');
     setStatus(isScanned ? 'Lese gescannte Seiten und extrahiere relevante Klauseln …' : 'Extrahiere relevante Klauseln …', 'loading');
-    const requiredAreas = getRequiredAreas(currentContractType);
     const guReviewRules = getGuReviewCorrectionRules(currentContractType);
     const deadlineReviewRules = getDeadlineConsequenceCorrectionRules(currentContractType);
     const marketPrompt = getMarketPromptConfig(currentContractType);
+    const extractionFocusAreas = getExtractionFocusAreas(currentContractType);
+    const extractionPrecisionRules = getExtractionPrecisionRules(currentContractType);
     const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Generalunternehmerverträge) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext vollständig und extrahiere die wesentlichen vertraglich relevanten Punkte – bei umfangreichen Verträgen (GU-Vertrag, viele Paragrafen) typischerweise 12 bis 20 Punkte, bei kürzeren Verträgen entsprechend weniger.
-${requiredAreas}
-${guReviewRules}
+${extractionFocusAreas}
 Kategorisierung: Ordne jeden Punkt der inhaltlich treffendsten Kategorie zu, nicht der oberflächlichsten. Beispiele: Eine Prüfpflicht mit Haftungsfolge bei übersehenen Fehlern gehört zu "Haftung", nicht zu "Frist", auch wenn eine Frist genannt wird. Bürgschaften und Sicherheitseinbehalte gehören zur eigenen Kategorie "Sicherheit", nicht zu "Sonstiges" oder "Zahlung".
 Wichtig: Bleibe so konkret wie der Vertrag es hergibt. Wenn der Vertrag Prozentsätze, Fristtage, Deckelungsgrenzen, konkrete Kündigungsgründe oder Paragrafen nennt, übernimm diese Zahlen/Bezeichnungen in die Paraphrase statt nur die allgemeine Kategorie zu benennen (z.B. "Vertragsstrafe 0,2%/Tag, Deckel 5% bei Endtermin-Verzug" statt nur "Vertragsstrafe vereinbart").
-Präzision statt Verallgemeinerung: Formuliere den genauen Anwendungsbereich einer Klausel nicht weiter, als der Vertragstext es hergibt. Wenn eine Regelung z.B. nur für "weitere Leistungen im Zusammenhang mit dem Bauvorhaben" gilt, schreibe das so – nicht verkürzt als "gilt auch für Folgeaufträge" o.ä., da das den Anwendungsbereich fälschlich verbreitert.
 Belegtreue: Erfinde keine Paragraphen-/Ziffernverweise. Nenne Paragrafen oder Ziffern nur, wenn sie im Vertragstext eindeutig beim Punkt stehen. Vertragsstrafen, Deckel, Bezugsgrößen, Sicherheiten-Kumulationen und Rückgabe-/Austauschmechanismen müssen exakt aus dem Vertrag übernommen werden; nicht aus Marktüblichkeit oder Wissensbasis ergänzen. Unterscheide bei Sicherheiten ausdrücklich, ob Bürgschaften gleichzeitig bestehen oder Zug um Zug ausgetauscht werden. Unterscheide bei Vertragsstrafen, ob sie für Gesamtfertigstellung oder nur bestimmte Zwischentermine gelten und ob die Bezugsgröße die Gesamtauftragssumme oder nur eine Teilleistung ist.
-Paragraphentreue: Wenn eine Klausel am Ende einer Ziffer steht, verweise auf diese Ziffer und nicht auf die folgende Überschrift/Ziffer. Wenn ein Paragraphenverweis nicht sicher ist, lasse ihn weg oder schreibe "ohne sicheren Paragraphenverweis". Bei Dokumentationseinbehalten, Open-Book-Regeln, Ausführungspflichten, Abnahmen und Verjährung sind falsche Ziffern schlimmer als fehlende Ziffern.
-Vertragsstrafen und Sicherheiten präzisieren: Nenne bei Vertragsstrafen Anrechnung, Deckel und Bezugsgröße ausdrücklich, wenn sie im Vertrag stehen. Vermeide "Kumulation", wenn der Vertrag Anrechnung vorsieht. Bei Sicherheiten formuliere: keine gleichzeitige Kumulation von Vertragserfüllungs- und Mängelbürgschaft bei Zug-um-Zug-Austausch; eine zusätzliche Kumulation mit Dokumentationseinbehalt ist möglich, wenn der Einbehalt zeitlich neben der jeweils bestehenden Bürgschaft wirkt.
-Klauselgrenzen übernehmen: Bei Open Book zwischen Einsicht in Angebots-/Kalkulations-/Abrechnungsunterlagen und bloßer Information über Nachunternehmerverträge unterscheiden. Formuliere nicht "tatsächliche Kosten werden erstattet", wenn der Vertrag nur erstattungsfähige Kosten nach Ausschlüssen, Abzügen, Vergaberegeln oder Open-Book-Abwicklung meint. Bei Abnahmeunterlagen Ausnahmen aufnehmen, wenn der AN Unterlagen nicht von nicht beauftragten Dritten beschaffen muss oder der AG zuständig ist. Bei Vollständigkeitsklauseln Einschränkungen wie "erkennbar und erforderlich" sowie AG-seitig verursachte Planungs-/Statikänderungen nennen. Bei Kündigung nicht "Verdacht" schreiben, wenn der Vertrag nur tatsächliches Anbieten, Versprechen oder Gewähren unzulässiger Vorteile nennt; Nachfristen je Kündigungsgrund differenzieren.
-Entlastungen und Bedingungen nennen: Jede Risikobeschreibung muss auch risikomindernde Vertragsbedingungen nennen, wenn sie im Vertrag stehen. Beispiele: Prozesskosten trägt AG bei angeordneter Prozessführung; Teilvergütung/unbestrittene Vergütung bei Nachträgen; Kostenerstattung bei Beschleunigungsmaßnahmen; Wartungsvertrag als Bedingung verlängerter Verjährung; Mengenabrechnung nach tatsächlichem Nachweis trotz fester Einheitspreise. Keine Risikoeinstufung darf diese Einschränkungen verschweigen.
-VOB/B-Privilegierung prüfen: Wenn VOB/B/VOB/C als Vertragsbestandteil genannt werden, prüfe immer, ob die VOB/B unverändert insgesamt einbezogen ist oder ob der Vertrag wesentliche Abweichungen enthält (z.B. Ausschluss § 7 VOB/B, Ausschluss fiktive Abnahme/Ingebrauchnahme, geänderte Mängelverjährung, eigene Nachtragslogik mit § 650b BGB, Ausführungspflicht ohne Vergütungseinigung, eingeschränkte Zurückbehaltungsrechte oder Rangfolge des GU-/Individualvertrags vor VOB/B). Bei solchen Abweichungen muss ein eigener Punkt "BGB-Bauvertrag mit modifizierter VOB/B / AGB-Kontrolle" aufgenommen werden: Hinweis, dass bei Verwendung als vorformulierte, nicht im Einzelnen ausgehandelte Vertragsbedingung wegen der Änderungen eine klauselspezifische Prüfung nach § 307 BGB in Betracht kommt; nicht behaupten, der Vertrag sei insgesamt unwirksam oder jede Klausel sei automatisch AGB.
+${extractionPrecisionRules}
 Ermittle außerdem kurz das Bauvorhaben (Projektbezeichnung und/oder Adresse, falls im Vertrag genannt) sowie die Vertragsparteien (Firmenname von Auftraggeber und Auftragnehmer, keine natürlichen Personen/Unterzeichner) und fasse dies in einem Satz im Feld "projektkontext" zusammen (max 30 Wörter). Wenn ein Aspekt nicht auffindbar ist, lasse ihn im Satz einfach weg, statt ihn zu erfinden.
 Ermittle zusätzlich, sofern im Vertrag auffindbar, die tatsächlichen Vertragswerte für einen Marktvergleich im Feld "marktvergleich" (jeweils als kurzer String, max 18 Wörter; wenn eine Angabe im Vertrag fehlt, lasse den Wert leer statt zu raten): ${marketPrompt.fieldsText}
 Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. Format:
