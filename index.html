@@ -395,8 +395,8 @@
     display:grid; grid-template-columns:118px 1fr; gap:13px; align-items:center; background:#fffdf8;
   }
   .risk-profile-card.summary{
-    grid-column:1 / -1; display:grid; grid-template-columns:minmax(220px,.55fr) minmax(260px,.8fr) minmax(360px,1.3fr);
-    gap:14px; align-items:center;
+    grid-column:1 / -1; display:grid; grid-template-columns:minmax(220px,.75fr) minmax(260px,.75fr) minmax(420px,1.5fr);
+    gap:16px; align-items:center; padding:16px;
   }
   .donut-chart{
     width:112px; height:112px; border-radius:50%; position:relative; flex-shrink:0;
@@ -432,6 +432,9 @@
     border-radius:6px; padding:8px 9px; color:var(--text-muted); font-size:11.5px; line-height:1.4;
   }
   .summary-explain b{ color:var(--navy); }
+  .summary-version-note{
+    margin-top:7px; color:var(--text-muted); font-size:10.5px; line-height:1.35;
+  }
   .index-scale{ margin-top:8px; display:flex; flex-direction:column; gap:4px; }
   .index-scale-head{ display:flex; justify-content:space-between; gap:8px; font-size:10.5px; color:var(--text-muted); }
   .index-scale-current{ color:var(--navy); font-weight:bold; }
@@ -506,10 +509,17 @@
     .risk-profile-note{ margin:0 0 6px !important; font-size:10.5px !important; }
     .legend-row{ font-size:10.5px !important; }
     .summary-meta{ grid-template-columns:1fr 1fr !important; }
+    .summary-explain{ font-size:10px !important; line-height:1.3 !important; }
+    .index-scale{ margin-top:5px !important; }
+    .axis-grid{ gap:5px !important; }
+    .axis-bar-row{ gap:8px !important; font-size:10.5px !important; }
+    .axis-label{ width:62px !important; }
+    .axis-score{ font-size:10px !important; }
     tr{ page-break-inside:avoid; }
     .result-tab-pane{ display:block !important; }
     .table-scroll{ overflow:visible !important; }
-    .result-table{ table-layout:fixed; font-size:11px; }
+    .result-table{ table-layout:fixed; font-size:9.7px; line-height:1.28; }
+    .result-table th, .result-table td{ padding:6px 5px !important; }
     .result-table th:nth-child(1), .result-table td:nth-child(1){ width:26%; }
     .result-table th:nth-child(2), .result-table td:nth-child(2){ width:9%; }
     .result-table th:nth-child(3), .result-table td:nth-child(3){ width:25%; }
@@ -1344,8 +1354,9 @@ const HELP_CONTENT = [
     <p><b>Was die zwei Optionen bedeuten:</b> „VOB/B als Hauptgrundlage prüfen" startet die Analyse stärker mit VOB/B-Benchmark, sucht aber trotzdem nach Abweichungen und modifizierter VOB/B. „Bauvertrag mit VOB/B-Bezügen prüfen" bleibt stärker auf dem konkreten Bauvertrag kalibriert und behandelt VOB/B eher als ergänzende oder modifizierte Bezugsgrundlage. Bei Bauverträgen mit umfangreichen eigenen Regelungen ist diese zweite Option häufig der sauberere Startpunkt.</p>
     <p><b>AGB- und Privilegierungsprüfung:</b> Wenn ein Vertrag die VOB/B nur teilweise übernimmt, in wesentlichen Punkten ändert oder durch vorrangige Individualregelungen verdrängt, ist dies als eigener Prüfpunkt darzustellen. Vorformulierte belastende Klauseln sind dann besonders auf AGB-Kontrolle nach § 307 BGB und auf einen möglichen Wegfall der VOB/B-Privilegierung nach § 310 Abs. 1 Satz 3 BGB hinzuweisen.</p>
     <p><b>Risikoprofil:</b> Die Management Summary zeigt zuerst die Anzahl der erkannten Risikopunkte nach Stufe. „20 Risiken" bedeutet nicht automatisch gut oder schlecht, sondern: Es wurden 20 bewertungsrelevante Punkte erkannt. Entscheidend ist die Mischung aus kritisch/hoch/mittel/niedrig und ob einzelne Punkte marktüblich, ungewöhnlich oder klar abweichend sind.</p>
-    <p><b>Management-Einschätzung und Risikoindex:</b> Die Ampel übersetzt Anzahl und Schwere der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Der Risikoindex ist ein gewichteter Orientierungswert aus den Risikostufen (kritisch zählt stärker als hoch, hoch stärker als mittel). Er ist kein Prozentwert, keine Schulnote und nicht auf 100 begrenzt. Orientierung: 0-6 gering, 7-15 moderat, 16-31 erhöht, ab 32 kritisch.</p>
-    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Der Wirkungsindex ist ein gewichteter Orientierungswert für wirtschaftlichen Druck, ebenfalls ohne feste 100er-Obergrenze. Orientierung: 0-34 gering, 35-69 moderat, 70-99 erhöht, ab 100 sehr hoch. Donut und Balkendiagramm nutzen dieselbe Datenbasis; der Donut zeigt den Überblick, die Balken zeigen die Rangfolge der wirtschaftlichen Schwerpunkte. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
+    <p><b>Management-Einschätzung und Risikoindex:</b> Die Ampel übersetzt Anzahl, Schwere und thematische Konzentration der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Ab Bewertungslogik V6 wird der Risikoindex konsolidiert berechnet: Mehrere ähnliche Einzelpunkte erhöhen den Index nur begrenzt, wenn sie zum selben Risikothema gehören. Der Wert ist kein Prozentwert, keine Schulnote und kein objektiver Marktpreis des Vertrags. Orientierung: 0-6 gering, 7-15 moderat, 16-31 erhöht, ab 32 kritisch.</p>
+    <p><b>Vergleichbarkeit älterer Läufe:</b> Wenn sich Analyseumfang, Extraktionslogik oder Bewertungslogik ändern, sind alte und neue Punktwerte nur eingeschränkt vergleichbar. Eine höhere Zahl kann bedeuten, dass die App mehr Details erkannt oder anders konsolidiert hat – nicht zwingend, dass derselbe Vertrag fachlich schlechter geworden ist.</p>
+    <p><b>Auswirkungsachsen:</b> jeder Punkt wird zusätzlich einer wirtschaftlichen Wirkungsebene zugeordnet – Liquidität, Termin, Haftung, Nachtrag oder Marge. Der Wirkungsindex ist ein normalisierter Orientierungswert für wirtschaftlichen Druck: Er berücksichtigt sowohl die Summe der Achsenpunkte als auch den stärksten Schwerpunkt, damit sehr viele kleinteilige Punkte nicht automatisch überzeichnen. Orientierung: 0-34 gering, 35-69 moderat, 70-99 erhöht, ab 100 sehr hoch. Donut und Balkendiagramm nutzen dieselbe Datenbasis; der Donut zeigt den Überblick, die Balken zeigen die Rangfolge der wirtschaftlichen Schwerpunkte. Bei HOAI-Planungsverträgen kalibriert die App die wirtschaftliche Sicht zusätzlich auf Marge, Planungsaufwand, Leistungsumfang und Haftung, damit Liquidität nur dann dominiert, wenn echte Zahlungs-, Sicherheiten- oder Vorfinanzierungsrisiken vorliegen.</p>
     <p><b>Marktvergleich:</b> stellt ausgewählte Vertragswerte den in der App fest hinterlegten marktüblichen Richtwerten gegenüber – je nach Vertragsgrundlage unterschiedlich. Bei Bauverträgen werden z. B. Gewährleistung, Vertragsstrafe, Zahlungsziel, Skonto, VOB/B-Einbeziehung, Vertragserfüllungssicherheit, Mängelsicherheit, kumulierte Einbehalte, Abnahme, Nachträge und Schlussdokumentation getrennt betrachtet; bei Planungsverträgen/HOAI stehen Honorar-/Leistungsumfang, stufenweise Beauftragung, Kostensteuerung, Nutzungsrechte, BIM-/Projektplattformpflichten, Freigaben und Zahlungs-/Prüffristen im Vordergrund.</p>
     <p><b>Terminkritische Klauseln:</b> alle Fristen, bei denen eine konkrete finanzielle oder rechtliche Folge erkannt wurde, priorisiert nach Schwere, Unmittelbarkeit und Steuerbarkeit. „Kritisch" ist Fristen mit harter unmittelbarer Sanktion vorbehalten, z. B. ausdrücklich vereinbarter Vertragsstrafe, konkretem Schadensersatzmechanismus, hohem Einbehalt, Rechtsverlust oder blockierter Abnahme/Schlusszahlung. Zielsetzungen, Ordnungstermine und nicht ausdrücklich strafbewehrte Zwischentermine dürfen nicht als Vertragsstrafenfristen dargestellt werden.</p>
     <p><b>Fristen:</b> zweigeteilt – oben ein chronologischer Zeitstrahl für erkannte Fristen mit einem echten Kalenderdatum, darunter die nach Kategorie gruppierte Liste der erkannten Fristen (Vertragsfristen, Prüfungsfristen, Zahlungsfristen, Reaktionsfristen, Verjährungsfristen, Vertragsstrafen-Termine). Relative Fristen (z. B. „12 Werktage nach Erhalt der Ausführungsplanung") zeigen zusätzlich eine Dauer-Kennzeichnung und den hervorgehobenen Bezugspunkt.</p>
@@ -3125,6 +3136,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     const classifyPrompt = `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
 Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch echte Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere ausdrücklich strafbewehrte Termine, oder das Zusammenwirken von Vollständigkeitsklausel + funktionaler Leistungsbeschreibung + fehlender Detailbeschreibung). Kumulation nur annehmen, wenn Belastungen tatsächlich gleichzeitig oder ohne vollständige Anrechnung wirken. Wenn der Vertrag Anrechnung, Austausch, Zug-um-Zug-Mechanik, Bedingungen oder Ausnahmen vorsieht, muss dies die Einstufung mindern oder präzisieren. Wenn zwei oder mehr Punkte inhaltlich unmittelbar zusammenhängen (z.B. Leistungsverweigerungsrecht und Anordnungsrecht), benenne diesen Zusammenhang explizit in der Begründung beider Punkte als Kombinationsrisiko.
 Kalibrierung der Risikoverteilung: Verteile die Einstufungen realistisch und nicht zu gleichmäßig. "kritisch" ist die Ausnahme und gehört nur den wenigen wirklich gravierendsten Punkten im gesamten Vertrag. "hoch" ist eine kleinere bis mittlere Gruppe. Die Mehrheit der Punkte sollte "mittel" oder "niedrig" sein. Vermeide, dass am Ende ungefähr gleich viele Punkte in jeder Stufe landen.
+Konsolidierungsregel: Bewerte echte Einzelrisiken, aber vermeide künstliche Verschlechterung durch doppelte oder sehr ähnliche Punkte. Wenn mehrere Klauseln dasselbe Risikothema betreffen (z.B. Sicherheiten/Einbehalte, Abnahme/Dokumentation, Vertragsstrafe/Termine, Open-Book/Marge), dürfen sie nur dann mehrfach "hoch" oder "kritisch" sein, wenn jede Klausel eine eigenständige zusätzliche Belastung mit eigener Folge erzeugt. Andernfalls stufe Nebenpunkte niedriger ein und benenne in der Begründung den Zusammenhang zum Hauptrisiko.
 Bewertungskriterien: Beurteile jeden Punkt nach (1) Schwere der rechtlichen/wirtschaftlichen Folge, (2) Eintrittsnähe und Steuerbarkeit, (3) Abweichung vom marktüblichen Standard, (4) Kumulation mit anderen Klauseln und (5) absoluter wirtschaftlicher Wirkung. Eine marktübliche, klar begrenzte, austauschbare oder befristete Regelung ist nicht automatisch "kritisch", auch wenn sie wirtschaftlich relevant ist. Nutze "kritisch" nur bei unmittelbarer erheblicher Belastung, ungewöhnlicher Einseitigkeit, fehlender Begrenzung, konkreter Zahlungs-/Abnahmeblockade, Rechtsverlust oder starker Kumulation.
 Sicherheiten-Regel: Bürgschaften um ca. 10% der Auftragssumme oder übliche Sicherheitseinbehalte sind regelmäßig "hoch", wenn sie Liquidität/Avalrahmen spürbar belasten. "Kritisch" nur bei zusätzlicher Kumulation, außergewöhnlicher absoluter Höhe, fehlender Rückgabe-/Austauschmöglichkeit, sehr kurzer Stellungfrist, Zahlungssperre, Abnahmeblockade oder besonderer Existenz-/Projektwirkung.
 Margen-Regel: Ein vereinbarter Festpreis OHNE Gleitklausel für Lohn-, Material-, Geräte- oder Stoffkosten überträgt Preissteigerungsrisiken vollständig auf den AN. Ordne einen solchen Punkt der Auswirkung "Marge" zu und bewerte ihn mindestens als "mittel", bei längerer Bauzeit oder volatilen Materialpreisen als "hoch" – nicht als reines Formalie ohne wirtschaftliche Bedeutung.
@@ -3277,6 +3289,7 @@ const FRIST_KAT_ORDER = ["Vertragsfrist","Vertragsstrafe","Pruefungsfrist","Zahl
 const PRIO_ORDER = {kritisch:0, hoch:1, mittel:2, niedrig:3};
 const AUSWIRKUNG_ACHSEN = ["Liquidität","Nachtrag","Marge","Termin","Haftung"];
 const RISK_WEIGHT = {kritisch:3, hoch:2, mittel:1, niedrig:0};
+const ANALYSIS_LOGIC_VERSION = "Bewertungslogik V6 · konsolidierter Risikoindex";
 
 const PROJECT_TARGET_DEFS = [
   {label:"DGNB Gold", re:/dgnb/i},
@@ -3300,6 +3313,51 @@ const PROJECT_COMPLEXITY_DEFS = [
 
 function collectItemText(items){
   return items.map(it => [it.kategorie, it.text, it.begruendung, it.massnahme, ...(it.referenzen||[])].filter(Boolean).join(' ')).join(' ');
+}
+function getRiskTheme(it){
+  const text = [it.kategorie, it.text, it.begruendung, it.massnahme, ...(it.referenzen||[])].filter(Boolean).join(' ').toLowerCase();
+  const rules = [
+    ['sicherheiten', /(bürgschaft|buergschaft|sicherheit|einbehalt|aval|zahlungsbürgschaft|vertragserfüllung|mängel|maengel|dokumentationseinbehalt)/i],
+    ['vertragsstrafe-termin', /(vertragsstrafe|strafbewehr|verzug|gesamtfertigstellung|zwischentermin|beschleunigung|werktag)/i],
+    ['abnahme-dokumentation', /(abnahme|schlussdokumentation|dokumentation|einweisung|funktionsprüfung|funktionspruefung|unterlagen)/i],
+    ['zahlung-liquiditaet', /(zahlung|abschlag|schlussrechnung|schlusszahlung|fälligkeit|faelligkeit|skonto|zurückbehalt|zurueckbehalt|vorfinanz)/i],
+    ['nachtrag-anordnung', /(nachtrag|leistungsänderung|leistungsaenderung|anordnung|650b|650c|vergütungsanpassung|verguetungsanpassung)/i],
+    ['open-book-marge', /(open.?book|cost.?plus|fee|gu-zuschlag|gläserne taschen|glaeserne taschen|kalkulation|nachunternehmer|marge|deckungsbeitrag)/i],
+    ['haftung-gewaehrleistung', /(haftung|schadensersatz|gewährleistung|gewaehrleistung|verjährung|verjaehrung|freistellung|versicherung)/i],
+    ['kuendigung-rechte', /(kündigung|kuendigung|rücktritt|ruecktritt|außerordentlich|ausserordentlich|leistungsverweiger)/i],
+    ['vob-bgb-agb', /(vob\/b|bgb|agb|307|310|rangfolge|privilegierung|fiktive abnahme|§\s*7)/i],
+    ['planung-hoai', /(hoai|planer|architekt|ingenieur|bim|ifc|projektziel|kostensteuer|grundleistung|besondere leistung)/i]
+  ];
+  const found = rules.find(([, re]) => re.test(text));
+  return found ? found[0] : (it.auswirkung || it.kategorie || 'sonstiges').toString().toLowerCase();
+}
+function calculateConsolidatedRiskMetrics(items, riskCounts, axisScores){
+  const themeMap = new Map();
+  items.forEach(it => {
+    const theme = getRiskTheme(it);
+    const weight = RISK_WEIGHT[it.risiko] ?? 0;
+    const current = themeMap.get(theme) || {count:0, maxWeight:0, weighted:0};
+    current.count += 1;
+    current.maxWeight = Math.max(current.maxWeight, weight);
+    current.weighted += weight;
+    themeMap.set(theme, current);
+  });
+  const themeScore = [...themeMap.values()].reduce((sum, theme) => {
+    if(!theme.weighted) return sum;
+    return sum + theme.maxWeight + Math.min(2, Math.max(0, theme.count - 1) * 0.35);
+  }, 0);
+  const rawRiskIndex = (riskCounts.kritisch || 0) * 3 + (riskCounts.hoch || 0) * 2 + (riskCounts.mittel || 0);
+  const consolidatedRiskIndex = Math.round(themeScore + Math.min(10, Math.max(0, rawRiskIndex - themeScore) * 0.25));
+  const rawImpactIndex = AUSWIRKUNG_ACHSEN.reduce((sum, axis) => sum + (Number(axisScores[axis]) || 0), 0);
+  const dominantAxis = Math.max(...AUSWIRKUNG_ACHSEN.map(axis => Number(axisScores[axis]) || 0), 0);
+  const normalizedImpactIndex = Math.round((rawImpactIndex * 0.55) + (dominantAxis * 0.45));
+  return {
+    rawRiskIndex,
+    consolidatedRiskIndex,
+    rawImpactIndex:Math.round(rawImpactIndex),
+    normalizedImpactIndex,
+    themeCount:themeMap.size
+  };
 }
 function matchProjectLabels(items, defs){
   const text = collectItemText(items);
@@ -3492,7 +3550,8 @@ function renderIndexScale(value, bands, title, cap){
 function getOverallRiskAssessment(summary){
   const counts = summary.riskCounts || {};
   const totalRisks = Object.values(counts).reduce((sum, value) => sum + (Number(value) || 0), 0);
-  const weightedRisk = (counts.kritisch || 0) * 3 + (counts.hoch || 0) * 2 + (counts.mittel || 0);
+  const metrics = summary.metrics || calculateConsolidatedRiskMetrics([], counts, summary.axisScores || {});
+  const weightedRisk = metrics.consolidatedRiskIndex;
   const criticalHigh = (counts.kritisch || 0) + (counts.hoch || 0);
   if((counts.kritisch || 0) >= 4 || criticalHigh >= 10 || weightedRisk >= 32){
     return {
@@ -3501,6 +3560,7 @@ function getOverallRiskAssessment(summary){
       text:'Mehrere wesentliche Risiken. Vor Freigabe/Unterschrift fachkundig prüfen und zentrale Punkte verhandeln.',
       totalRisks,
       weightedRisk,
+      metrics,
       band:getBand(weightedRisk, RISK_INDEX_BANDS)
     };
   }
@@ -3511,6 +3571,7 @@ function getOverallRiskAssessment(summary){
       text:'Relevante Risiken vorhanden. Kritische und hohe Punkte gezielt prüfen, priorisieren und verhandeln.',
       totalRisks,
       weightedRisk,
+      metrics,
       band:getBand(weightedRisk, RISK_INDEX_BANDS)
     };
   }
@@ -3521,6 +3582,7 @@ function getOverallRiskAssessment(summary){
       text:'Überschaubares Risikoprofil. Einzelpunkte prüfen; Standardrisiken bleiben möglich.',
       totalRisks,
       weightedRisk,
+      metrics,
       band:getBand(weightedRisk, RISK_INDEX_BANDS)
     };
   }
@@ -3530,6 +3592,7 @@ function getOverallRiskAssessment(summary){
     text:'Aktuell geringe Risikodichte. Ergebnis trotzdem fachlich plausibilisieren.',
     totalRisks,
     weightedRisk,
+    metrics,
     band:getBand(weightedRisk, RISK_INDEX_BANDS)
   };
 }
@@ -3538,7 +3601,7 @@ function renderOverallRiskCard(summary){
   const strongestAxis = AUSWIRKUNG_ACHSEN
     .map(axis => ({axis, score:summary.axisScores[axis] || 0}))
     .sort((a,b) => b.score - a.score)[0] || {axis:'-', score:0};
-  const impactTotal = AUSWIRKUNG_ACHSEN.reduce((sum, axis) => sum + (Number(summary.axisScores[axis]) || 0), 0);
+  const impactTotal = summary.metrics ? summary.metrics.normalizedImpactIndex : AUSWIRKUNG_ACHSEN.reduce((sum, axis) => sum + (Number(summary.axisScores[axis]) || 0), 0);
   const impactBand = getBand(impactTotal, IMPACT_INDEX_BANDS);
   const impactLabel = impactBand.desc;
   return `
@@ -3557,11 +3620,12 @@ function renderOverallRiskCard(summary){
         </div>
       </div>
       <div class="summary-explain">
-        <b>Einordnung:</b> Risikoindex ${assessment.weightedRisk} Punkte liegt im Bereich <b>${escapeHtml(assessment.band.label)}</b>
+        <b>Einordnung:</b> Konsolidierter Risikoindex ${assessment.weightedRisk} Punkte liegt im Bereich <b>${escapeHtml(assessment.band.label)}</b>
         (${escapeHtml(formatBandRange(assessment.band))}). Wirkungsindex ${Math.round(impactTotal)} Punkte liegt im Bereich
-        <b>${escapeHtml(impactBand.label)}</b> (${escapeHtml(formatBandRange(impactBand))}). Beide Werte sind nicht auf 100 begrenzt, kein pauschales Urteil über die Vertragsqualität und mit älteren Läufen nur eingeschränkt vergleichbar, wenn sich Analyseumfang oder Extraktionslogik geändert haben.
+        <b>${escapeHtml(impactBand.label)}</b> (${escapeHtml(formatBandRange(impactBand))}). Die Werte sind Orientierungswerte, kein pauschales Urteil über die Vertragsqualität. Mehr erkannte Einzelpunkte erhöhen den Index nur begrenzt, wenn sie demselben Risikothema zugeordnet sind.
         ${renderIndexScale(assessment.weightedRisk, RISK_INDEX_BANDS, 'Risikoindex', 50)}
         ${renderIndexScale(Math.round(impactTotal), IMPACT_INDEX_BANDS, 'Wirkungsindex', 130)}
+        <div class="summary-version-note">${escapeHtml(ANALYSIS_LOGIC_VERSION)} · ${assessment.metrics.themeCount || 0} Risikothemen aus ${assessment.totalRisks} erkannten Einzelpunkten konsolidiert. Rohwerte: Risiko ${assessment.metrics.rawRiskIndex || 0}, Wirkung ${assessment.metrics.rawImpactIndex || 0}.</div>
       </div>
     </div>`;
 }
@@ -3576,13 +3640,13 @@ function renderRiskProfileCharts(summary){
     value:summary.axisScores[key] || 0,
     color:AXIS_DONUT_COLORS[key] || '#5c6570'
   }));
-  const impactTotal = axisEntries.reduce((sum, entry) => sum + (Number(entry.value) || 0), 0);
+  const impactTotal = summary.metrics ? summary.metrics.normalizedImpactIndex : axisEntries.reduce((sum, entry) => sum + (Number(entry.value) || 0), 0);
   const impactLabel = getImpactIndexAssessment(impactTotal);
   return `
     <div class="risk-profile-grid">
       ${renderOverallRiskCard(summary)}
-      ${renderDonutCard('Geschätzte Risikoverteilung', riskEntries, 'Risiken', 'Erkannte Risikopunkte nach Schweregrad. Entscheidend ist die Mischung der Stufen.')}
-      ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Punkte', `Wirkungsindex ${Math.round(impactTotal)} Punkte: ${impactLabel}. Orientierungswert ohne feste 100er-Obergrenze.`)}
+      ${renderDonutCard('Geschätzte Risikoverteilung', riskEntries, 'Einzelpunkte', 'Erkannte Risikopunkte nach Schweregrad. Für die Management-Einschätzung werden gleichartige Punkte zusätzlich konsolidiert.')}
+      ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Achsenpunkte', `Normalisierter Wirkungsindex ${Math.round(impactTotal)} Punkte: ${impactLabel}. Die Achsenwerte zeigen die fachlichen Schwerpunkte.`)}
     </div>`;
 }
 function buildManagementSummary(items){
@@ -3604,7 +3668,8 @@ function buildManagementSummary(items){
   });
   applyPlanningAxisCalibration(items, axisScores);
   applyConstructionAxisCalibration(items, axisScores);
-  return { top5, riskCounts, axisScores };
+  const metrics = calculateConsolidatedRiskMetrics(items, riskCounts, axisScores);
+  return { top5, riskCounts, axisScores, metrics };
 }
 
 function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext, scanPreviewImages = []){
