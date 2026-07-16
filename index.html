@@ -701,7 +701,7 @@
   .internal-step p{ margin:0; color:var(--text-muted); font-size:12.8px; line-height:1.45; }
   .internal-step b{ color:var(--navy); font-size:14px; }
   .internal-step-num{ width:30px; height:30px; border-radius:50%; background:var(--navy); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; flex:0 0 auto; box-shadow:0 0 0 4px #fffdf8; }
-  .internal-price-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px; }
+  .internal-price-grid{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px; margin-top:18px; }
   .internal-price-card{
     border:1px solid var(--border); border-top:4px solid var(--gold); border-radius:10px;
     padding:15px 12px; text-align:center; background:#fff; min-height:0;
@@ -1072,12 +1072,13 @@
       <section class="internal-page">
         <h2 class="internal-page-title">Preise Vertragsanalyse</h2>
         <div class="internal-price-grid">
-          <div class="internal-price-card"><b>bis 30 Seiten</b><strong>249 €</strong></div>
-          <div class="internal-price-card"><b>bis 60 Seiten</b><strong>399 €</strong></div>
-          <div class="internal-price-card"><b>bis 100 Seiten</b><strong>599 €</strong></div>
+          <div class="internal-price-card"><b>bis 15 Seiten</b><strong>249 €</strong></div>
+          <div class="internal-price-card"><b>bis 30 Seiten</b><strong>399 €</strong></div>
+          <div class="internal-price-card"><b>bis 60 Seiten</b><strong>599 €</strong></div>
+          <div class="internal-price-card"><b>bis 100 Seiten</b><strong>799 €</strong></div>
           <div class="internal-price-card"><b>über 100 Seiten</b><strong class="compact-price">Individuelles Angebot</strong></div>
         </div>
-        <p class="internal-note">Alle Preise verstehen sich zuzüglich der gesetzlichen Mehrwertsteuer. Die Seitenangaben beziehen sich ausschließlich auf den Hauptvertrag. Anlagen wie Pläne, Baubeschreibungen, technische Nachweise, Leistungsverzeichnisse oder sonstige Vertragsanlagen sind nicht Bestandteil dieser Pauschalen und werden nur nach gesonderter Vereinbarung geprüft.</p>
+        <p class="internal-note">Alle Preise verstehen sich zuzüglich der gesetzlichen Mehrwertsteuer. Die Preisstaffel bezieht sich ausschließlich auf den Hauptvertrag. Anlagen wie Leistungsverzeichnisse, Pläne, Zeichnungen, technische Nachweise oder sonstige Vertragsunterlagen sind nicht Bestandteil der Analyse und werden nur nach gesonderter Vereinbarung berücksichtigt.</p>
       </section>
 
       <section class="internal-page internal-license">
