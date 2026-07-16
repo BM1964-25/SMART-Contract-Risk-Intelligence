@@ -4282,47 +4282,23 @@ function getOverallRiskAssessment(summary){
   const metrics = summary.metrics || calculateConsolidatedRiskMetrics([], counts, summary.axisScores || {});
   const weightedRisk = metrics.consolidatedRiskIndex;
   const criticalHigh = (counts.kritisch || 0) + (counts.hoch || 0);
-  if((counts.kritisch || 0) >= 4 || criticalHigh >= 10 || weightedRisk >= 32){
-    return {
-      label:'Kritisch',
-      color:'#8b1e1e',
-      text:'Mehrere wesentliche Risiken. Vor Freigabe/Unterschrift fachkundig prüfen und zentrale Punkte verhandeln.',
-      totalRisks,
-      weightedRisk,
-      metrics,
-      band:getBand(weightedRisk, RISK_INDEX_BANDS)
-    };
-  }
-  if((counts.kritisch || 0) >= 1 || criticalHigh >= 5 || weightedRisk >= 16){
-    return {
-      label:'Erhöht',
-      color:'#b0512a',
-      text:'Relevante Risiken vorhanden. Kritische und hohe Punkte gezielt prüfen, priorisieren und verhandeln.',
-      totalRisks,
-      weightedRisk,
-      metrics,
-      band:getBand(weightedRisk, RISK_INDEX_BANDS)
-    };
-  }
-  if(weightedRisk >= 7 || totalRisks >= 10){
-    return {
-      label:'Moderat',
-      color:'#a5750f',
-      text:'Überschaubares Risikoprofil. Einzelpunkte prüfen; Standardrisiken bleiben möglich.',
-      totalRisks,
-      weightedRisk,
-      metrics,
-      band:getBand(weightedRisk, RISK_INDEX_BANDS)
-    };
+  const band = getBand(weightedRisk, RISK_INDEX_BANDS);
+  const color = band.color;
+  let text = 'Aktuell geringe Risikodichte. Ergebnis trotzdem fachlich plausibilisieren.';
+  if(band.label === 'Kritisch') text = 'Mehrere wesentliche Risiken. Vor Freigabe/Unterschrift fachkundig prüfen und zentrale Punkte verhandeln.';
+  else if(band.label === 'Erhöht') text = 'Relevante Risiken vorhanden. Kritische und hohe Punkte gezielt prüfen, priorisieren und verhandeln.';
+  else if(band.label === 'Moderat') text = 'Überschaubares Risikoprofil. Einzelpunkte prüfen; Standardrisiken bleiben möglich.';
+  if(band.label !== 'Kritisch' && criticalHigh >= 10){
+    text += ' Die Anzahl hoher Einzelpunkte ist auffällig; maßgeblich bleibt die konsolidierte Index-Einordnung.';
   }
   return {
-    label:'Gering',
-    color:'#2f7a4f',
-    text:'Aktuell geringe Risikodichte. Ergebnis trotzdem fachlich plausibilisieren.',
+    label:band.label,
+    color,
+    text,
     totalRisks,
     weightedRisk,
     metrics,
-    band:getBand(weightedRisk, RISK_INDEX_BANDS)
+    band
   };
 }
 function renderOverallRiskCard(summary){
@@ -4330,9 +4306,20 @@ function renderOverallRiskCard(summary){
   const strongestAxis = AUSWIRKUNG_ACHSEN
     .map(axis => ({axis, score:summary.axisScores[axis] || 0}))
     .sort((a,b) => b.score - a.score)[0] || {axis:'-', score:0};
+  const deadlineQuality = summary.deadlineQuality || {};
+  const deadlineUnavailable = strongestAxis.axis === 'Termin' && deadlineQuality.source === 'none';
+  const strongestAxisValue = deadlineUnavailable ? 'Fristen offen' : strongestAxis.axis;
+  const strongestAxisLabel = deadlineUnavailable
+    ? 'Terminwirkung nicht belastbar'
+    : (strongestAxis.axis === 'Termin' && deadlineQuality.source === 'fallback' ? 'aus Risiko-/Textdaten' : 'stärkste Wirkung');
   const impactTotal = summary.metrics ? summary.metrics.normalizedImpactIndex : AUSWIRKUNG_ACHSEN.reduce((sum, axis) => sum + (Number(summary.axisScores[axis]) || 0), 0);
   const impactBand = getBand(impactTotal, IMPACT_INDEX_BANDS);
   const impactLabel = impactBand.desc;
+  const deadlineNote = deadlineUnavailable
+    ? '<div class="summary-version-note">Hinweis: Die Terminachse stammt aus der Risikoklassifikation. Da keine belastbare Fristenliste vorliegt, wird Termin nicht als gesicherte stärkste Wirkung ausgewiesen.</div>'
+    : (strongestAxis.axis === 'Termin' && deadlineQuality.source === 'fallback'
+      ? '<div class="summary-version-note">Hinweis: Die Terminwirkung basiert teilweise auf Fallback-Fristen aus Risiko- und Textdaten und sollte fachlich geprüft werden.</div>'
+      : '');
   return `
     <div class="risk-profile-card summary">
       <div class="summary-left">
@@ -4344,8 +4331,8 @@ function renderOverallRiskCard(summary){
             <span class="summary-meta-label">Risikoindex · ${escapeHtml(assessment.band.label)}</span>
           </div>
           <div class="summary-meta-item">
-            <span class="summary-meta-value">${escapeHtml(strongestAxis.axis)}</span>
-            <span class="summary-meta-label">stärkste Wirkung</span>
+            <span class="summary-meta-value">${escapeHtml(strongestAxisValue)}</span>
+            <span class="summary-meta-label">${escapeHtml(strongestAxisLabel)}</span>
           </div>
         </div>
       </div>
@@ -4358,6 +4345,7 @@ function renderOverallRiskCard(summary){
           ${renderIndexScale(assessment.weightedRisk, RISK_INDEX_BANDS, 'Risikoindex', 50)}
           ${renderIndexScale(Math.round(impactTotal), IMPACT_INDEX_BANDS, 'Wirkungsindex', 130)}
           <div class="summary-version-note">${escapeHtml(ANALYSIS_LOGIC_VERSION)} · ${assessment.metrics.themeCount || 0} Risikothemen aus ${assessment.totalRisks} erkannten Einzelpunkten konsolidiert. Rohwerte: Risiko ${assessment.metrics.rawRiskIndex || 0}, Wirkung ${assessment.metrics.rawImpactIndex || 0}.</div>
+          ${deadlineNote}
         </div>
       </div>
     </div>`;
@@ -4382,7 +4370,7 @@ function renderRiskProfileCharts(summary){
       ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Achsenpunkte', `Normalisierter Wirkungsindex ${Math.round(impactTotal)} Punkte: ${impactLabel}. Die Achsenwerte zeigen die fachlichen Schwerpunkte.`)}
     </div>`;
 }
-function buildManagementSummary(items){
+function buildManagementSummary(items, deadlineQuality = {}){
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
   const top5 = [...items].sort((a,b) => {
     const scoreDiff = getSummaryPriorityScore(b) - getSummaryPriorityScore(a);
@@ -4402,7 +4390,7 @@ function buildManagementSummary(items){
   applyPlanningAxisCalibration(items, axisScores);
   applyConstructionAxisCalibration(items, axisScores);
   const metrics = calculateConsolidatedRiskMetrics(items, riskCounts, axisScores);
-  return { top5, riskCounts, axisScores, metrics };
+  return { top5, riskCounts, axisScores, metrics, deadlineQuality };
 }
 
 function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext, scanPreviewImages = []){
@@ -4444,7 +4432,14 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
     ? projektKontext.trim()
     : `Diese Auswertung bezieht sich auf die Datei „${currentFileName}" (${CONTRACT_TYPE_LABELS[currentContractType] || 'Vertrag'}).`;
 
-  const summary = buildManagementSummary(items);
+  const hasFallbackDeadlines = fristenItems.some(f => /fallback/i.test(String(f.quelle || '')));
+  const deadlineQuality = {
+    hasReliableDeadlines: fristenItems.length > 0 && !fristenFailed && !hasFallbackDeadlines,
+    source: fristenItems.length ? (fristenFailed || hasFallbackDeadlines ? 'fallback' : 'primary') : 'none',
+    count: fristenItems.length,
+    failed: !!fristenFailed
+  };
+  const summary = buildManagementSummary(items, deadlineQuality);
   const projectInsightHtml = renderProjectInsight(items);
   const summaryHtml = `
     <div class="card">
