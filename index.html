@@ -2439,7 +2439,7 @@ function saveHistoryAsJson(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `SMART-Vertrags-und-Risikoanalyse_Verlauf_${exportTimestamp()}.json`;
+  a.download = `Vertragsrisikoanalyse_Verlauf_${exportTimestamp()}.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -2490,7 +2490,7 @@ function safeReportPdfFilename(name){
 }
 function buildReportBaseName(name, stamp = exportTimestamp()){
   const base = safeFileSlug(name, 'analyse');
-  return `SMART-Vertrags-und-Risikoanalyse_Bericht_${stamp}_${base}`;
+  return `Vertragsrisikoanalyse_${stamp}_${base}`;
 }
 function buildPlainHtmlReport(reportNames){
   const resultClone = document.getElementById('resultsArea').cloneNode(true);
@@ -2517,7 +2517,7 @@ function buildPlainHtmlReport(reportNames){
   resultClone.querySelectorAll('details').forEach(el => el.open = true);
   const appStyle = document.querySelector('style')?.textContent || '';
   const reportDate = new Date().toLocaleDateString('de-DE') + ' · ' + new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) + ' Uhr';
-  const reportTitle = (reportNames && reportNames.pdfName ? reportNames.pdfName.replace(/\.pdf$/i, '') : 'SMART Vertrags- & Risikoanalyse Bericht');
+  const reportTitle = (reportNames && reportNames.pdfName ? reportNames.pdfName.replace(/\.pdf$/i, '') : safeReportPdfFilename(currentFileName).replace(/\.pdf$/i, ''));
   const reportScript = [
     'const REPORT_PDF_TITLE = ' + JSON.stringify(reportTitle) + ';',
     'function printReport(){',
@@ -2588,7 +2588,7 @@ header,.site-footer,.top-actions,.no-print{display:none!important;}
 <div class="container">
 <div class="report-actionbar">
   <div>
-    <div class="report-actionbar-title">SMART Vertrags- &amp; Risikoanalyse Bericht</div>
+    <div class="report-actionbar-title">${escapeHtml(reportTitle)}</div>
     <div class="report-actionbar-meta">${escapeHtml(currentFileName)} · erstellt ${escapeHtml(reportDate)}</div>
   </div>
   <div class="report-actionbar-actions">
@@ -2662,7 +2662,7 @@ function buildEncryptedReportShell(payload){
     '<head>',
     '<meta charset="UTF-8">',
     '<meta name="viewport" content="width=device-width, initial-scale=1.0">',
-    '<title>Geschützter Analysebericht</title>',
+    '<title>' + escapeHtml(payload.title || 'Geschützter Analysebericht') + '</title>',
     '<style>',
     ':root{--navy:#0f2a4a;--gold:#c9a227;--bg:#f6f5f1;--card:#fff;--border:#e0ddd3;--text:#20262e;--muted:#5c6570;--red:#8b1e1e;}',
     '*{box-sizing:border-box}',
@@ -2680,7 +2680,7 @@ function buildEncryptedReportShell(payload){
     '</head>',
     '<body>',
     '<main class="unlock-card">',
-    '  <h1>SMART Vertrags- & Risikoanalyse Bericht</h1>',
+    '  <h1>' + escapeHtml(payload.title || 'Geschützter Analysebericht') + '</h1>',
     '  <p>Dieser HTML-Bericht ist verschlüsselt. Zur Anzeige ist das separat übermittelte Passwort erforderlich. Die Entschlüsselung erfolgt lokal im Browser.</p>',
     '  <label for="reportPassword">Passwort</label>',
     '  <input id="reportPassword" type="password" autocomplete="current-password" autofocus>',
@@ -2730,6 +2730,7 @@ async function exportEncryptedHtmlReport(){
   );
   const shell = buildEncryptedReportShell({
     version:1,
+    title: reportBaseName,
     algorithm:'AES-GCM',
     kdf:'PBKDF2-SHA-256',
     iterations:250000,
