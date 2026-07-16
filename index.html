@@ -2434,7 +2434,7 @@ function saveHistoryAsJson(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `scri-verlauf-${exportTimestamp()}.json`;
+  a.download = `SMART-Vertrags-und-Risikoanalyse_Verlauf_${exportTimestamp()}.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -2483,9 +2483,9 @@ function safeReportFilename(name){
 function safeReportPdfFilename(name){
   return `${buildReportBaseName(name)}.pdf`;
 }
-function buildReportBaseName(name){
+function buildReportBaseName(name, stamp = exportTimestamp()){
   const base = safeFileSlug(name, 'analyse');
-  return `SMART-Contract-Risk-Intelligence-Bericht-${exportTimestamp()}-${base}`;
+  return `SMART-Vertrags-und-Risikoanalyse_Bericht_${stamp}_${base}`;
 }
 function buildPlainHtmlReport(reportNames){
   const resultClone = document.getElementById('resultsArea').cloneNode(true);
@@ -2711,8 +2711,9 @@ async function exportEncryptedHtmlReport(){
     alert('Die Passwörter stimmen nicht überein.');
     return;
   }
-  const htmlName = safeReportFilename(latestReportSnapshot.filename);
-  const pdfName = safeReportPdfFilename(latestReportSnapshot.filename);
+  const reportBaseName = buildReportBaseName(latestReportSnapshot.filename);
+  const htmlName = `${reportBaseName}.html`;
+  const pdfName = `${reportBaseName}.pdf`;
   const plainReport = buildPlainHtmlReport({htmlName, pdfName});
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
