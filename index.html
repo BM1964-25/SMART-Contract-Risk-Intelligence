@@ -395,9 +395,11 @@
     display:grid; grid-template-columns:118px 1fr; gap:13px; align-items:center; background:#fffdf8;
   }
   .risk-profile-card.summary{
-    grid-column:1 / -1; display:grid; grid-template-columns:minmax(220px,.75fr) minmax(260px,.75fr) minmax(420px,1.5fr);
+    grid-column:1 / -1; display:grid; grid-template-columns:minmax(230px,.42fr) minmax(0,1fr);
     gap:16px; align-items:center; padding:16px;
   }
+  .summary-left{ display:flex; flex-direction:column; gap:10px; }
+  .summary-main{ min-width:0; display:flex; flex-direction:column; gap:10px; }
   .donut-chart{
     width:112px; height:112px; border-radius:50%; position:relative; flex-shrink:0;
     background:conic-gradient(var(--border) 0 360deg);
@@ -407,10 +409,14 @@
     box-shadow:inset 0 0 0 1px rgba(15,42,74,0.05);
   }
   .donut-total{
-    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
     z-index:1; color:var(--navy); font-weight:bold; font-size:20px; line-height:1;
   }
-  .donut-total span{ margin-top:4px; color:var(--text-muted); font-size:10px; font-weight:bold; text-transform:uppercase; letter-spacing:0.4px; }
+  .donut-label{
+    margin-top:8px; width:112px; color:var(--text-muted); font-size:10px; font-weight:bold;
+    text-transform:uppercase; letter-spacing:0.35px; text-align:center; line-height:1.2;
+  }
+  .donut-wrap{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .risk-profile-title{ font-weight:bold; color:var(--navy); font-size:14px; margin-bottom:7px; }
   .risk-profile-note{ color:var(--text-muted); font-size:11.5px; line-height:1.38; margin:-2px 0 8px; }
   .risk-profile-legend{ display:flex; flex-direction:column; gap:5px; }
@@ -457,6 +463,7 @@
     .risk-profile-card{ grid-template-columns:96px 1fr; }
     .donut-chart{ width:90px; height:90px; }
     .donut-chart::after{ inset:19px; }
+    .donut-label{ width:90px; }
   }
   .axis-grid{ display:flex; flex-direction:column; gap:10px; }
   .axis-bar-row{ display:flex; align-items:center; gap:12px; font-size:13px; }
@@ -3120,7 +3127,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       console.error('Fristen-Extraktion fehlgeschlagen – Analyse wird ohne Fristen fortgesetzt', e);
       fristenFailed = true;
       fristenItems = [];
-      setPipelineStep(2,'warn');
+      setPipelineStep(2,'done');
     }
 
     // Stage 3: Klassifikation
@@ -3179,7 +3186,7 @@ ${JSON.stringify(critical)}`;
       });
     }
     setPipelineStep(4,'done');
-    setStatus(fristenFailed ? 'Analyse abgeschlossen (Fristen-Erkennung übersprungen, siehe Fristen-Tab).' : 'Analyse abgeschlossen.', fristenFailed ? undefined : 'done');
+    setStatus(fristenFailed ? 'Analyse abgeschlossen. Fristen-Erkennung wurde übersprungen; Details siehe Fristen-Tab.' : 'Analyse abgeschlossen.', 'done');
 
     renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, document.getElementById('saveContractCheckbox')?.checked ? extractedText : '', isScanned ? documentImages : []);
     saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich);
@@ -3486,8 +3493,11 @@ function renderDonutCard(title, entries, totalLabel, note = ''){
   const visibleEntries = entries.filter(entry => Number(entry.value) > 0);
   return `
     <div class="risk-profile-card">
-      <div class="donut-chart" style="background:${buildDonutGradient(entries)}">
-        <div class="donut-total">${Math.round(total)}<span>${escapeHtml(totalLabel)}</span></div>
+      <div class="donut-wrap">
+        <div class="donut-chart" style="background:${buildDonutGradient(entries)}">
+          <div class="donut-total">${Math.round(total)}</div>
+        </div>
+        <div class="donut-label">${escapeHtml(totalLabel)}</div>
       </div>
       <div>
         <div class="risk-profile-title">${escapeHtml(title)}</div>
@@ -3608,26 +3618,30 @@ function renderOverallRiskCard(summary){
   const impactLabel = impactBand.desc;
   return `
     <div class="risk-profile-card summary">
-      <div class="risk-profile-title">Management-Einschätzung</div>
-      <div class="summary-badge"><span class="summary-dot" style="background:${assessment.color}; box-shadow:0 0 0 3px ${assessment.color}22"></span>${escapeHtml(assessment.label)}</div>
-      <div class="risk-profile-note">${escapeHtml(assessment.text)}</div>
-      <div class="summary-meta">
-        <div class="summary-meta-item">
-          <span class="summary-meta-value">${assessment.weightedRisk}</span>
-          <span class="summary-meta-label">Risikoindex · ${escapeHtml(assessment.band.label)}</span>
-        </div>
-        <div class="summary-meta-item">
-          <span class="summary-meta-value">${escapeHtml(strongestAxis.axis)}</span>
-          <span class="summary-meta-label">stärkste Wirkung</span>
+      <div class="summary-left">
+        <div class="risk-profile-title">Management-Einschätzung</div>
+        <div class="summary-badge"><span class="summary-dot" style="background:${assessment.color}; box-shadow:0 0 0 3px ${assessment.color}22"></span>${escapeHtml(assessment.label)}</div>
+        <div class="summary-meta">
+          <div class="summary-meta-item">
+            <span class="summary-meta-value">${assessment.weightedRisk}</span>
+            <span class="summary-meta-label">Risikoindex · ${escapeHtml(assessment.band.label)}</span>
+          </div>
+          <div class="summary-meta-item">
+            <span class="summary-meta-value">${escapeHtml(strongestAxis.axis)}</span>
+            <span class="summary-meta-label">stärkste Wirkung</span>
+          </div>
         </div>
       </div>
-      <div class="summary-explain">
-        <b>Einordnung:</b> Konsolidierter Risikoindex ${assessment.weightedRisk} Punkte liegt im Bereich <b>${escapeHtml(assessment.band.label)}</b>
-        (${escapeHtml(formatBandRange(assessment.band))}). Wirkungsindex ${Math.round(impactTotal)} Punkte liegt im Bereich
-        <b>${escapeHtml(impactBand.label)}</b> (${escapeHtml(formatBandRange(impactBand))}). Die Werte sind Orientierungswerte, kein pauschales Urteil über die Vertragsqualität. Mehr erkannte Einzelpunkte erhöhen den Index nur begrenzt, wenn sie demselben Risikothema zugeordnet sind.
-        ${renderIndexScale(assessment.weightedRisk, RISK_INDEX_BANDS, 'Risikoindex', 50)}
-        ${renderIndexScale(Math.round(impactTotal), IMPACT_INDEX_BANDS, 'Wirkungsindex', 130)}
-        <div class="summary-version-note">${escapeHtml(ANALYSIS_LOGIC_VERSION)} · ${assessment.metrics.themeCount || 0} Risikothemen aus ${assessment.totalRisks} erkannten Einzelpunkten konsolidiert. Rohwerte: Risiko ${assessment.metrics.rawRiskIndex || 0}, Wirkung ${assessment.metrics.rawImpactIndex || 0}.</div>
+      <div class="summary-main">
+        <div class="risk-profile-note">${escapeHtml(assessment.text)}</div>
+        <div class="summary-explain">
+          <b>Einordnung:</b> Konsolidierter Risikoindex ${assessment.weightedRisk} Punkte liegt im Bereich <b>${escapeHtml(assessment.band.label)}</b>
+          (${escapeHtml(formatBandRange(assessment.band))}). Wirkungsindex ${Math.round(impactTotal)} Punkte liegt im Bereich
+          <b>${escapeHtml(impactBand.label)}</b> (${escapeHtml(formatBandRange(impactBand))}). Die Werte sind Orientierungswerte, kein pauschales Urteil über die Vertragsqualität. Mehr erkannte Einzelpunkte erhöhen den Index nur begrenzt, wenn sie demselben Risikothema zugeordnet sind.
+          ${renderIndexScale(assessment.weightedRisk, RISK_INDEX_BANDS, 'Risikoindex', 50)}
+          ${renderIndexScale(Math.round(impactTotal), IMPACT_INDEX_BANDS, 'Wirkungsindex', 130)}
+          <div class="summary-version-note">${escapeHtml(ANALYSIS_LOGIC_VERSION)} · ${assessment.metrics.themeCount || 0} Risikothemen aus ${assessment.totalRisks} erkannten Einzelpunkten konsolidiert. Rohwerte: Risiko ${assessment.metrics.rawRiskIndex || 0}, Wirkung ${assessment.metrics.rawImpactIndex || 0}.</div>
+        </div>
       </div>
     </div>`;
 }
