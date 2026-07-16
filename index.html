@@ -721,6 +721,25 @@
   .internal-check-list{ list-style:none; margin:0; padding:0; columns:2; column-gap:22px; }
   .internal-check-list li{ break-inside:avoid; margin:0 0 8px; padding-left:18px; position:relative; }
   .internal-check-list li:before{ content:"✓"; position:absolute; left:0; color:var(--green); font-weight:bold; }
+  .internal-training-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px; }
+  .internal-training-step{
+    display:grid; grid-template-columns:34px 1fr; gap:11px; align-items:start;
+    border:1px solid var(--border); border-radius:9px; background:#fff; padding:13px;
+  }
+  .internal-training-step .num{
+    width:30px; height:30px; border-radius:50%; background:var(--navy); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:bold;
+  }
+  .internal-training-step b{ color:var(--navy); display:block; margin-bottom:4px; }
+  .internal-training-step p{ margin:0; color:var(--text-muted); font-size:12.8px; line-height:1.45; }
+  .internal-training-quality{
+    margin-top:14px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+  }
+  .internal-training-quality div{
+    border:1px solid var(--border); border-radius:8px; background:var(--bg); padding:11px;
+    font-size:12.5px; color:var(--text-muted);
+  }
+  .internal-training-quality b{ display:block; color:var(--navy); margin-bottom:3px; }
   .internal-compare{ width:100%; border-collapse:collapse; margin-top:14px; font-size:13px; }
   .internal-compare th, .internal-compare td{ border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
   .internal-compare th{ background:var(--bg); color:var(--navy); }
@@ -729,7 +748,8 @@
   .internal-final{ margin-top:18px; padding:16px; border-left:4px solid var(--gold); background:#fff; border-radius:8px; color:var(--navy); font-weight:bold; }
   @media(max-width:900px){
     .internal-hero, .internal-report-layout, .internal-license{ grid-template-columns:1fr; }
-    .internal-feature-grid, .internal-price-grid{ grid-template-columns:1fr 1fr; }
+    .internal-feature-grid, .internal-price-grid, .internal-training-grid{ grid-template-columns:1fr 1fr; }
+    .internal-training-quality{ grid-template-columns:1fr; }
     .internal-flow, .internal-steps{ grid-template-columns:1fr 1fr; }
   }
   @media (max-width:640px){
@@ -741,7 +761,7 @@
     .help-content{ padding:12px 16px 20px; }
     .internal-cards{ grid-template-columns:1fr; }
     .internal-page{ padding:18px; min-height:auto; }
-    .internal-feature-grid, .internal-price-grid, .internal-steps, .internal-flow, .internal-screenshot-grid{ grid-template-columns:1fr; }
+    .internal-feature-grid, .internal-price-grid, .internal-steps, .internal-flow, .internal-screenshot-grid, .internal-training-grid{ grid-template-columns:1fr; }
     .internal-check-list{ columns:1; }
   }
   .modal-pane .hint{ margin-top:2px; }
@@ -1132,6 +1152,43 @@
           <img src="assets/software-dashboard-screenshot.png" alt="Screenshot der SMART Contract & Risk Intelligence Oberfläche">
           <figcaption>Softwareoberfläche mit API-Zugang, Dokument-Upload, Analyse-Pipeline und Wissensbasis.</figcaption>
         </figure>
+      </section>
+
+      <section class="internal-page">
+        <h2 class="internal-page-title">Wie die KI fachlich weiter verbessert wird</h2>
+        <p class="internal-page-subtitle">Die App wird nicht durch ungeprüfte Einzelmeinungen verbessert, sondern durch einen klaren Qualitätsprozess: Analyse prüfen, fachliche Abweichung dokumentieren, Wissensbasis gezielt ergänzen und das Ergebnis erneut testen.</p>
+        <div class="internal-training-grid">
+          <div class="internal-training-step">
+            <span class="num">1</span>
+            <div><b>Analysebericht fachlich prüfen</b><p>Nach jeder wichtigen Vertragsanalyse wird der Bericht mit dem Originalvertrag verglichen. Besonders geprüft werden fehlende Risiken, falsch bewertete Klauseln, übersehene Fristen, Marktvergleich und Management Summary.</p></div>
+          </div>
+          <div class="internal-training-step">
+            <span class="num">2</span>
+            <div><b>Abweichung konkret festhalten</b><p>Jede Rückmeldung muss eindeutig formuliert werden: Was wurde falsch erkannt, was fehlt, welche Vertragsstelle ist betroffen und wie müsste die fachlich richtige Bewertung lauten?</p></div>
+          </div>
+          <div class="internal-training-step">
+            <span class="num">3</span>
+            <div><b>Allgemeine Regel ableiten</b><p>Aus dem Einzelfall wird eine allgemeine Lernregel gebildet. Ziel ist keine Korrektur nur für einen Vertrag, sondern eine wiederverwendbare Regel für ähnliche Bau-, VOB/B-, BGB-, GU-, Pauschal-, Einheitspreis- oder HOAI-Verträge.</p></div>
+          </div>
+          <div class="internal-training-step">
+            <span class="num">4</span>
+            <div><b>Wissensbasis ergänzen</b><p>Die Regel wird als eigener Wissensbasis-Eintrag angelegt: klarer Titel, kurze fachliche Erläuterung, passende Tags und Zuordnung zum Vertragstyp. Je präziser die Tags, desto besser wird die Regel später gefunden.</p></div>
+          </div>
+          <div class="internal-training-step">
+            <span class="num">5</span>
+            <div><b>Analyse erneut testen</b><p>Der gleiche Vertrag wird erneut analysiert. Danach wird geprüft, ob die Korrektur tatsächlich im Bericht ankommt und ob sich keine neuen Überbewertungen oder Doppelzählungen ergeben haben.</p></div>
+          </div>
+          <div class="internal-training-step">
+            <span class="num">6</span>
+            <div><b>Freigabe dokumentieren</b><p>Erst wenn die neue Regel fachlich plausibel wirkt, bleibt sie in der Wissensbasis. Bei wichtigen Regeln sollte kurz notiert werden, aus welchem Vertragstyp sie stammt und welches Problem dadurch behoben wurde.</p></div>
+          </div>
+        </div>
+        <div class="internal-training-quality">
+          <div><b>Was eingepflegt wird</b>Allgemeine Prüflogik, typische Klauselrisiken, Fristenfolgen, Marktvergleichswerte, Bewertungsmaßstäbe und wiederkehrende Vertragsmuster.</div>
+          <div><b>Was nicht eingepflegt wird</b>Vertrauliche Namen, personenbezogene Daten, vollständige Vertragsinhalte oder rein einzelfallbezogene Aussagen ohne allgemeinen Nutzen.</div>
+          <div><b>Wann es wirkt</b>Neue Wissensbasis-Einträge fließen bei der nächsten Analyse als Fachkontext ein. Sie ersetzen keine juristische Prüfung, verbessern aber die Trefferquote und Bewertungskonsistenz.</div>
+        </div>
+        <div class="internal-final">Praktische Faustregel: Jede fachliche Korrektur sollte so formuliert werden, dass eine andere Person sie ohne Vorwissen versteht und sofort als Wissensbasis-Regel nutzen kann.</div>
       </section>
 
       <section class="internal-page">
