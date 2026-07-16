@@ -549,10 +549,13 @@
     max-height:82vh; display:flex; flex-direction:column; overflow:hidden;
     box-shadow:0 12px 40px rgba(0,0,0,0.28);
   }
+  .modal-box.kb-wide{ max-width:1080px; height:86vh; }
+  .modal-box.history-box{ max-width:680px; height:auto; }
   .modal-header{
     display:flex; align-items:center; justify-content:space-between;
     border-bottom:1px solid var(--border); padding:0 6px 0 18px; flex-shrink:0;
   }
+  .modal-title{ font-weight:bold; color:var(--navy); font-size:15px; padding:14px 0 12px; }
   .modal-tabs{ display:flex; gap:4px; }
   .modal-tab{
     background:none; border:none; padding:14px 14px 12px; font-size:14px; font-family:inherit;
@@ -565,6 +568,33 @@
   }
   .modal-close:hover{ color:var(--text); }
   .modal-body{ padding:18px 22px 22px; overflow-y:auto; }
+  .kb-layout{ display:grid; grid-template-columns:minmax(360px,.9fr) minmax(430px,1.1fr); gap:18px; align-items:start; }
+  .kb-toolbar{ display:grid; grid-template-columns:minmax(0,1fr) 150px 150px; gap:8px; margin:12px 0 14px; }
+  .kb-toolbar input, .kb-toolbar select,
+  .kb-form input, .kb-form textarea, .kb-form select{
+    width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px;
+    font-family:inherit; font-size:13px; background:#fff;
+  }
+  .kb-form textarea{ min-height:132px; resize:vertical; }
+  .kb-form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .kb-form-card{
+    position:sticky; top:0; border:1px solid var(--border); border-top:3px solid var(--gold);
+    border-radius:8px; background:#fffdf8; padding:14px; box-shadow:0 8px 20px rgba(15,42,74,.06);
+  }
+  .kb-form-card h3{ font-family:inherit; font-size:14px; color:var(--navy); margin:0 0 8px; }
+  .kb-form-card .hint{ margin-bottom:12px; }
+  .kb-field-label{ font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; font-weight:bold; margin:9px 0 5px; display:block; }
+  .kb-checkline{ display:flex; align-items:center; gap:7px; margin-top:10px; font-size:12.5px; color:var(--text-muted); }
+  .kb-list-head{ display:flex; justify-content:space-between; gap:12px; align-items:flex-end; margin-bottom:8px; }
+  .kb-list-head h3{ font-family:inherit; margin:0; color:var(--navy); font-size:14px; }
+  .kb-list-meta{ color:var(--text-muted); font-size:12px; }
+  .kb-meta-row{ display:flex; gap:5px; flex-wrap:wrap; margin:5px 0 7px; }
+  .tag.source{ background:#edf2f7; color:var(--navy); }
+  .tag.status{ background:var(--green-bg); color:var(--green); font-weight:bold; }
+  .tag.status.draft{ background:var(--amber-bg); color:var(--amber); }
+  .tag.status.review{ background:var(--gold-light); color:var(--navy); }
+  .tag.inactive{ background:var(--red-bg); color:var(--red); font-weight:bold; }
+  .history-actions{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px; }
 
   .help-box{ max-width:820px; height:82vh; }
   .help-ai-banner{
@@ -782,6 +812,14 @@
     .internal-page{ padding:18px; min-height:auto; }
     .internal-feature-grid, .internal-price-grid, .internal-steps, .internal-flow, .internal-screenshot-grid, .internal-training-grid{ grid-template-columns:1fr; }
     .internal-check-list{ columns:1; }
+  }
+  @media(max-width:900px){
+    .kb-layout{ grid-template-columns:1fr; }
+    .kb-form-card{ position:static; }
+    .kb-toolbar{ grid-template-columns:1fr; }
+  }
+  @media(max-width:640px){
+    .kb-form-grid, .history-actions{ grid-template-columns:1fr; }
   }
   .modal-pane .hint{ margin-top:2px; }
   .kb-explainer{
@@ -1340,48 +1378,114 @@ Hier folgt der Analysebericht:
   </div>
 </div>
 
-<!-- WISSENSBASIS & VERLAUF MODAL -->
+<!-- WISSENSBASIS / VERLAUF MODAL -->
 <div class="modal-overlay no-print" id="modalOverlay" style="display:none;">
-  <div class="modal-box">
+  <div class="modal-box" id="areaModalBox">
     <div class="modal-header">
-      <div class="modal-tabs">
-        <button class="modal-tab active" id="tabKbBtn">Wissensbasis</button>
-        <button class="modal-tab" id="tabHistoryBtn">Verlauf</button>
-      </div>
+      <div class="modal-title" id="areaModalTitle">Wissensbasis</div>
       <button class="modal-close" id="modalCloseBtn" aria-label="Schließen">&times;</button>
     </div>
     <div class="modal-body">
       <div class="modal-pane" id="paneKb">
-        <p class="hint">Fließt als Referenz in die Risikobewertung ein</p>
         <div class="kb-explainer">
-          Für jede erkannte Vertragsklausel sucht die App automatisch die bis zu drei am besten passenden Einträge hier
-          heraus und gibt sie der KI als Fachkontext mit. Bewertet wird nach <b>Tags</b>: stimmt ein Tag exakt mit
-          der Klausel-Kategorie überein (z. B. „Frist"), zählt das stärker als ein Tag, der nur im Fließtext der
-          Klausel vorkommt. Je genauer und zahlreicher deine Tags, desto treffsicherer die Zuordnung. Ergänze
-          eigene Einträge zu deinen Vertragsmustern, Standardklauseln oder Erfahrungswerten aus der Praxis –
-          jeder gut getaggte Eintrag verbessert die Qualität der Risikoeinschätzung.
+          Die Wissensbasis ist das fachliche Regelwerk der Anwendung. Für jede erkannte Vertragsklausel sucht die App automatisch passende Einträge und gibt sie der KI als Fachkontext mit. Neue Regeln sollten fachkundig geprüft und sauber getaggt werden, weil sie die spätere Risikobewertung direkt beeinflussen.
         </div>
-        <div id="kbList"></div>
-        <button class="btn secondary small" id="kbAddBtn">+ Eintrag hinzufügen</button>
-        <div class="kb-form" id="kbForm" style="display:none;">
-          <input type="text" id="kbTitleInput" placeholder="Titel">
-          <textarea id="kbTextInput" rows="3" placeholder="Inhalt / Praxiswissen"></textarea>
-          <input type="text" id="kbTagsInput" placeholder="Tags, kommagetrennt (z.B. frist, vob)">
-          <label style="font-size:12px; color:var(--text-muted); display:block; margin-bottom:6px;">Gilt für Vertragstyp(en):</label>
-          <div class="kb-typ-row" style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:10px; font-size:12.5px;">
-            <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="vob" checked>VOB/B</label>
-            <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="bgb">BGB</label>
-            <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="planung">Planung</label>
-            <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="sonstige">Sonstige</label>
+        <div class="kb-layout">
+          <div>
+            <div class="kb-list-head">
+              <div>
+                <h3>Fachregeln</h3>
+                <div class="kb-list-meta" id="kbListMeta">0 Einträge</div>
+              </div>
+              <button class="btn secondary small" id="kbAddBtn">+ Neuer Eintrag</button>
+            </div>
+            <div class="kb-toolbar">
+              <input type="search" id="kbSearchInput" placeholder="Wissensbasis durchsuchen">
+              <select id="kbTypeFilter">
+                <option value="">Alle Vertragstypen</option>
+                <option value="vob">VOB/B</option>
+                <option value="bgb">BGB</option>
+                <option value="planung">Planung/HOAI</option>
+                <option value="sonstige">Sonstige</option>
+              </select>
+              <select id="kbStatusFilter">
+                <option value="">Alle Status</option>
+                <option value="freigegeben">Freigegeben</option>
+                <option value="pruefung">In Prüfung</option>
+                <option value="entwurf">Entwurf</option>
+              </select>
+            </div>
+            <div id="kbList"></div>
           </div>
-          <button class="btn small" id="kbSaveBtn">Speichern</button>
+          <div class="kb-form-card">
+            <h3>Wissensbasis-Eintrag anlegen</h3>
+            <p class="hint">Neue Regeln nur übernehmen, wenn sie fachlich belastbar und allgemein nutzbar sind.</p>
+            <div class="kb-form" id="kbForm">
+              <label class="kb-field-label" for="kbTitleInput">Titel</label>
+              <input type="text" id="kbTitleInput" placeholder="z.B. VOB/B-Abweichung bei fiktiver Abnahme">
+              <label class="kb-field-label" for="kbTextInput">Fachliche Regel</label>
+              <textarea id="kbTextInput" placeholder="Kurze, allgemeine Regel. Keine vertraulichen Namen, keine langen Vertragszitate."></textarea>
+              <div class="kb-form-grid">
+                <div>
+                  <label class="kb-field-label" for="kbCategoryInput">Kategorie</label>
+                  <select id="kbCategoryInput">
+                    <option value="">Bitte wählen</option>
+                    <option>Frist</option>
+                    <option>Zahlung</option>
+                    <option>Sicherheit</option>
+                    <option>Abnahme</option>
+                    <option>Haftung</option>
+                    <option>Nachtrag</option>
+                    <option>Vertragsstrafe</option>
+                    <option>Kündigung</option>
+                    <option>Open Book</option>
+                    <option>HOAI/Planung</option>
+                    <option>Sonstiges</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="kb-field-label" for="kbSourceInput">Quelle</label>
+                  <select id="kbSourceInput">
+                    <option value="fachpruefung">Fachprüfung</option>
+                    <option value="ki-zweitpruefung">KI-Zweitprüfung</option>
+                    <option value="anwalt">Anwaltliche Prüfung</option>
+                    <option value="projektanalyse">Projektanalyse</option>
+                    <option value="eigene-erfahrung">Eigene Erfahrung</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="kb-field-label" for="kbStatusInput">Status</label>
+                  <select id="kbStatusInput">
+                    <option value="freigegeben">Freigegeben</option>
+                    <option value="pruefung">In Prüfung</option>
+                    <option value="entwurf">Entwurf</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="kb-field-label" for="kbTagsInput">Tags</label>
+                  <input type="text" id="kbTagsInput" placeholder="frist, vob, abnahme">
+                </div>
+              </div>
+              <label class="kb-field-label">Gilt für Vertragstyp(en)</label>
+              <div class="kb-typ-row" style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:8px; font-size:12.5px;">
+                <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="vob" checked>VOB/B</label>
+                <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="bgb">BGB</label>
+                <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="planung">Planung</label>
+                <label style="display:flex; align-items:center; gap:5px;"><input type="checkbox" class="kbTypCheck" value="sonstige">Sonstige</label>
+              </div>
+              <label class="kb-checkline"><input type="checkbox" id="kbActiveInput" checked> Regel ist aktiv und darf in Analysen einfließen</label>
+              <button class="btn small" id="kbSaveBtn" style="margin-top:12px;">Wissensbasis-Eintrag speichern</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-pane" id="paneHistory" style="display:none;">
-        <p class="hint">Bisherige Analysen (lokal in diesem Browser gespeichert, max. 50 Einträge – ältere werden automatisch verdrängt)</p>
+        <p class="hint">Bisherige Analysen werden lokal in diesem Browser gespeichert. Der Verlauf dient dem Wiederöffnen und Exportieren, nicht der fachlichen Wissenspflege.</p>
         <div id="historyList"></div>
-        <button class="btn secondary small" id="historySaveBtn" style="width:100%; margin-top:12px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Verlauf als JSON speichern</button>
-        <button class="btn secondary small" id="historyRestoreBtn" style="width:100%; margin-top:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Verlauf wiederherstellen</button>
+        <div class="history-actions">
+          <button class="btn secondary small" id="historySaveBtn" style="width:100%; margin-top:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Verlauf als JSON speichern</button>
+          <button class="btn secondary small" id="historyRestoreBtn" style="width:100%; margin-top:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Verlauf wiederherstellen</button>
+        </div>
         <input type="file" id="historyRestoreInput" accept="application/json,.json" style="display:none;">
       </div>
     </div>
@@ -2080,17 +2184,56 @@ async function saveKB(){
 }
 
 const TYP_LABELS = {vob:"VOB/B", bgb:"BGB", planung:"Planung", sonstige:"Sonstige"};
+const KB_STATUS_LABELS = {freigegeben:"Freigegeben", pruefung:"In Prüfung", entwurf:"Entwurf"};
+const KB_SOURCE_LABELS = {
+  fachpruefung:"Fachprüfung",
+  "ki-zweitpruefung":"KI-Zweitprüfung",
+  anwalt:"Anwaltliche Prüfung",
+  projektanalyse:"Projektanalyse",
+  "eigene-erfahrung":"Eigene Erfahrung"
+};
+function getKbFilteredEntries(){
+  const query = (document.getElementById('kbSearchInput')?.value || '').trim().toLowerCase();
+  const typeFilter = document.getElementById('kbTypeFilter')?.value || '';
+  const statusFilter = document.getElementById('kbStatusFilter')?.value || '';
+  return knowledgeBase.filter(k => {
+    const searchable = [
+      k.title, k.text, k.category, k.source, k.status,
+      ...(k.tags || []), ...(k.typ || [])
+    ].join(' ').toLowerCase();
+    if(query && !searchable.includes(query)) return false;
+    if(typeFilter && !(k.typ || []).includes(typeFilter)) return false;
+    if(statusFilter && (k.status || 'freigegeben') !== statusFilter) return false;
+    return true;
+  });
+}
 function renderKB(){
   const el = document.getElementById('kbList');
-  el.innerHTML = knowledgeBase.map(k => `
-    <div class="kb-item">
-      <div class="kb-title">${escapeHtml(k.title)}</div>
-      <div class="kb-typ">${(k.typ||[]).map(t=>`<span class="tag typ">${escapeHtml(TYP_LABELS[t]||t)}</span>`).join('')}</div>
-      <div class="kb-text">${escapeHtml(k.text)}</div>
-      <div class="kb-tags">${k.tags.map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
-      <div class="kb-actions"><button onclick="deleteKB('${k.id}')">Entfernen</button></div>
-    </div>
-  `).join('');
+  const entries = getKbFilteredEntries();
+  if(el){
+    el.innerHTML = entries.length ? entries.map(k => {
+      const status = k.status || 'freigegeben';
+      const source = k.source || 'fachpruefung';
+      const statusClass = status === 'entwurf' ? 'draft' : status === 'pruefung' ? 'review' : '';
+      return `
+        <div class="kb-item">
+          <div class="kb-title">${escapeHtml(k.title)}</div>
+          <div class="kb-meta-row">
+            ${(k.typ||[]).map(t=>`<span class="tag typ">${escapeHtml(TYP_LABELS[t]||t)}</span>`).join('')}
+            ${k.category ? `<span class="tag">${escapeHtml(k.category)}</span>` : ''}
+            <span class="tag source">${escapeHtml(KB_SOURCE_LABELS[source] || source)}</span>
+            <span class="tag status ${statusClass}">${escapeHtml(KB_STATUS_LABELS[status] || status)}</span>
+            ${k.active === false ? '<span class="tag inactive">Inaktiv</span>' : ''}
+          </div>
+          <div class="kb-text">${escapeHtml(k.text)}</div>
+          <div class="kb-tags">${(k.tags || []).map(t=>`<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+          <div class="kb-actions"><button onclick="deleteKB('${k.id}')">Entfernen</button></div>
+        </div>
+      `;
+    }).join('') : '<p class="hint">Keine passenden Wissensbasis-Einträge gefunden.</p>';
+  }
+  const listMeta = document.getElementById('kbListMeta');
+  if(listMeta) listMeta.textContent = `${entries.length} von ${knowledgeBase.length} Einträgen`;
   const badge = document.getElementById('kbCountBadge');
   if(badge) badge.textContent = knowledgeBase.length;
   const caption = document.getElementById('kbCaption');
@@ -2107,23 +2250,38 @@ window.deleteKB = async function(id){
 };
 
 document.getElementById('kbAddBtn').onclick = () => {
-  document.getElementById('kbForm').style.display = 'block';
+  document.getElementById('kbTitleInput')?.focus();
+  document.getElementById('kbForm')?.scrollIntoView({behavior:'smooth', block:'start'});
 };
 document.getElementById('kbSaveBtn').onclick = async () => {
   const title = document.getElementById('kbTitleInput').value.trim();
   const text = document.getElementById('kbTextInput').value.trim();
   const tags = document.getElementById('kbTagsInput').value.split(',').map(t=>t.trim().toLowerCase()).filter(Boolean);
   const typ = Array.from(document.querySelectorAll('.kbTypCheck:checked')).map(c => c.value);
+  const category = document.getElementById('kbCategoryInput').value.trim();
+  const source = document.getElementById('kbSourceInput').value;
+  const status = document.getElementById('kbStatusInput').value;
+  const active = document.getElementById('kbActiveInput').checked;
   if(!title || !text) return;
-  knowledgeBase.push({id:'kb'+Date.now(), title, text, tags, typ: typ.length ? typ : ['vob','bgb','planung','sonstige']});
+  knowledgeBase.push({id:'kb'+Date.now(), title, text, tags, typ: typ.length ? typ : ['vob','bgb','planung','sonstige'], category, source, status, active});
   await saveKB();
   renderKB();
   document.getElementById('kbTitleInput').value='';
   document.getElementById('kbTextInput').value='';
   document.getElementById('kbTagsInput').value='';
+  document.getElementById('kbCategoryInput').value='';
+  document.getElementById('kbSourceInput').value='fachpruefung';
+  document.getElementById('kbStatusInput').value='freigegeben';
+  document.getElementById('kbActiveInput').checked=true;
   document.querySelectorAll('.kbTypCheck').forEach((c,i) => c.checked = i===0);
-  document.getElementById('kbForm').style.display='none';
 };
+['kbSearchInput','kbTypeFilter','kbStatusFilter'].forEach(id => {
+  const node = document.getElementById(id);
+  if(node){
+    node.addEventListener('input', renderKB);
+    node.addEventListener('change', renderKB);
+  }
+});
 
 // ---------- history ----------
 function loadHistory(){
@@ -4364,15 +4522,20 @@ function closeModal(){
 }
 function switchModalTab(tab){
   const isKb = tab === 'kb';
-  document.getElementById('tabKbBtn').classList.toggle('active', isKb);
-  document.getElementById('tabHistoryBtn').classList.toggle('active', !isKb);
+  const box = document.getElementById('areaModalBox');
+  const title = document.getElementById('areaModalTitle');
+  if(box){
+    box.classList.toggle('kb-wide', isKb);
+    box.classList.toggle('history-box', !isKb);
+  }
+  if(title) title.textContent = isKb ? 'Wissensbasis' : 'Verlauf';
   document.getElementById('paneKb').style.display = isKb ? 'block' : 'none';
   document.getElementById('paneHistory').style.display = isKb ? 'none' : 'block';
+  if(isKb) renderKB();
+  else renderHistory();
 }
 document.getElementById('openKbBtn').onclick = () => openModal('kb');
 document.getElementById('openHistoryBtn').onclick = () => openModal('history');
-document.getElementById('tabKbBtn').onclick = () => switchModalTab('kb');
-document.getElementById('tabHistoryBtn').onclick = () => switchModalTab('history');
 document.getElementById('modalCloseBtn').onclick = closeModal;
 modalOverlay.onclick = (e) => { if(e.target === modalOverlay) closeModal(); };
 document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closeModal(); });
