@@ -649,8 +649,8 @@
   }
   .internal-feature b{ color:var(--navy); display:block; margin-bottom:4px; }
   .internal-feature span{ color:var(--text-muted); font-size:12.5px; }
-  .internal-report-layout{ display:grid; grid-template-columns:1.15fr .85fr; gap:18px; align-items:start; }
-  .internal-screenshot-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .internal-report-layout{ display:grid; grid-template-columns:1.25fr .75fr; gap:18px; align-items:start; }
+  .internal-screenshot-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .internal-shot{
     min-height:112px; border:1px solid var(--border); border-radius:8px; background:linear-gradient(180deg,#fff,#f6f5f1);
     padding:10px; position:relative; overflow:hidden;
@@ -659,6 +659,17 @@
   .internal-shot .line{ height:7px; border-radius:999px; background:var(--gold-light); margin-top:9px; }
   .internal-shot .line:nth-child(3){ width:72%; background:#e8e3d5; }
   .internal-shot .line:nth-child(4){ width:88%; background:#e8e3d5; }
+  .internal-report-shot{
+    margin:0; border:1px solid var(--border); border-radius:9px; background:#fff;
+    padding:8px; box-shadow:0 8px 18px rgba(15,42,74,.08);
+  }
+  .internal-report-shot img{
+    display:block; width:100%; aspect-ratio:16/10; object-fit:cover; object-position:top left;
+    border-radius:6px; border:1px solid #ded8ca; background:#f6f5f1;
+  }
+  .internal-report-shot figcaption{
+    margin-top:7px; color:var(--navy); font-weight:bold; font-size:12px;
+  }
   .internal-software-shot{
     border:1px solid var(--border); border-radius:10px; background:#fff; padding:10px;
     box-shadow:0 10px 24px rgba(15,42,74,.10);
@@ -1013,14 +1024,26 @@
         <h2 class="internal-page-title">Der Analysebericht</h2>
         <div class="internal-report-layout">
           <div class="internal-screenshot-grid">
-            <div class="internal-shot"><b>Executive Summary</b><div class="line"></div><div class="line"></div><div class="line"></div></div>
-            <div class="internal-shot"><b>Risikoübersicht</b><div class="line"></div><div class="line"></div><div class="line"></div></div>
-            <div class="internal-shot"><b>Ampelbewertung</b><div class="line"></div><div class="line"></div><div class="line"></div></div>
-            <div class="internal-shot"><b>Fristenübersicht</b><div class="line"></div><div class="line"></div><div class="line"></div></div>
+            <figure class="internal-report-shot">
+              <img src="assets/report-management-summary.png" alt="Screenshot Management-Einschätzung im Analysebericht">
+              <figcaption>Management-Einschätzung</figcaption>
+            </figure>
+            <figure class="internal-report-shot">
+              <img src="assets/report-risk-table.png" alt="Screenshot Risikobewertung im Analysebericht">
+              <figcaption>Risikobewertung mit Maßnahmen</figcaption>
+            </figure>
+            <figure class="internal-report-shot">
+              <img src="assets/report-critical-deadlines.png" alt="Screenshot terminkritische Klauseln im Analysebericht">
+              <figcaption>Terminkritische Klauseln</figcaption>
+            </figure>
+            <figure class="internal-report-shot">
+              <img src="assets/report-deadline-timeline.png" alt="Screenshot Fristen und Termine im Analysebericht">
+              <figcaption>Fristen & Termine</figcaption>
+            </figure>
           </div>
           <div>
             <p>Der Kunde sieht sofort, was er erhält: eine strukturierte, managementfähige Auswertung mit Prioritäten, Risikostufen, wirtschaftlicher Wirkung, Marktvergleich, Fristen und konkreten Maßnahmen.</p>
-            <p class="internal-note">Die Platzhalter können später durch echte Screenshots aus einem anonymisierten Musterbericht ersetzt werden.</p>
+            <p class="internal-note">Die Beispielansichten zeigen typische Bestandteile eines Analyseberichts: Management-Einordnung, Risikotabelle, terminkritische Klauseln und chronologische Fristenübersicht.</p>
           </div>
         </div>
       </section>
