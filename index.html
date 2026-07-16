@@ -586,7 +586,7 @@
     margin:14px 22px 0; padding:11px 14px; border:1px solid var(--gold);
     background:var(--gold-light); border-radius:6px; font-size:12.8px; line-height:1.55;
   }
-  .internal-content{ padding:18px 22px 24px; overflow-y:auto; font-size:13px; line-height:1.55; }
+  .internal-content{ padding:16px 20px 22px; overflow-y:auto; font-size:13px; line-height:1.5; }
   .internal-section{ margin-bottom:22px; }
   .internal-section h3{
     font-family:inherit; font-size:15px; font-weight:bold; color:var(--navy);
@@ -602,36 +602,39 @@
   .internal-card b{ display:block; color:var(--navy); margin-bottom:3px; }
   .internal-card span{ color:var(--text-muted); font-size:12px; }
   .internal-page{
-    min-height:440px; padding:26px; margin-bottom:18px; border:1px solid var(--border);
+    padding:22px; margin-bottom:14px; border:1px solid var(--border);
     border-radius:10px; background:#fffdf8; box-shadow:0 6px 20px rgba(15,42,74,.06);
   }
   .internal-page-title{
     font-family:Arial,"Segoe UI",sans-serif; font-size:23px; font-weight:800;
     color:var(--navy); margin:0 0 8px; letter-spacing:0;
   }
-  .internal-page-subtitle{ color:var(--text-muted); font-size:14px; margin:0 0 18px; }
-  .internal-claim{ font-size:21px; color:var(--navy); font-weight:800; margin:16px 0 22px; }
+  .internal-page-subtitle{ color:var(--text-muted); font-size:14px; margin:0 0 12px; }
+  .internal-claim{ font-size:21px; color:var(--navy); font-weight:800; margin:12px 0 16px; }
   .internal-hero{
-    display:grid; grid-template-columns:minmax(280px,.9fr) minmax(320px,1.1fr); gap:24px; align-items:center;
+    display:grid; grid-template-columns:minmax(280px,.88fr) minmax(360px,1.12fr); gap:22px; align-items:center;
   }
   .internal-hero-visual{
-    min-height:290px; border-radius:12px; border:1px solid rgba(255,255,255,.22);
-    background:
-      linear-gradient(135deg, rgba(15,42,74,.92), rgba(28,63,102,.78)),
-      linear-gradient(45deg, #6d7884, #d9c893);
-    position:relative; overflow:hidden; color:#fff; padding:22px;
+    min-height:330px; border-radius:12px; border:1px solid rgba(15,42,74,.18);
+    background:#102a4a; position:relative; overflow:hidden; color:#fff; padding:22px;
+    box-shadow:0 16px 32px rgba(15,42,74,.18);
   }
   .internal-hero-visual:before{
-    content:""; position:absolute; inset:28px 38px auto auto; width:180px; height:180px;
-    border:1px solid rgba(255,255,255,.32); transform:skew(-18deg) rotate(-8deg);
-    box-shadow:0 0 0 18px rgba(255,255,255,.05), 0 0 38px rgba(201,162,39,.32);
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(15,42,74,.78), rgba(15,42,74,.28) 48%, rgba(15,42,74,.08));
+    z-index:1;
   }
   .internal-hero-visual:after{
-    content:""; position:absolute; left:-40px; right:-40px; bottom:34px; height:64px;
-    background:repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 2px, transparent 2px 38px);
-    transform:perspective(280px) rotateX(58deg);
+    content:""; position:absolute; right:24px; bottom:24px; width:170px; height:108px;
+    border:1px solid rgba(255,255,255,.48); border-radius:8px;
+    background:linear-gradient(135deg, rgba(255,255,255,.18), rgba(201,162,39,.16));
+    box-shadow:0 0 28px rgba(201,162,39,.36); transform:skew(-10deg) rotate(-2deg); z-index:2;
   }
-  .internal-visual-label{ position:absolute; left:22px; bottom:22px; font-size:13px; color:#d8e3f0; }
+  .internal-hero-visual img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .internal-hero-copy{ position:relative; z-index:3; max-width:285px; }
+  .internal-hero-copy b{ display:block; font-size:19px; line-height:1.25; }
+  .internal-hero-copy p{ color:#eef4fb; margin:8px 0 0; }
+  .internal-visual-label{ position:absolute; left:22px; bottom:22px; z-index:3; font-size:12px; color:#eaf0f6; }
   .internal-flow{
     display:grid; grid-template-columns:repeat(5,1fr); gap:8px; align-items:stretch; margin-top:18px;
   }
@@ -639,10 +642,10 @@
     background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px 10px;
     text-align:center; font-weight:bold; color:var(--navy); font-size:13px;
   }
-  .internal-feature-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; }
+  .internal-feature-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; }
   .internal-feature{
     border:1px solid var(--border); border-top:3px solid var(--gold); border-radius:8px;
-    padding:14px; background:#fff;
+    padding:12px; background:#fff; min-height:76px;
   }
   .internal-feature b{ color:var(--navy); display:block; margin-bottom:4px; }
   .internal-feature span{ color:var(--text-muted); font-size:12.5px; }
@@ -656,13 +659,14 @@
   .internal-shot .line{ height:7px; border-radius:999px; background:var(--gold-light); margin-top:9px; }
   .internal-shot .line:nth-child(3){ width:72%; background:#e8e3d5; }
   .internal-shot .line:nth-child(4){ width:88%; background:#e8e3d5; }
-  .internal-steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:20px; }
-  .internal-step{ border:1px solid var(--border); border-radius:8px; padding:14px; background:#fff; }
+  .internal-steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:16px; }
+  .internal-step{ border:1px solid var(--border); border-radius:8px; padding:12px; background:#fff; }
+  .internal-step p{ margin:6px 0 0; color:var(--text-muted); font-size:12.5px; }
   .internal-step-num{ width:26px; height:26px; border-radius:50%; background:var(--navy); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; margin-bottom:8px; }
   .internal-price-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px; }
   .internal-price-card{
     border:1px solid var(--border); border-top:4px solid var(--gold); border-radius:10px;
-    padding:18px 14px; text-align:center; background:#fff; min-height:145px;
+    padding:15px 12px; text-align:center; background:#fff; min-height:0;
   }
   .internal-price-card b{ color:var(--navy); display:block; font-size:15px; margin-bottom:12px; }
   .internal-price-card strong{ color:var(--navy); font-size:27px; display:block; }
@@ -946,11 +950,12 @@
           <p>Die Anwendung verbindet strukturierte Vertragsauswertung, fachliche Risikoklassifikation, Fristenlogik und professionelle Berichtsausgabe für Bau-, Planer- und Immobilienverträge.</p>
         </div>
         <div class="internal-hero-visual">
-          <div style="position:relative; z-index:1; max-width:260px;">
-            <b style="font-size:18px;">Bauprojekt + Vertragsmodell</b>
-            <p style="color:#d8e3f0; margin-top:8px;">Visuelle Leitidee: hochwertiges Bauprojekt mit holografischem Vertragsmodell.</p>
+          <img src="assets/internal-title-building.jpeg" alt="Modernes nachhaltiges Bauprojekt als Titelbild">
+          <div class="internal-hero-copy">
+            <b>Vertragsrisiken im Bauprojekt früh erkennen</b>
+            <p>Platzhalter für Titelbild und spätere Angebotsunterlagen.</p>
           </div>
-          <div class="internal-visual-label">Titelbild-Platzhalter · später durch echtes Projektbild ersetzbar</div>
+          <div class="internal-visual-label">SMART Contract & Risk Intelligence</div>
         </div>
       </section>
 
