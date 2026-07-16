@@ -1376,6 +1376,8 @@ const HELP_CONTENT = [
   { id:"fehler", title:"Fehler & Lösungen", body:`
     <h3>Fehler & Lösungen</h3>
     <p><b>„Kein API-Key hinterlegt"</b> – API-Key im Bereich „API-Zugang" eintragen und speichern.</p>
+    <p><b>„Anthropic ist momentan überlastet" / Status 529</b> – der Anthropic-Dienst ist temporär ausgelastet. Das ist kein Hinweis auf verbrauchte API-Tokens und kein Fehler des Vertrags. Die App startet automatisch mehrere Wiederholungsversuche mit kurzer Wartezeit. Wenn der Fehler bestehen bleibt, bitte einige Minuten warten und die Analyse erneut starten.</p>
+    <p><b>„Rate Limit" / Status 429</b> – es wurden zu viele Anfragen in kurzer Zeit gestellt oder das Konto ist aktuell begrenzt. Kurz warten, ggf. ein kleineres Dokument testen oder das Anthropic-Konto prüfen.</p>
     <p><b>„Antwort wurde wegen Erreichen des Token-Limits abgeschnitten"</b> – der betroffene Analyseschritt hat zu viel JSON erzeugt. Lange Textdokumente werden nun automatisch in Abschnitten ausgewertet und anschließend konsolidiert; bei wiederholtem Auftreten kann ein Wechsel auf Opus 4.8 oder eine reduzierte Anlagenfassung helfen.</p>
     <p><b>„Fristen-Erkennung konnte für dieses Dokument nicht abgeschlossen werden"</b> – die übrige Analyse (Klauseln, Risikobewertung, Maßnahmen) bleibt davon unberührt und vollständig nutzbar; nur das Fristenmodul konnte in diesem Lauf nicht abgeschlossen werden. Ein erneuter Analyselauf kann helfen.</p>
     <p><b>„Kein Textlayer gefunden"</b> – die App erkennt automatisch gescannte PDFs ohne durchsuchbaren Text, bereitet alle Seiten als Bilder vor und analysiert sie in Seitenpaketen. Das dauert länger und kann höhere API-Kosten verursachen, verhindert aber, dass spätere Vertragsseiten unberücksichtigt bleiben.</p>
@@ -2699,6 +2701,39 @@ function retrieveContextForItem(item, topN){
 }
 
 // ---------- Claude API ----------
+class ClaudeApiError extends Error{
+  constructor(message, {status, type, requestId, bodyText} = {}){
+    super(message);
+    this.name = 'ClaudeApiError';
+    this.status = status;
+    this.type = type;
+    this.requestId = requestId;
+    this.bodyText = bodyText || '';
+  }
+}
+function getClaudeErrorMessage(status, type, requestId){
+  if(status === 529 || type === 'overloaded_error'){
+    return 'Anthropic ist momentan überlastet. Die App versucht es automatisch erneut. Falls der Fehler bestehen bleibt, bitte in wenigen Minuten noch einmal starten.';
+  }
+  if(status === 429 || type === 'rate_limit_error'){
+    return 'Anthropic hat die Anfrage wegen zu vieler gleichzeitiger oder zu schneller Anfragen begrenzt. Bitte kurz warten und erneut versuchen.';
+  }
+  if(status === 401 || status === 403){
+    return 'Der Anthropic-API-Key wurde abgelehnt. Bitte API-Key prüfen, speichern und Verbindung erneut testen.';
+  }
+  return 'API antwortete mit Status ' + status + (type ? ' (' + type + ')' : '') + (requestId ? ' · Anfrage: ' + requestId : '');
+}
+function isTemporaryClaudeError(err){
+  return err && (err.status === 529 || err.status === 429 || err.type === 'overloaded_error' || err.type === 'rate_limit_error');
+}
+function retryDelayMs(attempt, err){
+  if(err && (err.status === 529 || err.type === 'overloaded_error')) return [2500, 6000, 12000][attempt] || 15000;
+  if(err && (err.status === 429 || err.type === 'rate_limit_error')) return [4000, 9000, 16000][attempt] || 20000;
+  return 700 + attempt * 600;
+}
+function formatRetryDelay(ms){
+  return ms >= 1000 ? Math.round(ms / 1000) + ' s' : ms + ' ms';
+}
 async function callClaude(content, maxTokens, signal){
   if(!apiKey){
     throw new Error('Kein API-Key hinterlegt. Bitte oben im Feld "API-Zugang" deinen Anthropic-API-Key eintragen und speichern.');
@@ -2727,7 +2762,16 @@ async function callClaude(content, maxTokens, signal){
   if(!response.ok){
     let bodyText = '';
     try{ bodyText = await response.text(); }catch(e){}
-    throw new Error('API antwortete mit Status ' + response.status + ': ' + bodyText.slice(0,200));
+    let parsed = null;
+    try{ parsed = bodyText ? JSON.parse(bodyText) : null; }catch(e){}
+    const apiType = parsed && parsed.error ? parsed.error.type : '';
+    const requestId = parsed && parsed.request_id ? parsed.request_id : (response.headers.get('request-id') || '');
+    throw new ClaudeApiError(getClaudeErrorMessage(response.status, apiType, requestId), {
+      status: response.status,
+      type: apiType,
+      requestId,
+      bodyText
+    });
   }
   let bodyText;
   try{
@@ -2804,7 +2848,7 @@ function setError(msg){
 
 // ---------- analysis ----------
 async function callClaudeWithRetry(content, statusPrefix, maxTokens, signal){
-  const maxRetries = 2;
+  const maxRetries = 3;
   let lastErr;
   for(let attempt=0; attempt<=maxRetries; attempt++){
     try{
@@ -2812,10 +2856,17 @@ async function callClaudeWithRetry(content, statusPrefix, maxTokens, signal){
     }catch(err){
       if(err.name === 'AbortError') throw err;
       lastErr = err;
-      if(attempt < maxRetries){
+      const retryable = isTemporaryClaudeError(err) || attempt < 2;
+      if(attempt < maxRetries && retryable){
+        const delay = retryDelayMs(attempt, err);
         console.warn('Versuch ' + (attempt+1) + ' fehlgeschlagen, wiederhole …', err.message);
-        if(statusPrefix) setStatus(statusPrefix + ' (erneuter Versuch ' + (attempt+2) + '/' + (maxRetries+1) + ' …)', 'loading');
-        await new Promise(r => setTimeout(r, 700 + attempt*600));
+        if(statusPrefix){
+          const suffix = isTemporaryClaudeError(err)
+            ? `Anthropic momentan ausgelastet, neuer Versuch in ${formatRetryDelay(delay)} (${attempt+2}/${maxRetries+1}) …`
+            : `erneuter Versuch ${attempt+2}/${maxRetries+1} …`;
+          setStatus(statusPrefix + ' (' + suffix + ')', 'loading');
+        }
+        await new Promise(r => setTimeout(r, delay));
       }
     }
   }
