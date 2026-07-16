@@ -1790,7 +1790,7 @@ const DEFAULT_MODEL = "claude-sonnet-5";
 const ALLOWED_MODELS = new Set(["claude-sonnet-5", "claude-opus-4-8", "claude-haiku-4-5-20251001"]);
 let MODEL = DEFAULT_MODEL;
 const DOC_CHAR_LIMIT = 300000; // ca. 100-110 Seiten bei ~2800 Zeichen/Seite
-const TEXT_STAGE_CHUNK_SIZE = 24000; // kleinere Einstiegspakete verhindern zu große Anthropic-Requests
+const TEXT_STAGE_CHUNK_SIZE = 12000; // kleinere Einstiegspakete verhindern zu große Anthropic-Requests
 const CLASSIFICATION_BATCH_SIZE = 5;
 const ACTION_BATCH_SIZE = 8;
 const CLAUDE_DEFAULT_MAX_TOKENS = 8000;
@@ -3272,6 +3272,12 @@ function isOutputLimitError(err){
   const detail = `${err?.message || ''} ${err?.bodyText || ''}`.toLowerCase();
   return /token-limit|token limit|erreichen des token-limits|max_tokens|antwort.*abgeschnitten|kein text mehr erzeugt|zu viel ausgabe|ausgabelimit|output.*long|response.*long/.test(detail);
 }
+function shouldSplitExtractionChunk(err){
+  const detail = `${err?.message || ''} ${err?.bodyText || ''}`.toLowerCase();
+  return isInvalidRequestSizeError(err)
+    || isOutputLimitError(err)
+    || /kein gültiges json|ungueltiges json|unvollständiges json|unvollstaendiges json/.test(detail);
+}
 
 // ---------- pipeline UI ----------
 function setPipelineStep(step, state){
@@ -3553,7 +3559,7 @@ function chunkTextForAnalysis(text, size){
 function buildTextStageOneChunkInstruction(extractInstruction, indexLabel){
   return `${extractInstruction}
 
-Du siehst nur ${indexLabel}. Analysiere diesen Abschnitt vollständig, aber gib nur die wirtschaftlich oder rechtlich wesentlichen Punkte dieses Abschnitts zurück. Andere Abschnitte werden separat geprüft und anschließend zusammengeführt.`;
+Du siehst nur ${indexLabel}. Analysiere diesen Abschnitt vollständig, aber gib nur die wirtschaftlich oder rechtlich wesentlichen Punkte dieses Abschnitts zurück. Beschränke die Ausgabe dieses Abschnitts auf maximal 6 bis 8 konkrete Punkte. Andere Abschnitte werden separat geprüft und anschließend zusammengeführt.`;
 }
 async function extractTextClauseChunkRecursive(extractInstruction, textChunk, signal, label){
   const statusLabel = label === 'den Vertragstext' ? 'dem Vertragstext' : label;
@@ -3563,11 +3569,11 @@ async function extractTextClauseChunkRecursive(extractInstruction, textChunk, si
     return parseStageOneResult(parseJson(raw));
   }catch(err){
     if(err.name === 'AbortError') throw err;
-    if(isInvalidRequestSizeError(err) && textChunk.length > 4500){
+    if(shouldSplitExtractionChunk(err) && textChunk.length > 2500){
       const mid = Math.ceil(textChunk.length / 2);
       let splitAt = textChunk.lastIndexOf('\n', mid);
       if(splitAt < Math.floor(textChunk.length * 0.35)) splitAt = mid;
-      setStatus(`${label} ist zu groß, teile in kleinere Textpakete …`, 'loading');
+      setStatus(`${label} erzeugt zu viel Ausgabe, teile in kleinere Textpakete …`, 'loading');
       const first = await extractTextClauseChunkRecursive(extractInstruction, textChunk.slice(0, splitAt), signal, `${label} Teil A`);
       const second = await extractTextClauseChunkRecursive(extractInstruction, textChunk.slice(splitAt), signal, `${label} Teil B`);
       return {
@@ -3635,9 +3641,9 @@ async function extractScannedClauseBatchRecursive(extractInstruction, images, st
     return parseStageOneResult(parseJson(raw));
   }catch(err){
     if(err.name === 'AbortError') throw err;
-    if(isInvalidRequestSizeError(err) && images.length > 1){
+    if(shouldSplitExtractionChunk(err) && images.length > 1){
       const mid = Math.ceil(images.length / 2);
-      setStatus(`${statusLabel} ist zu groß, teile in kleinere Scan-Pakete …`, 'loading');
+      setStatus(`${statusLabel} erzeugt zu viel Ausgabe, teile in kleinere Scan-Pakete …`, 'loading');
       const first = await extractScannedClauseBatchRecursive(extractInstruction, images.slice(0, mid), startPage, totalPages, signal, `${statusLabel} Teil A`);
       const second = await extractScannedClauseBatchRecursive(extractInstruction, images.slice(mid), startPage + mid, totalPages, signal, `${statusLabel} Teil B`);
       return {
