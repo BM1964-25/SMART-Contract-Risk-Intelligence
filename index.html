@@ -1801,6 +1801,7 @@ const CLAUDE_CLASSIFICATION_MAX_TOKENS = 7000;
 const CLAUDE_ACTION_MAX_TOKENS = 6000;
 const SCAN_RENDER_MAX_DIMENSION = 1400;
 const SCAN_RENDER_JPEG_QUALITY = 0.62;
+const ANALYSIS_CACHE_VERSION = "v1";
 let apiKey = "";
 let currentContractType = "vob";
 let currentPerspective = "auftragnehmer";
@@ -1808,6 +1809,7 @@ let currentRoleLabel = "Auftragnehmer";
 let latestReportSnapshot = null;
 let analysisAbortController = null;
 let isAnalysisRunning = false;
+let currentDocumentSignature = "";
 
 const ROLE_MAP = {
   vob:      {contractType:"vob", perspective:"auftragnehmer", roleLabel:"Auftragnehmer (Bauunternehmen)",
@@ -2978,6 +2980,7 @@ function resetWorkspace(){
   analysisAbortController = null;
   isAnalysisRunning = false;
   currentFileName = "";
+  currentDocumentSignature = "";
   extractedText = "";
   documentImages = [];
   scannedPageCount = 0;
@@ -3016,6 +3019,7 @@ fileInput.onchange = (e) => { if(e.target.files.length) handleFile(e.target.file
 async function handleFile(file){
   if(isAnalysisRunning && analysisAbortController) analysisAbortController.abort();
   currentFileName = file.name;
+  currentDocumentSignature = buildDocumentSignature(file);
   setError('');
   setStatus('Lese Dokument …', 'loading');
   resetPipeline();
@@ -3037,6 +3041,7 @@ async function handleFile(file){
         const result = await renderPdfPagesAsImages(file);
         documentImages = result.images;
         scannedPageCount = result.totalPages;
+        currentDocumentSignature = buildDocumentSignature(file, `scan:${result.totalPages}:${result.images.length}`);
         isScanned = true;
         document.getElementById('fileInfo').innerHTML = `
           <div class="file-info"><span class="name">${escapeHtml(file.name)}</span>
@@ -3054,6 +3059,7 @@ async function handleFile(file){
       throw new Error('Nicht unterstütztes Dateiformat: .' + ext);
     }
     const charCount = extractedText.length;
+    currentDocumentSignature = buildDocumentSignature(file, extractedText);
     const estPages = Math.max(1, Math.round(charCount / 2800));
     const overLimit = charCount > DOC_CHAR_LIMIT;
     document.getElementById('fileInfo').innerHTML = `
@@ -3347,6 +3353,50 @@ function normalizeDedupeText(value){
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
+}
+function simpleHash(value){
+  const str = String(value || '');
+  let h = 2166136261;
+  for(let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(16);
+}
+function buildDocumentSignature(file, contentHint = ''){
+  const base = [
+    file?.name || currentFileName || '',
+    file?.size || '',
+    file?.lastModified || '',
+    scannedPageCount || '',
+    contentHint ? simpleHash(String(contentHint).slice(0, 120000)) : ''
+  ].join('|');
+  return simpleHash(base);
+}
+function getAnalysisCacheKey(stage){
+  const signature = currentDocumentSignature || simpleHash([currentFileName, extractedText.length, scannedPageCount].join('|'));
+  return `scri-analysis-cache:${ANALYSIS_CACHE_VERSION}:${stage}:${currentContractType}:${currentPerspective}:${signature}`;
+}
+function readAnalysisCache(stage){
+  try{
+    const raw = localStorage.getItem(getAnalysisCacheKey(stage));
+    if(!raw) return null;
+    const cached = JSON.parse(raw);
+    if(!cached || !cached.savedAt) return null;
+    const maxAgeMs = 14 * 24 * 60 * 60 * 1000;
+    if(Date.now() - cached.savedAt > maxAgeMs) return null;
+    return cached.value || null;
+  }catch(e){
+    console.warn('Analyse-Zwischenspeicher konnte nicht gelesen werden', e);
+    return null;
+  }
+}
+function writeAnalysisCache(stage, value){
+  try{
+    localStorage.setItem(getAnalysisCacheKey(stage), JSON.stringify({savedAt:Date.now(), value}));
+  }catch(e){
+    console.warn('Analyse-Zwischenspeicher konnte nicht gespeichert werden', e);
+  }
 }
 function reindexItems(items){
   return (items || []).map((item, index) => ({...item, id:String(index + 1)}));
@@ -3838,16 +3888,25 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     let items = [];
     let projektKontext = '';
     let marktvergleich = {};
-    if(isScanned && documentImages.length){
-      const scannedStage1 = await extractScannedClausesInBatches(extractInstruction, analysisSignal);
-      items = scannedStage1.items;
-      projektKontext = scannedStage1.projektkontext;
-      marktvergleich = scannedStage1.marktvergleich;
+    const cachedStage1 = readAnalysisCache('stage1');
+    if(cachedStage1 && Array.isArray(cachedStage1.items) && cachedStage1.items.length){
+      setStatus('Nutze zwischengespeicherte Klausel-Extraktion …', 'loading');
+      items = cachedStage1.items;
+      projektKontext = cachedStage1.projektkontext || '';
+      marktvergleich = cachedStage1.marktvergleich || {};
     } else {
-      const textStage1 = await extractTextClausesInBatches(extractInstruction, docExcerpt, analysisSignal);
-      items = textStage1.items;
-      projektKontext = textStage1.projektkontext;
-      marktvergleich = textStage1.marktvergleich;
+      if(isScanned && documentImages.length){
+        const scannedStage1 = await extractScannedClausesInBatches(extractInstruction, analysisSignal);
+        items = scannedStage1.items;
+        projektKontext = scannedStage1.projektkontext;
+        marktvergleich = scannedStage1.marktvergleich;
+      } else {
+        const textStage1 = await extractTextClausesInBatches(extractInstruction, docExcerpt, analysisSignal);
+        items = textStage1.items;
+        projektKontext = textStage1.projektkontext;
+        marktvergleich = textStage1.marktvergleich;
+      }
+      writeAnalysisCache('stage1', {items, projektkontext:projektKontext, marktvergleich});
     }
     setPipelineStep(1,'done');
 
@@ -3871,12 +3930,20 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     let fristenItems = [];
     let fristenFailed = false;
     try{
-      if(isScanned && documentImages.length){
-        fristenItems = await extractScannedDeadlinesInBatches(fristenInstruction, analysisSignal);
+      const cachedDeadlines = readAnalysisCache('deadlines');
+      if(cachedDeadlines && Array.isArray(cachedDeadlines.fristenItems)){
+        setStatus('Nutze zwischengespeicherte Fristen-Erkennung …', 'loading');
+        fristenItems = cachedDeadlines.fristenItems;
+        fristenFailed = !!cachedDeadlines.fristenFailed;
       } else {
-        const fristenContent = fristenInstruction + "\n\nVertragstext:\n" + docExcerpt;
-        const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', CLAUDE_DEADLINES_MAX_TOKENS, analysisSignal);
-        fristenItems = parseJson(stageFristenRaw);
+        if(isScanned && documentImages.length){
+          fristenItems = await extractScannedDeadlinesInBatches(fristenInstruction, analysisSignal);
+        } else {
+          const fristenContent = fristenInstruction + "\n\nVertragstext:\n" + docExcerpt;
+          const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', CLAUDE_DEADLINES_MAX_TOKENS, analysisSignal);
+          fristenItems = parseJson(stageFristenRaw);
+        }
+        writeAnalysisCache('deadlines', {fristenItems, fristenFailed:false});
       }
       if(!Array.isArray(fristenItems)) fristenItems = [];
       if(!fristenItems.length){
@@ -3892,6 +3959,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       console.error('Fristen-Extraktion fehlgeschlagen – versuche Fallback aus Risiko- und Textdaten', e);
       fristenFailed = true;
       fristenItems = deriveFallbackDeadlines(items, docExcerpt);
+      writeAnalysisCache('deadlines', {fristenItems, fristenFailed:true});
       setPipelineStep(2, fristenItems.length ? 'warn' : 'done');
     }
 
