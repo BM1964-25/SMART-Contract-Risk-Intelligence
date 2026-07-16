@@ -659,10 +659,17 @@
   .internal-shot .line{ height:7px; border-radius:999px; background:var(--gold-light); margin-top:9px; }
   .internal-shot .line:nth-child(3){ width:72%; background:#e8e3d5; }
   .internal-shot .line:nth-child(4){ width:88%; background:#e8e3d5; }
-  .internal-steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:16px; }
-  .internal-step{ border:1px solid var(--border); border-radius:8px; padding:12px; background:#fff; }
-  .internal-step p{ margin:6px 0 0; color:var(--text-muted); font-size:12.5px; }
-  .internal-step-num{ width:26px; height:26px; border-radius:50%; background:var(--navy); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; margin-bottom:8px; }
+  .internal-steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px; position:relative; }
+  .internal-steps:before{ content:""; position:absolute; left:7%; right:7%; top:28px; height:2px; background:linear-gradient(90deg, var(--gold), rgba(201,162,39,.18)); }
+  .internal-step{
+    border:1px solid var(--border); border-top:3px solid var(--gold); border-radius:8px;
+    padding:14px; background:linear-gradient(180deg,#fff,#fffdf8); position:relative; z-index:1;
+    box-shadow:0 6px 16px rgba(15,42,74,.06);
+  }
+  .internal-step-head{ display:flex; align-items:center; gap:9px; margin-bottom:12px; }
+  .internal-step p{ margin:0; color:var(--text-muted); font-size:12.8px; line-height:1.45; }
+  .internal-step b{ color:var(--navy); font-size:14px; }
+  .internal-step-num{ width:30px; height:30px; border-radius:50%; background:var(--navy); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; flex:0 0 auto; box-shadow:0 0 0 4px #fffdf8; }
   .internal-price-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px; }
   .internal-price-card{
     border:1px solid var(--border); border-top:4px solid var(--gold); border-radius:10px;
@@ -1011,10 +1018,10 @@
         <h2 class="internal-page-title">Vertragsanalyse als Dienstleistung</h2>
         <p class="internal-page-subtitle">So einfach funktioniert es.</p>
         <div class="internal-steps">
-          <div class="internal-step"><span class="internal-step-num">1</span><b>Vertrag senden</b><p>Sie senden uns Ihren Hauptvertrag.</p></div>
-          <div class="internal-step"><span class="internal-step-num">2</span><b>Analyse</b><p>Die Analyse erfolgt mit SMART Contract & Risk Intelligence.</p></div>
-          <div class="internal-step"><span class="internal-step-num">3</span><b>Bericht</b><p>Sie erhalten Ihren strukturierten Analysebericht.</p></div>
-          <div class="internal-step"><span class="internal-step-num">4</span><b>Besprechung</b><p>Optional besprechen wir gemeinsam die Ergebnisse.</p></div>
+          <div class="internal-step"><div class="internal-step-head"><span class="internal-step-num">1</span><b>Vertrag senden</b></div><p>Sie senden uns Ihren Hauptvertrag.</p></div>
+          <div class="internal-step"><div class="internal-step-head"><span class="internal-step-num">2</span><b>Analyse</b></div><p>Die Analyse erfolgt mit SMART Contract & Risk Intelligence.</p></div>
+          <div class="internal-step"><div class="internal-step-head"><span class="internal-step-num">3</span><b>Bericht</b></div><p>Sie erhalten Ihren strukturierten Analysebericht.</p></div>
+          <div class="internal-step"><div class="internal-step-head"><span class="internal-step-num">4</span><b>Besprechung</b></div><p>Optional besprechen wir gemeinsam die Ergebnisse.</p></div>
         </div>
       </section>
 
