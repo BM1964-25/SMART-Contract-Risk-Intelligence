@@ -1779,6 +1779,14 @@ document.addEventListener('keydown', (e) => {
 let MODEL = "claude-sonnet-5";
 const DOC_CHAR_LIMIT = 300000; // ca. 100-110 Seiten bei ~2800 Zeichen/Seite
 const TEXT_STAGE_CHUNK_SIZE = 24000; // kleinere Einstiegspakete verhindern zu große Anthropic-Requests
+const CLAUDE_DEFAULT_MAX_TOKENS = 8000;
+const CLAUDE_STAGE1_MAX_TOKENS = 6000;
+const CLAUDE_CONSOLIDATION_MAX_TOKENS = 8000;
+const CLAUDE_DEADLINES_MAX_TOKENS = 8000;
+const CLAUDE_CLASSIFICATION_MAX_TOKENS = 7000;
+const CLAUDE_ACTION_MAX_TOKENS = 6000;
+const SCAN_RENDER_MAX_DIMENSION = 1400;
+const SCAN_RENDER_JPEG_QUALITY = 0.62;
 let apiKey = "";
 let currentContractType = "vob";
 let currentPerspective = "auftragnehmer";
@@ -2162,7 +2170,7 @@ let documentImages = [];
 let scannedPageCount = 0;
 let contractBasisConfirmed = false;
 let currentBasisIssue = null;
-const SCAN_BATCH_SIZE = 2;
+const SCAN_BATCH_SIZE = 1;
 
 // ---------- storage ----------
 async function loadKB(){
@@ -3063,12 +3071,15 @@ async function renderPdfPagesAsImages(file, maxPages){
   const images = [];
   for(let i=1;i<=pageCount;i++){
     const page = await pdf.getPage(i);
-    const viewport = page.getViewport({scale:1.0});
+    const baseViewport = page.getViewport({scale:1.0});
+    const maxSide = Math.max(baseViewport.width, baseViewport.height);
+    const scale = maxSide > SCAN_RENDER_MAX_DIMENSION ? SCAN_RENDER_MAX_DIMENSION / maxSide : 1.0;
+    const viewport = page.getViewport({scale});
     const canvas = document.createElement('canvas');
     canvas.width = viewport.width; canvas.height = viewport.height;
     const ctx = canvas.getContext('2d');
     await page.render({canvasContext: ctx, viewport: viewport}).promise;
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+    const dataUrl = canvas.toDataURL('image/jpeg', SCAN_RENDER_JPEG_QUALITY);
     images.push(dataUrl.split(',')[1]);
   }
   return {images, truncated: !!maxPages && pdf.numPages > maxPages, totalPages: pdf.numPages};
@@ -3149,7 +3160,7 @@ async function callClaude(content, maxTokens, signal){
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: maxTokens || 16000,
+        max_tokens: maxTokens || CLAUDE_DEFAULT_MAX_TOKENS,
         messages: [{role:"user", content: content}]
       }),
       signal
@@ -3165,7 +3176,11 @@ async function callClaude(content, maxTokens, signal){
     try{ parsed = bodyText ? JSON.parse(bodyText) : null; }catch(e){}
     const apiType = parsed && parsed.error ? parsed.error.type : '';
     const requestId = parsed && parsed.request_id ? parsed.request_id : (response.headers.get('request-id') || '');
-    throw new ClaudeApiError(getClaudeErrorMessage(response.status, apiType, requestId), {
+    let userMessage = getClaudeErrorMessage(response.status, apiType, requestId);
+    if(response.status === 400 && /max[_-]?tokens/i.test(bodyText || '')){
+      userMessage = 'Anthropic hat die angeforderte Antwortlänge für dieses Modell abgelehnt. Die App nutzt jetzt kleinere Antwortbudgets pro Analyseschritt; bitte die Analyse erneut starten.';
+    }
+    throw new ClaudeApiError(userMessage, {
       status: response.status,
       type: apiType,
       requestId,
@@ -3359,7 +3374,7 @@ async function extractTextClauseChunkRecursive(extractInstruction, textChunk, si
   const statusLabel = label === 'den Vertragstext' ? 'dem Vertragstext' : label;
   const prompt = buildTextStageOneChunkInstruction(extractInstruction, label) + "\n\nVertragstext-Abschnitt:\n" + textChunk;
   try{
-    const raw = await callClaudeWithRetry(prompt, `Extrahiere relevante Klauseln aus ${statusLabel} …`, 16000, signal);
+    const raw = await callClaudeWithRetry(prompt, `Extrahiere relevante Klauseln aus ${statusLabel} …`, CLAUDE_STAGE1_MAX_TOKENS, signal);
     return parseStageOneResult(parseJson(raw));
   }catch(err){
     if(err.name === 'AbortError') throw err;
@@ -3413,7 +3428,7 @@ Teilergebnisse:
 ${JSON.stringify(dedupedItems)}`;
   try{
     setStatus('Führe Text-Teilergebnisse zu einer Gesamtauswertung zusammen …', 'loading');
-    const raw = await callClaudeWithRetry(consolidationPrompt, 'Führe Text-Teilergebnisse zusammen …', 20000, signal);
+    const raw = await callClaudeWithRetry(consolidationPrompt, 'Führe Text-Teilergebnisse zusammen …', CLAUDE_CONSOLIDATION_MAX_TOKENS, signal);
     const parsed = parseStageOneResult(parseJson(raw));
     return {
       items: dedupeClauseItems(parsed.items),
@@ -3431,7 +3446,7 @@ async function extractScannedClauseBatchRecursive(extractInstruction, images, st
   const statusLabel = label || `Scan-Seiten ${startPage}-${endPage}`;
   const content = buildImageBatchContent(images, extractInstruction, startPage, endPage, totalPages);
   try{
-    const raw = await callClaudeWithRetry(content, `Extrahiere relevante Klauseln aus ${statusLabel} …`, 16000, signal);
+    const raw = await callClaudeWithRetry(content, `Extrahiere relevante Klauseln aus ${statusLabel} …`, CLAUDE_STAGE1_MAX_TOKENS, signal);
     return parseStageOneResult(parseJson(raw));
   }catch(err){
     if(err.name === 'AbortError') throw err;
@@ -3484,7 +3499,7 @@ Teilergebnisse:
 ${JSON.stringify(dedupedItems)}`;
   try{
     setStatus('Führe Scan-Teilergebnisse zu einer Gesamtauswertung zusammen …', 'loading');
-    const raw = await callClaudeWithRetry(consolidationPrompt, 'Führe Scan-Teilergebnisse zusammen …', 20000, signal);
+    const raw = await callClaudeWithRetry(consolidationPrompt, 'Führe Scan-Teilergebnisse zusammen …', CLAUDE_CONSOLIDATION_MAX_TOKENS, signal);
     const parsed = parseStageOneResult(parseJson(raw));
     return {
       items: dedupeClauseItems(parsed.items),
@@ -3506,7 +3521,7 @@ async function extractScannedDeadlinesInBatches(fristenInstruction, signal){
     const prefix = `Extrahiere Fristen aus Scan-Seiten ${startPage}-${endPage} (${i+1}/${batches.length}) …`;
     setStatus(prefix, 'loading');
     const content = buildImageBatchContent(batches[i], fristenInstruction, startPage, endPage, documentImages.length);
-    const raw = await callClaudeWithRetry(content, prefix, 20000, signal);
+    const raw = await callClaudeWithRetry(content, prefix, CLAUDE_DEADLINES_MAX_TOKENS, signal);
     const parsed = parseJson(raw);
     if(Array.isArray(parsed)){
       allDeadlines.push(...parsed.map(item => ({...item, quelle:`Seiten ${startPage}-${endPage}`})));
@@ -3537,7 +3552,7 @@ ${JSON.stringify(itemsBatch.map(({_referenzTitel, ...rest}) => rest))}`;
 async function classifyBatchRecursive(itemsBatch, options, signal, batchLabel){
   const prompt = buildClassificationPrompt(itemsBatch, options);
   try{
-    const raw = await callClaudeWithRetry(prompt, batchLabel, 12000, signal);
+    const raw = await callClaudeWithRetry(prompt, batchLabel, CLAUDE_CLASSIFICATION_MAX_TOKENS, signal);
     const parsed = parseJson(raw);
     return Array.isArray(parsed) ? parsed : [];
   }catch(err){
@@ -3577,7 +3592,7 @@ ${JSON.stringify(itemsBatch)}`;
 }
 async function actionBatchRecursive(itemsBatch, signal, batchLabel){
   try{
-    const raw = await callClaudeWithRetry(buildActionPrompt(itemsBatch), batchLabel, 10000, signal);
+    const raw = await callClaudeWithRetry(buildActionPrompt(itemsBatch), batchLabel, CLAUDE_ACTION_MAX_TOKENS, signal);
     const parsed = parseJson(raw);
     return Array.isArray(parsed) ? parsed : [];
   }catch(err){
@@ -3701,7 +3716,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
         fristenItems = await extractScannedDeadlinesInBatches(fristenInstruction, analysisSignal);
       } else {
         const fristenContent = fristenInstruction + "\n\nVertragstext:\n" + docExcerpt;
-        const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', 20000, analysisSignal);
+        const stageFristenRaw = await callClaudeWithRetry(fristenContent, 'Extrahiere alle Fristen und Termine …', CLAUDE_DEADLINES_MAX_TOKENS, analysisSignal);
         fristenItems = parseJson(stageFristenRaw);
       }
       setPipelineStep(2,'done');
