@@ -47,6 +47,7 @@
     padding:9px 16px; border-radius:6px; font-size:13.5px; font-family:inherit; cursor:pointer;
   }
   .help-btn:hover{ background:rgba(255,255,255,0.18); }
+  .header-actions{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
   .container{ max-width:1320px; width:100%; margin:0 auto; padding:28px 24px 44px; flex:1 0 auto; }
   .setup-row{
     display:grid;
@@ -82,7 +83,8 @@
     .site-footer .footer-right{ text-align:center; }
     header{ flex-direction:column; align-items:flex-start; gap:14px; padding:22px 20px; }
     header h1{ font-size:23px; }
-    .help-btn{ align-self:flex-end; }
+    .header-actions{ align-self:flex-end; }
+    .help-btn{ padding:8px 12px; }
   }
   select{
     appearance:none; -webkit-appearance:none; -moz-appearance:none;
@@ -564,12 +566,34 @@
   .help-kitable th, .help-kitable td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--border); }
   .help-kitable .yes{ color:var(--amber); font-weight:bold; }
   .help-kitable .no{ color:var(--green); font-weight:bold; }
+  .internal-box{ max-width:900px; height:82vh; }
+  .internal-intro{
+    margin:14px 22px 0; padding:11px 14px; border:1px solid var(--gold);
+    background:var(--gold-light); border-radius:6px; font-size:12.8px; line-height:1.55;
+  }
+  .internal-content{ padding:18px 22px 24px; overflow-y:auto; font-size:13px; line-height:1.55; }
+  .internal-section{ margin-bottom:22px; }
+  .internal-section h3{
+    font-family:inherit; font-size:15px; font-weight:bold; color:var(--navy);
+    margin:0 0 10px; padding-bottom:7px; border-bottom:2px solid var(--gold);
+  }
+  .internal-table{ width:100%; border-collapse:collapse; margin:8px 0 10px; font-size:12.5px; }
+  .internal-table th, .internal-table td{ text-align:left; vertical-align:top; padding:8px 9px; border-bottom:1px solid var(--border); }
+  .internal-table th{ color:var(--navy); background:var(--bg); font-size:11px; text-transform:uppercase; letter-spacing:.25px; }
+  .internal-table td.price{ white-space:nowrap; font-weight:bold; color:var(--navy); }
+  .internal-note{ color:var(--text-muted); font-size:12px; margin:8px 0 0; }
+  .internal-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:10px 0; }
+  .internal-card{ border:1px solid var(--border); border-radius:7px; padding:10px 11px; background:var(--bg); }
+  .internal-card b{ display:block; color:var(--navy); margin-bottom:3px; }
+  .internal-card span{ color:var(--text-muted); font-size:12px; }
   @media (max-width:640px){
     .help-box{ max-width:100%; width:100%; height:100%; max-height:100%; border-radius:0; }
+    .internal-box{ max-width:100%; width:100%; height:100%; max-height:100%; border-radius:0; }
     .help-body{ flex-direction:column; }
     .help-nav{ width:100%; border-right:none; border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; gap:4px; padding:8px 16px; }
     .help-nav button{ width:auto; }
     .help-content{ padding:12px 16px 20px; }
+    .internal-cards{ grid-template-columns:1fr; }
   }
   .modal-pane .hint{ margin-top:2px; }
   .kb-explainer{
@@ -636,10 +660,16 @@
       <p>BuiltSmart AI — Vertrags- und Risikoanalyse für Bau-, Planer- und Ingenieurverträge</p>
     </div>
   </div>
-  <button class="help-btn no-print" id="openHelpBtn" aria-label="Hilfe öffnen">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    Hilfe
-  </button>
+  <div class="header-actions no-print">
+    <button class="help-btn" id="openInternalBtn" aria-label="Interne Preise öffnen">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Intern
+    </button>
+    <button class="help-btn" id="openHelpBtn" aria-label="Hilfe öffnen">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Hilfe
+    </button>
+  </div>
 </header>
 
 <div class="container">
@@ -798,6 +828,107 @@
     <div class="help-body">
       <nav class="help-nav" id="helpNav"></nav>
       <div class="help-content" id="helpContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- INTERN MODAL — interne Preis- und Angebotskalkulation -->
+<div class="modal-overlay no-print" id="internalOverlay" style="display:none;">
+  <div class="modal-box internal-box">
+    <div class="modal-header">
+      <div style="display:flex; align-items:center; gap:12px; padding:0 6px;">
+        <h2 style="margin:0; font-size:16px;">Intern</h2>
+      </div>
+      <button class="modal-close" id="internalCloseBtn" aria-label="Schließen">&times;</button>
+    </div>
+    <div class="internal-intro">
+      <b>Interne Richtwerte.</b> Alle Beträge verstehen sich netto zzgl. Umsatzsteuer und ohne externe API-/Fremdkosten, soweit nicht anders vereinbart. Die Werte dienen als Kalkulations- und Angebotsgrundlage und können je nach Vertragsumfang, Eilbedürftigkeit, Haftungsnähe und gewünschter Prüftiefe angepasst werden.
+    </div>
+    <div class="internal-content">
+      <section class="internal-section">
+        <h3>App-Kauf und Lizenzmodell</h3>
+        <table class="internal-table">
+          <thead>
+            <tr><th>Modell</th><th>Leistung</th><th>Richtpreis</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Einzelplatz-Lizenz</b></td>
+              <td>Nutzung der App durch eine Person, lokale Wissensbasis, Verlauf, Exportfunktionen. Anthropic-API-Key und KI-Kosten trägt der Nutzer selbst.</td>
+              <td class="price">490 € / Jahr</td>
+            </tr>
+            <tr>
+              <td><b>Team-Lizenz klein</b></td>
+              <td>Bis 5 Nutzer, gemeinsame Einführung, Standard-Wissensbasis, kurze Schulung und E-Mail-Support.</td>
+              <td class="price">1.900 € / Jahr</td>
+            </tr>
+            <tr>
+              <td><b>Unternehmenslizenz</b></td>
+              <td>Mehrere Nutzer, angepasste Wissensbasis, Vertragsmuster-Kalibrierung, Onboarding und priorisierte Weiterentwicklung.</td>
+              <td class="price">ab 4.900 € / Jahr</td>
+            </tr>
+            <tr>
+              <td><b>Einmalkauf / Projektlizenz</b></td>
+              <td>Zeitlich definierte Nutzung für ein Projekt oder eine Transaktion, ohne dauerhafte Jahresbindung.</td>
+              <td class="price">ab 950 €</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="internal-note">Empfehlung: App-Kauf immer getrennt von KI-Verbrauch abrechnen. Der eigene API-Key des Kunden vermeidet verdeckte Verbrauchskosten und erleichtert Datenschutz-/Kostenkontrolle.</p>
+      </section>
+
+      <section class="internal-section">
+        <h3>Dienstleistung Vertragsanalyse</h3>
+        <table class="internal-table">
+          <thead>
+            <tr><th>Paket</th><th>Typischer Inhalt</th><th>Richtpreis</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Kurzcheck</b></td>
+              <td>KI-gestützte Erstanalyse, Management Summary, Top-Risiken, Fristenüberblick, kurze Einordnung per PDF.</td>
+              <td class="price">350–650 €</td>
+            </tr>
+            <tr>
+              <td><b>Standardanalyse</b></td>
+              <td>Vollständiger Analysebericht mit Risikobewertung, terminkritischen Klauseln, Marktvergleich und Maßnahmenvorschlägen.</td>
+              <td class="price">950–1.850 €</td>
+            </tr>
+            <tr>
+              <td><b>Premiumanalyse</b></td>
+              <td>Vertiefte fachliche Prüfung, Kommentierung der wesentlichen Klauseln, Verhandlungsagenda und Priorisierung für Projektleitung/Geschäftsführung.</td>
+              <td class="price">2.500–4.900 €</td>
+            </tr>
+            <tr>
+              <td><b>Transaktion / Großvertrag</b></td>
+              <td>Umfangreiche GU/GÜ-, HOAI-, Paket- oder Anlagenverträge, mehrere Dokumente, Workshop und überarbeitete Risikomatrix.</td>
+              <td class="price">ab 5.900 €</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="internal-section">
+        <h3>Zuschläge und Abgrenzung</h3>
+        <div class="internal-cards">
+          <div class="internal-card"><b>Eilzuschlag</b><span>+25 % bei Lieferung innerhalb von 48 Stunden, +50 % bei Lieferung am selben/folgenden Arbeitstag.</span></div>
+          <div class="internal-card"><b>Scan-/Anlagenaufwand</b><span>+150–750 € bei schwer lesbaren Scans, sehr vielen Anlagen oder manueller Vorstrukturierung.</span></div>
+          <div class="internal-card"><b>Workshop</b><span>350 € / Stunde für Ergebnisbesprechung, Verhandlungsstrategie oder interne Schulung.</span></div>
+        </div>
+        <p class="internal-note">Nicht enthalten: verbindliche Rechtsberatung, anwaltliche Freigabe, Vertragsverhandlung im fremden Namen oder Haftungsübernahme für rechtliche Entscheidungen. Bei juristisch verbindlichen Entscheidungen sollte ein Rechtsanwalt eingebunden werden.</p>
+      </section>
+
+      <section class="internal-section">
+        <h3>Angebotslogik</h3>
+        <table class="internal-table">
+          <tbody>
+            <tr><td><b>Bis ca. 30 Seiten</b></td><td>Kurzcheck oder Standardanalyse, sofern keine komplexen Anlagen oder Sondermodelle enthalten sind.</td></tr>
+            <tr><td><b>30–80 Seiten</b></td><td>Standardanalyse; bei GU/GÜ, HOAI, Open Book oder vielen Anlagen Premium prüfen.</td></tr>
+            <tr><td><b>Über 80 Seiten / mehrere Dateien</b></td><td>Individuelles Angebot mit Seiten-, Anlagen-, Scan- und Workshopanteil.</td></tr>
+            <tr><td><b>Haftungsnahe Entscheidung</b></td><td>Immer als fachliche Vorprüfung anbieten, mit ausdrücklicher Empfehlung zur anwaltlichen Endprüfung.</td></tr>
+          </tbody>
+        </table>
+      </section>
     </div>
   </div>
 </div>
@@ -1073,10 +1204,19 @@ function openHelp(activeId){
 function closeHelp(){
   document.getElementById('helpOverlay').style.display = 'none';
 }
+function openInternal(){
+  document.getElementById('internalOverlay').style.display = 'flex';
+}
+function closeInternal(){
+  document.getElementById('internalOverlay').style.display = 'none';
+}
 document.getElementById('openHelpBtn').onclick = openHelp;
+document.getElementById('openInternalBtn').onclick = openInternal;
 document.getElementById('modelHelpLink').onclick = () => openHelp('einrichtung');
 document.getElementById('helpCloseBtn').onclick = closeHelp;
 document.getElementById('helpOverlay').onclick = (e) => { if(e.target.id === 'helpOverlay') closeHelp(); };
+document.getElementById('internalCloseBtn').onclick = closeInternal;
+document.getElementById('internalOverlay').onclick = (e) => { if(e.target.id === 'internalOverlay') closeInternal(); };
 document.getElementById('helpSearch').oninput = (e) => {
   const q = e.target.value.trim().toLowerCase();
   const nav = document.getElementById('helpNav');
@@ -1092,6 +1232,7 @@ document.getElementById('helpSearch').oninput = (e) => {
 };
 document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape' && document.getElementById('helpOverlay').style.display === 'flex') closeHelp();
+  if(e.key === 'Escape' && document.getElementById('internalOverlay').style.display === 'flex') closeInternal();
 });
 
 let MODEL = "claude-sonnet-5";
