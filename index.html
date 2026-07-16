@@ -323,6 +323,7 @@
   .upload-notice details[open] summary::after{ content:' ausblenden'; }
   .upload-notice-detail{ margin-top:6px; color:var(--text); }
   .basis-check-actions{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .basis-check-actions button{ flex:1 1 100%; justify-content:center; }
   .upload-notice button{
     margin-top:7px; border:1px solid var(--border); background:#fff; color:var(--navy);
     border-radius:5px; padding:5px 8px; font-family:inherit; font-size:11.5px; font-weight:bold; cursor:pointer;
@@ -989,7 +990,7 @@ const HELP_CONTENT = [
     <ol>
       <li>Vertragsgrundlage und Rolle festlegen – das steuert, welche Wissensbasis-Einträge einbezogen werden und aus welcher Rechtsgrundlage heraus bewertet wird.</li>
       <li>Vertrag hochladen. Bei sehr langen Textdokumenten zeigt die App eine Seitenschätzung und ggf. einen Hinweis, falls das Zeichenlimit überschritten wird. Bei Scan-PDFs werden alle Seiten als Bilder vorbereitet und später paketweise analysiert. Beim Laden einer neuen Datei wird der aktuelle Arbeitsbereich für diese neue Prüfung vorbereitet; gespeicherte Verläufe bleiben erhalten.</li>
-      <li>Vertragsgrundlage prüfen. Wenn Dateiname oder ausgelesener Text nicht plausibel zur gewählten Grundlage passen, zeigt die App eine Bestätigungstafel. Die Analyse startet erst, wenn die aktuelle Auswahl bewusst bestätigt oder auf VOB/B, BGB/GU oder HOAI umgestellt wurde. Bei Bauverträgen unterscheidet die App zwischen „VOB/B als Hauptgrundlage prüfen" und „BGB/GU-Vertrag mit VOB/B-Bezügen prüfen". Die App kann VOB/B-Bezüge, Abweichungen und Rangfolgen fachlich erkennen, aber nicht mit juristischer Sicherheit entscheiden, ob die VOB/B wirksam unverändert insgesamt einbezogen oder einzelne Klauseln individuell ausgehandelt wurden.</li>
+      <li>Vertragsgrundlage prüfen. Wenn Dateiname oder ausgelesener Text nicht plausibel zur gewählten Grundlage passen, zeigt die App eine Bestätigungstafel. Die Analyse startet erst, wenn die aktuelle Auswahl bewusst bestätigt oder auf VOB/B, Bauvertrag mit VOB/B-Bezügen oder HOAI umgestellt wurde. Bei Bauverträgen unterscheidet die App zwischen „VOB/B als Hauptgrundlage prüfen" und „Bauvertrag mit VOB/B-Bezügen prüfen". Die App kann VOB/B-Bezüge, Abweichungen und Rangfolgen fachlich erkennen, aber nicht mit juristischer Sicherheit entscheiden, ob die VOB/B wirksam unverändert insgesamt einbezogen oder einzelne Klauseln individuell ausgehandelt wurden.</li>
       <li>Analyse starten – die vier Stufen (Klausel- und Vertragsstruktur, Fristen & Folgen, Risiko-Klassifikation, Maßnahmenvorschläge) laufen automatisch nacheinander. Bei Scan-PDFs kann dieser Vorgang wegen der Bilderkennung deutlich länger dauern.</li>
       <li>Management Summary zuerst lesen für den Überblick, dann bei Bedarf den Marktvergleich prüfen, anschließend gezielt in die drei Tabs wechseln.</li>
       <li>Bei kritischen/hohen Punkten die vorgeschlagenen Maßnahmen als Verhandlungsgrundlage nutzen – sie sind bewusst als Verhandlungsrahmen formuliert, nicht als starre Zielvorgabe.</li>
@@ -1014,9 +1015,9 @@ const HELP_CONTENT = [
     <p><b>Risikostufen:</b> Die Einstufung erfolgt nach Kombination aus rechtlicher/wirtschaftlicher Folge, Eintrittsnähe, Abweichung vom Marktüblichen und Kumulation mit anderen Klauseln. „Kritisch" ist die Ausnahme für wenige Punkte mit erheblicher, unmittelbarer oder ungewöhnlich einseitiger Wirkung. „Hoch" bedeutet relevanter Prüf- und Verhandlungsbedarf. „Mittel" ist der Regelfall für marktübliche, aber beachtenswerte Standardrisiken. „Niedrig" sind Beobachtungspunkte ohne starke Abweichung.</p>
     <p><b>Marktüblich vs. kritisch:</b> Eine harte Klausel ist nicht automatisch kritisch, wenn sie im Bau-/Planungskontext marktüblich und klar begrenzt ist. Beispiel: eine Vertragserfüllungssicherheit kann je nach Höhe, Dauer, Alternativen, Kumulation und Projektvolumen „hoch" statt „kritisch" sein. Kritisch wird sie eher bei ungewöhnlicher Höhe, fehlender Begrenzung, sehr kurzer Stellungfrist, Kumulation mit weiteren Einbehalten oder unmittelbarer Zahlungs-/Abnahmeblockade.</p>
     <p><b>Belegtreue:</b> Vertragsstrafen, Sicherheiten-Kumulationen, Paragraphenverweise und konkrete Rechtsfolgen werden nur dann als Vertragsinhalt behandelt, wenn sie im Vertrag ausdrücklich angelegt sind. Marktwerte, Risikoindex, Wirkungsindex, Risikostufen und Maßnahmen sind KI-gestützte Einordnungen der App und keine aus dem Vertrag übernommenen Tatsachen.</p>
-    <p><b>VOB/B, BGB/GU und gemischte Bauverträge:</b> Die App kann inzwischen deutlich besser unterscheiden, ob die VOB/B erwähnt oder einbezogen wird, ob BGB-Regelungen zusätzlich oder abweichend verwendet werden, ob VOB/B-Regelungen ausgeschlossen oder verändert werden, ob der GU-Vertrag in der Rangfolge vor der VOB/B steht und ob typische Abweichungen vorkommen, z. B. Ausschluss der fiktiven Abnahme, geänderte Behandlung von § 7 VOB/B, abweichende Verjährung oder eigene Nachtragslogik.</p>
+    <p><b>VOB/B, BGB und gemischte Bauverträge:</b> Die App kann inzwischen deutlich besser unterscheiden, ob die VOB/B erwähnt oder einbezogen wird, ob BGB-Regelungen zusätzlich oder abweichend verwendet werden, ob VOB/B-Regelungen ausgeschlossen oder verändert werden, ob der Einzelvertrag in der Rangfolge vor der VOB/B steht und ob typische Abweichungen vorkommen, z. B. Ausschluss der fiktiven Abnahme, geänderte Behandlung von § 7 VOB/B, abweichende Verjährung oder eigene Nachtragslogik. Das gilt nicht nur für GU-Verträge, sondern auch für Pauschalpreis-, Einheitspreis-, GMP-, Cost-plus-/Open-Book- und Mischverträge.</p>
     <p><b>Grenze der automatischen Einordnung:</b> Diese Prüfung ist fachlich hilfreich, aber nicht perfekt. Die App kann nicht mit juristischer Sicherheit entscheiden, ob die VOB/B wirksam unverändert insgesamt einbezogen wurde oder ob einzelne Klauseln individuell ausgehandelt wurden. Dafür braucht es den vollständigen Vertragskontext und im Zweifel eine juristische Prüfung.</p>
-    <p><b>Was die zwei Optionen bedeuten:</b> „VOB/B als Hauptgrundlage prüfen" startet die Analyse stärker mit VOB/B-Benchmark, sucht aber trotzdem nach Abweichungen und modifizierter VOB/B. „BGB/GU-Vertrag mit VOB/B-Bezügen prüfen" bleibt stärker auf BGB-/GU-Vertrag kalibriert und behandelt VOB/B eher als ergänzende oder modifizierte Bezugsgrundlage. Bei GU-Verträgen mit umfangreichen eigenen Regelungen ist diese zweite Option häufig der sauberere Startpunkt.</p>
+    <p><b>Was die zwei Optionen bedeuten:</b> „VOB/B als Hauptgrundlage prüfen" startet die Analyse stärker mit VOB/B-Benchmark, sucht aber trotzdem nach Abweichungen und modifizierter VOB/B. „Bauvertrag mit VOB/B-Bezügen prüfen" bleibt stärker auf dem konkreten Bauvertrag kalibriert und behandelt VOB/B eher als ergänzende oder modifizierte Bezugsgrundlage. Bei Bauverträgen mit umfangreichen eigenen Regelungen ist diese zweite Option häufig der sauberere Startpunkt.</p>
     <p><b>AGB- und Privilegierungsprüfung:</b> Wenn ein Vertrag die VOB/B nur teilweise übernimmt, in wesentlichen Punkten ändert oder durch vorrangige Individualregelungen verdrängt, ist dies als eigener Prüfpunkt darzustellen. Vorformulierte belastende Klauseln sind dann besonders auf AGB-Kontrolle nach § 307 BGB und auf einen möglichen Wegfall der VOB/B-Privilegierung nach § 310 Abs. 1 Satz 3 BGB hinzuweisen.</p>
     <p><b>Risikoprofil:</b> Die Management Summary zeigt zuerst die Anzahl der erkannten Risikopunkte nach Stufe. „20 Risiken" bedeutet nicht automatisch gut oder schlecht, sondern: Es wurden 20 bewertungsrelevante Punkte erkannt. Entscheidend ist die Mischung aus kritisch/hoch/mittel/niedrig und ob einzelne Punkte marktüblich, ungewöhnlich oder klar abweichend sind.</p>
     <p><b>Management-Einschätzung und Risikoindex:</b> Die Ampel übersetzt Anzahl und Schwere der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Der Risikoindex ist ein gewichteter Orientierungswert aus den Risikostufen (kritisch zählt stärker als hoch, hoch stärker als mittel). Er ist kein Prozentwert, keine Schulnote und nicht auf 100 begrenzt. Orientierung: 0-6 gering, 7-15 moderat, 16-31 erhöht, ab 32 kritisch.</p>
@@ -2048,10 +2049,10 @@ function getContractBasisIssue(source){
     return {
       kind:'bgb-vs-vob',
       title:'VOB/B-Einbeziehung prüfen',
-      text:'Die Datei enthält BGB-/GU-Hinweise und zugleich VOB/B-Bezüge. Wähle, ob die VOB/B als Hauptgrundlage geprüft werden soll oder ob ein BGB/GU-Vertrag mit VOB/B-Bezügen plausibler ist. Die App kann dies fachlich vorbereiten, aber nicht mit juristischer Sicherheit abschließend entscheiden.',
+      text:'Die Datei enthält Hinweise auf einen eigenständig geregelten Bauvertrag und zugleich VOB/B-Bezüge. Wähle, ob die VOB/B als Hauptgrundlage geprüft werden soll oder ob der konkrete Bauvertrag mit ergänzenden bzw. modifizierten VOB/B-Bezügen plausibler ist. Das kann Pauschalpreis-, Einheitspreis-, GU-/GÜ-, GMP-, Cost-plus-/Open-Book- oder Mischverträge betreffen. Die App kann dies fachlich vorbereiten, aber nicht mit juristischer Sicherheit abschließend entscheiden.',
       actions:[
         {label:'VOB/B als Hauptgrundlage prüfen', action:'confirm', primary:false},
-        {label:'BGB/GU-Vertrag mit VOB/B-Bezügen prüfen', action:'bgb', primary:true}
+        {label:'Bauvertrag mit VOB/B-Bezügen prüfen', action:'bgb', primary:true}
       ]
     };
   }
@@ -2059,10 +2060,10 @@ function getContractBasisIssue(source){
     return {
       kind:'vob-vs-bgb',
       title:'VOB/B-Einbeziehung prüfen',
-      text:'Die Datei enthält deutliche Hinweise auf VOB/B-Bezüge. Wähle, ob die VOB/B als Hauptgrundlage dienen soll oder ob der Vertrag besser als BGB/GU-Vertrag mit ergänzenden bzw. modifizierten VOB/B-Bezügen geprüft wird. Eine wirksame unveränderte VOB/B-Einbeziehung kann die App nicht endgültig juristisch bestätigen.',
+      text:'Die Datei enthält deutliche Hinweise auf VOB/B-Bezüge. Wähle, ob die VOB/B als Hauptgrundlage dienen soll oder ob der Vertrag besser als Bauvertrag mit ergänzenden bzw. modifizierten VOB/B-Bezügen geprüft wird. Das betrifft auch Pauschalpreis-, Einheitspreis-, GU-/GÜ-, GMP-, Cost-plus-/Open-Book- oder Mischverträge. Eine wirksame unveränderte VOB/B-Einbeziehung kann die App nicht endgültig juristisch bestätigen.',
       actions:[
         {label:'VOB/B als Hauptgrundlage prüfen', action:'vob', primary:true},
-        {label:'BGB/GU-Vertrag mit VOB/B-Bezügen prüfen', action:'confirm', primary:false}
+        {label:'Bauvertrag mit VOB/B-Bezügen prüfen', action:'confirm', primary:false}
       ]
     };
   }
