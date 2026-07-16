@@ -581,7 +581,7 @@
   .help-kitable th, .help-kitable td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--border); }
   .help-kitable .yes{ color:var(--amber); font-weight:bold; }
   .help-kitable .no{ color:var(--green); font-weight:bold; }
-  .internal-box{ max-width:900px; height:82vh; }
+  .internal-box{ max-width:1040px; height:86vh; }
   .internal-intro{
     margin:14px 22px 0; padding:11px 14px; border:1px solid var(--gold);
     background:var(--gold-light); border-radius:6px; font-size:12.8px; line-height:1.55;
@@ -601,6 +601,85 @@
   .internal-card{ border:1px solid var(--border); border-radius:7px; padding:10px 11px; background:var(--bg); }
   .internal-card b{ display:block; color:var(--navy); margin-bottom:3px; }
   .internal-card span{ color:var(--text-muted); font-size:12px; }
+  .internal-page{
+    min-height:440px; padding:26px; margin-bottom:18px; border:1px solid var(--border);
+    border-radius:10px; background:#fffdf8; box-shadow:0 6px 20px rgba(15,42,74,.06);
+  }
+  .internal-page-title{
+    font-family:Arial,"Segoe UI",sans-serif; font-size:23px; font-weight:800;
+    color:var(--navy); margin:0 0 8px; letter-spacing:0;
+  }
+  .internal-page-subtitle{ color:var(--text-muted); font-size:14px; margin:0 0 18px; }
+  .internal-claim{ font-size:21px; color:var(--navy); font-weight:800; margin:16px 0 22px; }
+  .internal-hero{
+    display:grid; grid-template-columns:minmax(280px,.9fr) minmax(320px,1.1fr); gap:24px; align-items:center;
+  }
+  .internal-hero-visual{
+    min-height:290px; border-radius:12px; border:1px solid rgba(255,255,255,.22);
+    background:
+      linear-gradient(135deg, rgba(15,42,74,.92), rgba(28,63,102,.78)),
+      linear-gradient(45deg, #6d7884, #d9c893);
+    position:relative; overflow:hidden; color:#fff; padding:22px;
+  }
+  .internal-hero-visual:before{
+    content:""; position:absolute; inset:28px 38px auto auto; width:180px; height:180px;
+    border:1px solid rgba(255,255,255,.32); transform:skew(-18deg) rotate(-8deg);
+    box-shadow:0 0 0 18px rgba(255,255,255,.05), 0 0 38px rgba(201,162,39,.32);
+  }
+  .internal-hero-visual:after{
+    content:""; position:absolute; left:-40px; right:-40px; bottom:34px; height:64px;
+    background:repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 2px, transparent 2px 38px);
+    transform:perspective(280px) rotateX(58deg);
+  }
+  .internal-visual-label{ position:absolute; left:22px; bottom:22px; font-size:13px; color:#d8e3f0; }
+  .internal-flow{
+    display:grid; grid-template-columns:repeat(5,1fr); gap:8px; align-items:stretch; margin-top:18px;
+  }
+  .internal-flow-step{
+    background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px 10px;
+    text-align:center; font-weight:bold; color:var(--navy); font-size:13px;
+  }
+  .internal-feature-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px; }
+  .internal-feature{
+    border:1px solid var(--border); border-top:3px solid var(--gold); border-radius:8px;
+    padding:14px; background:#fff;
+  }
+  .internal-feature b{ color:var(--navy); display:block; margin-bottom:4px; }
+  .internal-feature span{ color:var(--text-muted); font-size:12.5px; }
+  .internal-report-layout{ display:grid; grid-template-columns:1.15fr .85fr; gap:18px; align-items:start; }
+  .internal-screenshot-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .internal-shot{
+    min-height:112px; border:1px solid var(--border); border-radius:8px; background:linear-gradient(180deg,#fff,#f6f5f1);
+    padding:10px; position:relative; overflow:hidden;
+  }
+  .internal-shot b{ color:var(--navy); font-size:12px; }
+  .internal-shot .line{ height:7px; border-radius:999px; background:var(--gold-light); margin-top:9px; }
+  .internal-shot .line:nth-child(3){ width:72%; background:#e8e3d5; }
+  .internal-shot .line:nth-child(4){ width:88%; background:#e8e3d5; }
+  .internal-steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:20px; }
+  .internal-step{ border:1px solid var(--border); border-radius:8px; padding:14px; background:#fff; }
+  .internal-step-num{ width:26px; height:26px; border-radius:50%; background:var(--navy); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:bold; font-size:12px; margin-bottom:8px; }
+  .internal-price-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:18px; }
+  .internal-price-card{
+    border:1px solid var(--border); border-top:4px solid var(--gold); border-radius:10px;
+    padding:18px 14px; text-align:center; background:#fff; min-height:145px;
+  }
+  .internal-price-card b{ color:var(--navy); display:block; font-size:15px; margin-bottom:12px; }
+  .internal-price-card strong{ color:var(--navy); font-size:27px; display:block; }
+  .internal-license{ display:grid; grid-template-columns:minmax(260px,.85fr) minmax(300px,1.15fr); gap:18px; align-items:center; }
+  .internal-license-price{ font-size:34px; color:var(--navy); font-weight:900; margin:8px 0 12px; }
+  .internal-check-list{ list-style:none; margin:0; padding:0; columns:2; column-gap:22px; }
+  .internal-check-list li{ break-inside:avoid; margin:0 0 8px; padding-left:18px; position:relative; }
+  .internal-check-list li:before{ content:"✓"; position:absolute; left:0; color:var(--green); font-weight:bold; }
+  .internal-compare{ width:100%; border-collapse:collapse; margin-top:14px; font-size:13px; }
+  .internal-compare th, .internal-compare td{ border-bottom:1px solid var(--border); padding:10px; text-align:left; vertical-align:top; }
+  .internal-compare th{ background:var(--bg); color:var(--navy); }
+  .internal-final{ margin-top:18px; padding:16px; border-left:4px solid var(--gold); background:#fff; border-radius:8px; color:var(--navy); font-weight:bold; }
+  @media(max-width:900px){
+    .internal-hero, .internal-report-layout, .internal-license{ grid-template-columns:1fr; }
+    .internal-feature-grid, .internal-price-grid{ grid-template-columns:1fr 1fr; }
+    .internal-flow, .internal-steps{ grid-template-columns:1fr 1fr; }
+  }
   @media (max-width:640px){
     .help-box{ max-width:100%; width:100%; height:100%; max-height:100%; border-radius:0; }
     .internal-box{ max-width:100%; width:100%; height:100%; max-height:100%; border-radius:0; }
@@ -609,6 +688,9 @@
     .help-nav button{ width:auto; }
     .help-content{ padding:12px 16px 20px; }
     .internal-cards{ grid-template-columns:1fr; }
+    .internal-page{ padding:18px; min-height:auto; }
+    .internal-feature-grid, .internal-price-grid, .internal-steps, .internal-flow, .internal-screenshot-grid{ grid-template-columns:1fr; }
+    .internal-check-list{ columns:1; }
   }
   .modal-pane .hint{ margin-top:2px; }
   .kb-explainer{
@@ -855,93 +937,144 @@
       </div>
       <button class="modal-close" id="internalCloseBtn" aria-label="Schließen">&times;</button>
     </div>
-    <div class="internal-intro">
-      <b>Interne Richtwerte.</b> Alle Beträge verstehen sich netto zzgl. Umsatzsteuer und ohne externe API-/Fremdkosten, soweit nicht anders vereinbart. Die Werte dienen als Kalkulations- und Angebotsgrundlage und können je nach Vertragsumfang, Eilbedürftigkeit, Haftungsnähe und gewünschter Prüftiefe angepasst werden.
-    </div>
     <div class="internal-content">
-      <section class="internal-section">
-        <h3>App-Kauf und Lizenzmodell</h3>
-        <table class="internal-table">
-          <thead>
-            <tr><th>Modell</th><th>Leistung</th><th>Richtpreis</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><b>Einzelplatz-Lizenz</b></td>
-              <td>Nutzung der App durch eine Person, lokale Wissensbasis, Verlauf, Exportfunktionen. Anthropic-API-Key und KI-Kosten trägt der Nutzer selbst.</td>
-              <td class="price">490 € / Jahr</td>
-            </tr>
-            <tr>
-              <td><b>Team-Lizenz klein</b></td>
-              <td>Bis 5 Nutzer, gemeinsame Einführung, Standard-Wissensbasis, kurze Schulung und E-Mail-Support.</td>
-              <td class="price">1.900 € / Jahr</td>
-            </tr>
-            <tr>
-              <td><b>Unternehmenslizenz</b></td>
-              <td>Mehrere Nutzer, angepasste Wissensbasis, Vertragsmuster-Kalibrierung, Onboarding und priorisierte Weiterentwicklung.</td>
-              <td class="price">ab 4.900 € / Jahr</td>
-            </tr>
-            <tr>
-              <td><b>Einmalkauf / Projektlizenz</b></td>
-              <td>Zeitlich definierte Nutzung für ein Projekt oder eine Transaktion, ohne dauerhafte Jahresbindung.</td>
-              <td class="price">ab 950 €</td>
-            </tr>
-          </tbody>
-        </table>
-        <p class="internal-note">Empfehlung: App-Kauf immer getrennt von KI-Verbrauch abrechnen. Der eigene API-Key des Kunden vermeidet verdeckte Verbrauchskosten und erleichtert Datenschutz-/Kostenkontrolle.</p>
-      </section>
-
-      <section class="internal-section">
-        <h3>Dienstleistung Vertragsanalyse</h3>
-        <table class="internal-table">
-          <thead>
-            <tr><th>Paket</th><th>Typischer Inhalt</th><th>Richtpreis</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><b>Kurzcheck</b></td>
-              <td>KI-gestützte Erstanalyse, Management Summary, Top-Risiken, Fristenüberblick, kurze Einordnung per PDF.</td>
-              <td class="price">350–650 €</td>
-            </tr>
-            <tr>
-              <td><b>Standardanalyse</b></td>
-              <td>Vollständiger Analysebericht mit Risikobewertung, terminkritischen Klauseln, Marktvergleich und Maßnahmenvorschlägen.</td>
-              <td class="price">950–1.850 €</td>
-            </tr>
-            <tr>
-              <td><b>Premiumanalyse</b></td>
-              <td>Vertiefte fachliche Prüfung, Kommentierung der wesentlichen Klauseln, Verhandlungsagenda und Priorisierung für Projektleitung/Geschäftsführung.</td>
-              <td class="price">2.500–4.900 €</td>
-            </tr>
-            <tr>
-              <td><b>Transaktion / Großvertrag</b></td>
-              <td>Umfangreiche GU/GÜ-, HOAI-, Paket- oder Anlagenverträge, mehrere Dokumente, Workshop und überarbeitete Risikomatrix.</td>
-              <td class="price">ab 5.900 €</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="internal-section">
-        <h3>Zuschläge und Abgrenzung</h3>
-        <div class="internal-cards">
-          <div class="internal-card"><b>Eilzuschlag</b><span>+25 % bei Lieferung innerhalb von 48 Stunden, +50 % bei Lieferung am selben/folgenden Arbeitstag.</span></div>
-          <div class="internal-card"><b>Scan-/Anlagenaufwand</b><span>+150–750 € bei schwer lesbaren Scans, sehr vielen Anlagen oder manueller Vorstrukturierung.</span></div>
-          <div class="internal-card"><b>Workshop</b><span>350 € / Stunde für Ergebnisbesprechung, Verhandlungsstrategie oder interne Schulung.</span></div>
+      <section class="internal-page internal-hero">
+        <div>
+          <h1 class="internal-page-title">SMART Contract & Risk Intelligence</h1>
+          <p class="internal-page-subtitle">KI-gestützte Vertragsrisikoanalyse für Bau- und Immobilienprojekte</p>
+          <div class="internal-claim">Verträge verstehen. Risiken erkennen. Entscheidungen absichern.</div>
+          <p>Die Anwendung verbindet strukturierte Vertragsauswertung, fachliche Risikoklassifikation, Fristenlogik und professionelle Berichtsausgabe für Bau-, Planer- und Immobilienverträge.</p>
         </div>
-        <p class="internal-note">Nicht enthalten: verbindliche Rechtsberatung, anwaltliche Freigabe, Vertragsverhandlung im fremden Namen oder Haftungsübernahme für rechtliche Entscheidungen. Bei juristisch verbindlichen Entscheidungen sollte ein Rechtsanwalt eingebunden werden.</p>
+        <div class="internal-hero-visual">
+          <div style="position:relative; z-index:1; max-width:260px;">
+            <b style="font-size:18px;">Bauprojekt + Vertragsmodell</b>
+            <p style="color:#d8e3f0; margin-top:8px;">Visuelle Leitidee: hochwertiges Bauprojekt mit holografischem Vertragsmodell.</p>
+          </div>
+          <div class="internal-visual-label">Titelbild-Platzhalter · später durch echtes Projektbild ersetzbar</div>
+        </div>
       </section>
 
-      <section class="internal-section">
-        <h3>Angebotslogik</h3>
-        <table class="internal-table">
+      <section class="internal-page">
+        <h2 class="internal-page-title">Warum eine Vertragsanalyse?</h2>
+        <p class="internal-page-subtitle">Jeder Bauvertrag enthält wirtschaftliche Risiken. Nicht jede kritische Vertragsklausel fällt sofort auf.</p>
+        <div class="internal-feature-grid">
+          <div class="internal-feature"><b>Termine</b><span>Fristen, Abnahme, Bauzeit, Verzug.</span></div>
+          <div class="internal-feature"><b>Kosten</b><span>Zahlung, Einbehalte, Sicherheiten, Zusatzaufwand.</span></div>
+          <div class="internal-feature"><b>Haftung</b><span>Freistellung, Planung, Nachunternehmer, Versicherung.</span></div>
+          <div class="internal-feature"><b>Nachträge</b><span>Anordnungen, Vergütungslogik, Fristen, Nachweise.</span></div>
+          <div class="internal-feature"><b>Gewährleistung</b><span>Verjährung, Mängelsicherheit, Dokumentation.</span></div>
+          <div class="internal-feature"><b>Vertragsstrafen</b><span>Strafbewehrte Termine, Deckel, Bezugsgrößen.</span></div>
+        </div>
+        <div class="internal-final">Ein übersehenes Vertragsrisiko kostet häufig mehr als die gesamte Vertragsanalyse.</div>
+        <div class="internal-flow">
+          <div class="internal-flow-step">Vertrag</div>
+          <div class="internal-flow-step">KI</div>
+          <div class="internal-flow-step">Risiken</div>
+          <div class="internal-flow-step">Bericht</div>
+          <div class="internal-flow-step">sichere Entscheidung</div>
+        </div>
+      </section>
+
+      <section class="internal-page">
+        <h2 class="internal-page-title">Was analysiert SMART Contract & Risk Intelligence?</h2>
+        <div class="internal-feature-grid">
+          <div class="internal-feature"><b>Vertragsklauseln</b><span>Identifikation kritischer Klauseln.</span></div>
+          <div class="internal-feature"><b>Fristen</b><span>Automatische Erkennung wichtiger Termine.</span></div>
+          <div class="internal-feature"><b>Risiken</b><span>Technische und wirtschaftliche Risiken.</span></div>
+          <div class="internal-feature"><b>Handlungsempfehlungen</b><span>Konkrete Optimierungsvorschläge.</span></div>
+          <div class="internal-feature"><b>Executive Summary</b><span>Managementgerechte Zusammenfassung.</span></div>
+          <div class="internal-feature"><b>Berichte</b><span>Professionelle HTML- und PDF-Ausgabe.</span></div>
+        </div>
+      </section>
+
+      <section class="internal-page">
+        <h2 class="internal-page-title">Der Analysebericht</h2>
+        <div class="internal-report-layout">
+          <div class="internal-screenshot-grid">
+            <div class="internal-shot"><b>Executive Summary</b><div class="line"></div><div class="line"></div><div class="line"></div></div>
+            <div class="internal-shot"><b>Risikoübersicht</b><div class="line"></div><div class="line"></div><div class="line"></div></div>
+            <div class="internal-shot"><b>Ampelbewertung</b><div class="line"></div><div class="line"></div><div class="line"></div></div>
+            <div class="internal-shot"><b>Fristenübersicht</b><div class="line"></div><div class="line"></div><div class="line"></div></div>
+          </div>
+          <div>
+            <p>Der Kunde sieht sofort, was er erhält: eine strukturierte, managementfähige Auswertung mit Prioritäten, Risikostufen, wirtschaftlicher Wirkung, Marktvergleich, Fristen und konkreten Maßnahmen.</p>
+            <p class="internal-note">Die Platzhalter können später durch echte Screenshots aus einem anonymisierten Musterbericht ersetzt werden.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="internal-page">
+        <h2 class="internal-page-title">Vertragsanalyse als Dienstleistung</h2>
+        <p class="internal-page-subtitle">So einfach funktioniert es.</p>
+        <div class="internal-steps">
+          <div class="internal-step"><span class="internal-step-num">1</span><b>Vertrag senden</b><p>Sie senden uns Ihren Hauptvertrag.</p></div>
+          <div class="internal-step"><span class="internal-step-num">2</span><b>Analyse</b><p>Die Analyse erfolgt mit SMART Contract & Risk Intelligence.</p></div>
+          <div class="internal-step"><span class="internal-step-num">3</span><b>Bericht</b><p>Sie erhalten Ihren strukturierten Analysebericht.</p></div>
+          <div class="internal-step"><span class="internal-step-num">4</span><b>Besprechung</b><p>Optional besprechen wir gemeinsam die Ergebnisse.</p></div>
+        </div>
+      </section>
+
+      <section class="internal-page">
+        <h2 class="internal-page-title">Preise Vertragsanalyse</h2>
+        <div class="internal-price-grid">
+          <div class="internal-price-card"><b>bis 30 Seiten</b><strong>249 €</strong></div>
+          <div class="internal-price-card"><b>bis 60 Seiten</b><strong>399 €</strong></div>
+          <div class="internal-price-card"><b>bis 100 Seiten</b><strong>599 €</strong></div>
+          <div class="internal-price-card"><b>über 100 Seiten</b><strong>Individuelles Angebot</strong></div>
+        </div>
+        <p class="internal-note">Alle Preise verstehen sich zuzüglich der gesetzlichen Mehrwertsteuer. Analysiert wird ausschließlich der Hauptvertrag ohne Anlagen.</p>
+      </section>
+
+      <section class="internal-page internal-license">
+        <div>
+          <h2 class="internal-page-title">Softwarelösung</h2>
+          <p class="internal-page-subtitle">SMART Contract & Risk Intelligence · Jahreslizenz</p>
+          <div class="internal-license-price">2.500 € netto</div>
+          <ul class="internal-check-list">
+            <li>unbegrenzte Vertragsanalysen</li>
+            <li>regelmäßige Updates</li>
+            <li>Standard-Prüfkatalog</li>
+            <li>HTML-Berichte</li>
+            <li>PDF-Berichte</li>
+            <li>E-Mail-Support</li>
+          </ul>
+        </div>
+        <div class="internal-shot" style="min-height:260px;">
+          <b>Screenshot der Software</b>
+          <div class="line"></div><div class="line"></div><div class="line"></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:18px;">
+            <div class="internal-card"><b>Risiko</b><span>Management Summary</span></div>
+            <div class="internal-card"><b>Fristen</b><span>Terminübersicht</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="internal-page">
+        <h2 class="internal-page-title">Individuelle Anpassungen</h2>
+        <p class="internal-page-subtitle">Jedes Unternehmen arbeitet mit eigenen Standards. Die Software kann individuell erweitert werden.</p>
+        <div class="internal-feature-grid">
+          <div class="internal-feature"><b>Vertragsmuster</b><span>Unternehmensspezifische Vertragslogik.</span></div>
+          <div class="internal-feature"><b>Prüfkataloge</b><span>Eigene Bewertungsmaßstäbe.</span></div>
+          <div class="internal-feature"><b>Unternehmensrichtlinien</b><span>Interne Standards und Freigaben.</span></div>
+          <div class="internal-feature"><b>Risikobewertung</b><span>Anpassung von Stufen und Gewichtung.</span></div>
+          <div class="internal-feature"><b>Berichtsvorlagen</b><span>CI-konforme Ausgaben.</span></div>
+          <div class="internal-feature"><b>Schulungen</b><span>Einführung und Anwendung im Team.</span></div>
+        </div>
+        <div class="internal-final">Aufwand: 200 € netto pro Stunde</div>
+      </section>
+
+      <section class="internal-page">
+        <h2 class="internal-page-title">KI ersetzt keinen Rechtsanwalt</h2>
+        <table class="internal-compare">
+          <thead><tr><th>SMART Contract & Risk Intelligence</th><th>Rechtsanwalt</th></tr></thead>
           <tbody>
-            <tr><td><b>Bis ca. 30 Seiten</b></td><td>Kurzcheck oder Standardanalyse, sofern keine komplexen Anlagen oder Sondermodelle enthalten sind.</td></tr>
-            <tr><td><b>30–80 Seiten</b></td><td>Standardanalyse; bei GU/GÜ, HOAI, Open Book oder vielen Anlagen Premium prüfen.</td></tr>
-            <tr><td><b>Über 80 Seiten / mehrere Dateien</b></td><td>Individuelles Angebot mit Seiten-, Anlagen-, Scan- und Workshopanteil.</td></tr>
-            <tr><td><b>Haftungsnahe Entscheidung</b></td><td>Immer als fachliche Vorprüfung anbieten, mit ausdrücklicher Empfehlung zur anwaltlichen Endprüfung.</td></tr>
+            <tr><td>analysiert den gesamten Vertrag</td><td>prüft gezielt kritische Klauseln</td></tr>
+            <tr><td>erkennt Risiken</td><td>bewertet rechtlich</td></tr>
+            <tr><td>erstellt strukturierte Berichte</td><td>erstellt rechtliche Stellungnahmen</td></tr>
+            <tr><td>spart Vorbereitungszeit</td><td>liefert verbindliche Rechtsberatung</td></tr>
           </tbody>
         </table>
+        <div class="internal-final">Beide Leistungen ergänzen sich ideal. Durch den strukturierten Analysebericht kann sich der Rechtsanwalt auf die entscheidenden Vertragsklauseln konzentrieren. Dadurch lassen sich Zeit und Beratungskosten häufig deutlich reduzieren.</div>
       </section>
     </div>
   </div>
