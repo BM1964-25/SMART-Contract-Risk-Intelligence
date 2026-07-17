@@ -1675,6 +1675,7 @@ const HELP_CONTENT = [
     <p><b>VOB/B, BGB und gemischte Bauverträge:</b> Die App kann inzwischen deutlich besser unterscheiden, ob die VOB/B erwähnt oder einbezogen wird, ob BGB-Regelungen zusätzlich oder abweichend verwendet werden, ob VOB/B-Regelungen ausgeschlossen oder verändert werden, ob der Einzelvertrag in der Rangfolge vor der VOB/B steht und ob typische Abweichungen vorkommen, z. B. Ausschluss der fiktiven Abnahme, geänderte Behandlung von § 7 VOB/B, abweichende Verjährung oder eigene Nachtragslogik. Das gilt nicht nur für GU-Verträge, sondern auch für Pauschalpreis-, Einheitspreis-, GMP-, Cost-plus-/Open-Book- und Mischverträge.</p>
     <p><b>Grenze der automatischen Einordnung:</b> Diese Prüfung ist fachlich hilfreich, aber nicht perfekt. Die App kann nicht mit juristischer Sicherheit entscheiden, ob die VOB/B wirksam unverändert insgesamt einbezogen wurde oder ob einzelne Klauseln individuell ausgehandelt wurden. Dafür braucht es den vollständigen Vertragskontext und im Zweifel eine juristische Prüfung.</p>
     <p><b>Was die zwei Optionen bedeuten:</b> „VOB/B als Hauptgrundlage prüfen" startet die Analyse stärker mit VOB/B-Benchmark, sucht aber trotzdem nach Abweichungen und modifizierter VOB/B. „Bauvertrag mit VOB/B-Bezügen prüfen" bleibt stärker auf dem konkreten Bauvertrag kalibriert und behandelt VOB/B eher als ergänzende oder modifizierte Bezugsgrundlage. Bei Bauverträgen mit umfangreichen eigenen Regelungen ist diese zweite Option häufig der sauberere Startpunkt.</p>
+    <p><b>Qualitätssicherung der Wissensbasis:</b> Vor der Analyse prüft die App regelbasiert harte Vertragsprofil-Hinweise, z. B. ausdrücklicher Ausschluss der VOB/B, VOB/C als technische Vertragsgrundlage, Einheitspreis-/Pauschalvertrag und Verbraucherhinweise. Unpassende Wissensbasis-Regeln werden technisch ausgefiltert. Nach der KI-Bewertung bereinigt die App offensichtliche Widersprüche, etwa „Verbraucherbauvertrag" ohne Verbraucher oder „modifizierte VOB/B" trotz ausdrücklichem VOB/B-Ausschluss. Das ersetzt keine fachliche Freigabe, reduziert aber typische Fehlübertragungen.</p>
     <p><b>AGB- und Privilegierungsprüfung:</b> Wenn ein Vertrag die VOB/B nur teilweise übernimmt, in wesentlichen Punkten ändert oder durch vorrangige Individualregelungen verdrängt, ist dies als eigener Prüfpunkt darzustellen. Vorformulierte belastende Klauseln sind dann besonders auf AGB-Kontrolle nach § 307 BGB und auf einen möglichen Wegfall der VOB/B-Privilegierung nach § 310 Abs. 1 Satz 3 BGB hinzuweisen.</p>
     <p><b>Risikoprofil:</b> Die Management Summary zeigt zuerst die Anzahl der erkannten Risikopunkte nach Stufe. „20 Risiken" bedeutet nicht automatisch gut oder schlecht, sondern: Es wurden 20 bewertungsrelevante Punkte erkannt. Entscheidend ist die Mischung aus kritisch/hoch/mittel/niedrig und ob einzelne Punkte marktüblich, ungewöhnlich oder klar abweichend sind.</p>
     <p><b>Management-Einschätzung und Risikoindex:</b> Die Ampel übersetzt Anzahl, Schwere und thematische Konzentration der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Ab Bewertungslogik V6 wird der Risikoindex konsolidiert berechnet: Mehrere ähnliche Einzelpunkte erhöhen den Index nur begrenzt, wenn sie zum selben Risikothema gehören. Der Wert ist kein Prozentwert, keine Schulnote und kein objektiver Marktpreis des Vertrags. Orientierung: 0-6 gering, 7-15 moderat, 16-31 erhöht, ab 32 kritisch. Die App bremst die Einstufung jedoch, wenn der Index überwiegend aus marktüblichen, verhandlungsrelevanten Bauvertragsmechanismen ohne echte kritische Einzelklausel entsteht.</p>
@@ -1802,7 +1803,7 @@ const CLAUDE_CLASSIFICATION_MAX_TOKENS = 7000;
 const CLAUDE_ACTION_MAX_TOKENS = 6000;
 const SCAN_RENDER_MAX_DIMENSION = 1400;
 const SCAN_RENDER_JPEG_QUALITY = 0.62;
-const ANALYSIS_CACHE_VERSION = "v2";
+const ANALYSIS_CACHE_VERSION = "v3";
 let apiKey = "";
 let currentContractType = "vob";
 let currentPerspective = "auftragnehmer";
@@ -2227,6 +2228,7 @@ let documentImages = [];
 let scannedPageCount = 0;
 let contractBasisConfirmed = false;
 let currentBasisIssue = null;
+let currentContractProfile = null;
 const SCAN_BATCH_SIZE = 1;
 
 // ---------- storage ----------
@@ -2877,12 +2879,40 @@ function looksLikeBgbConstructionContract(text){
   const negative = negativeTerms.some(term => hay.includes(term));
   return positive && !negative;
 }
+function detectContractProfile(source){
+  const hay = normalizeDedupeText(source).slice(0, 160000);
+  const has = (pattern) => pattern.test(hay);
+  const vobBExcluded = has(/vob\s*\/?\s*b.{0,70}(ausgeschlossen|kein vertragsbestandteil|nicht vertragsbestandteil|findet keine anwendung|nicht vereinbart)/i)
+    || has(/(ausgeschlossen|kein vertragsbestandteil|nicht vertragsbestandteil|findet keine anwendung|nicht vereinbart).{0,70}vob\s*\/?\s*b/i);
+  const vobBIncluded = !vobBExcluded && (
+    has(/vob\s*\/?\s*b.{0,60}(vereinbart|einbezogen|vertragsbestandteil|gilt)/i)
+    || has(/(vereinbart|einbezogen|vertragsbestandteil|gilt).{0,60}vob\s*\/?\s*b/i)
+  );
+  const vobCIncluded = has(/vob\s*\/?\s*c|teil\s*c\s*der\s*vob|din\s*18\d{3}/i);
+  const unitPrice = has(/einheitspreis|einheitspreisvertrag|einheitspreise|positionspreis|aufma(ss|ß)|tats[aä]chliche mengen/i);
+  const lumpSum = has(/pauschalpreis|pauschalvertrag|pauschalsumme|pauschalvergütung|pauschalverguetung/i);
+  const consumer = has(/verbraucherbauvertrag|§\s*650i|650i\s*bgb|widerrufsrecht|privatperson|verbraucher/i);
+  const bgbConstruction = has(/bgb[-\s]*bauvertrag|§\s*650a|650a\s*bgb|§\s*650b|650b\s*bgb|§\s*650c|650c\s*bgb|§\s*640|640\s*bgb|werkvertragsrecht/i);
+  const profileType = vobBExcluded
+    ? 'bgb-vobc-or-bgb-only'
+    : (vobBIncluded ? 'vobb' : (bgbConstruction ? 'bgb' : 'unknown'));
+  const labels = [];
+  if(vobBExcluded) labels.push('VOB/B ausgeschlossen');
+  if(vobBIncluded) labels.push('VOB/B einbezogen');
+  if(vobCIncluded) labels.push('VOB/C einbezogen');
+  if(unitPrice) labels.push('Einheitspreisvertrag');
+  if(lumpSum) labels.push('Pauschalvertrag');
+  if(consumer) labels.push('Verbraucherhinweis');
+  if(bgbConstruction) labels.push('BGB-Bauvertrag');
+  return {hay, vobBExcluded, vobBIncluded, vobCIncluded, unitPrice, lumpSum, consumer, bgbConstruction, profileType, labels};
+}
 function getPlausibilitySource(){
   return [currentFileName, extractedText].filter(Boolean).join(' ');
 }
 function getContractBasisIssue(source){
   const normalized = normalizeDedupeText(source);
   if(!normalized) return null;
+  const profile = detectContractProfile(source);
   const looksConstruction = looksLikeConstructionContract(source);
   const looksPlanning = looksLikePlanningContract(source);
   const looksVob = looksLikeVobContract(source);
@@ -2912,18 +2942,20 @@ function getContractBasisIssue(source){
       ]
     };
   }
-  if(currentContractType === 'vob' && looksBgb){
+  if(currentContractType === 'vob' && (looksBgb || profile.vobBExcluded)){
     return {
       kind:'bgb-vs-vob',
       title:'VOB/B-Einbeziehung prüfen',
-      text:'Die Datei enthält Hinweise auf einen eigenständig geregelten Bauvertrag und zugleich VOB/B-Bezüge. Wähle, ob die VOB/B als Hauptgrundlage geprüft werden soll oder ob der konkrete Bauvertrag mit ergänzenden bzw. modifizierten VOB/B-Bezügen plausibler ist. Das kann Pauschalpreis-, Einheitspreis-, GU-/GÜ-, GMP-, Cost-plus-/Open-Book- oder Mischverträge betreffen. Die App kann dies fachlich vorbereiten, aber nicht mit juristischer Sicherheit abschließend entscheiden.',
+      text: profile.vobBExcluded
+        ? 'Die Datei enthält Hinweise, dass die VOB/B ausdrücklich ausgeschlossen ist. Eine Analyse als VOB/B-Hauptgrundlage wäre voraussichtlich falsch. Bitte auf Bauvertrag nach BGB umstellen oder die Auswahl bewusst bestätigen.'
+        : 'Die Datei enthält Hinweise auf einen eigenständig geregelten Bauvertrag und zugleich VOB/B-Bezüge. Wähle, ob die VOB/B als Hauptgrundlage geprüft werden soll oder ob der konkrete Bauvertrag mit ergänzenden bzw. modifizierten VOB/B-Bezügen plausibler ist. Das kann Pauschalpreis-, Einheitspreis-, GU-/GÜ-, GMP-, Cost-plus-/Open-Book- oder Mischverträge betreffen. Die App kann dies fachlich vorbereiten, aber nicht mit juristischer Sicherheit abschließend entscheiden.',
       actions:[
-        {label:'VOB/B als Hauptgrundlage prüfen', action:'confirm', primary:false},
+        {label:'VOB/B als Hauptgrundlage prüfen', action:'confirm', primary:!profile.vobBExcluded},
         {label:'Bauvertrag mit VOB/B-Bezügen prüfen', action:'bgb', primary:true}
       ]
     };
   }
-  if(currentContractType === 'bgb' && looksVob){
+  if(currentContractType === 'bgb' && looksVob && !profile.vobBExcluded){
     return {
       kind:'vob-vs-bgb',
       title:'VOB/B-Einbeziehung prüfen',
@@ -3164,10 +3196,12 @@ function retrieveContextForItem(item, topN){
   topN = topN || 2;
   const kategorie = (item.kategorie || '').toLowerCase();
   const text = (item.kategorie + ' ' + item.text).toLowerCase();
+  const profile = currentContractProfile || detectContractProfile(getPlausibilitySource());
   const pool = knowledgeBase.filter(kb => {
     if(kb.active === false) return false;
     if((kb.status || 'freigegeben') !== 'freigegeben') return false;
-    if(kb.id === 'kb14' && !/(verbraucher|privatperson|widerruf|650i|baubeschreibung)/i.test(text)) return false;
+    if(kb.id === 'kb14' && !profile.consumer && !/(verbraucher|privatperson|widerruf|650i|baubeschreibung)/i.test(text)) return false;
+    if(profile.vobBExcluded && ['kb13a','kb17'].includes(kb.id)) return false;
     if(kb.id === 'kb13a' && /(vob\/b.*(ausgeschlossen|kein vertragsbestandteil|nicht vertragsbestandteil)|ausdrücklich ausgeschlossen.*vob\/b|vob b.*ausgeschlossen)/i.test(text)) return false;
     if(kb.id === 'kb17' && /(vob\/b.*(ausgeschlossen|kein vertragsbestandteil|nicht vertragsbestandteil)|ausdrücklich ausgeschlossen.*vob\/b|vob b.*ausgeschlossen)/i.test(text)) return false;
     return !kb.typ || !kb.typ.length || currentContractType === 'sonstige' || kb.typ.includes(currentContractType);
@@ -3812,8 +3846,9 @@ function compactClassificationContext(matches){
     return total > 1400 ? part.slice(0, Math.max(120, part.length - (total - 1400))) : part;
   }).filter(Boolean).join(' | ');
 }
-function buildClassificationPrompt(itemsBatch, {typText, perspectiveText, classificationCalibration, guReviewRules}){
+function buildClassificationPrompt(itemsBatch, {typText, perspectiveText, classificationCalibration, guReviewRules, profileInstruction}){
   return `Du bewertest die folgenden vertraglichen Punkte hinsichtlich Risiko im Bau-/Immobilienkontext. Es handelt sich um ${typText}. Bewerte konsequent ${perspectiveText}. Jeder Punkt hat ein eigenes Feld "kontext" mit der dafür relevanten fachlichen Referenz – nutze ausschließlich den jeweils zugehörigen Kontext für die Bewertung dieses einen Punktes, nicht die Kontexte anderer Punkte.
+${profileInstruction || ''}
 Wichtig für die Einstufung: Prüfe nicht nur die einzelne Klausel isoliert, sondern auch echte Kumulations- und Zusammenspiel-Effekte, die im Kontext-Feld beschrieben sind (z.B. mehrere ausdrücklich strafbewehrte Termine, oder das Zusammenwirken von Vollständigkeitsklausel + funktionaler Leistungsbeschreibung + fehlender Detailbeschreibung). Kumulation nur annehmen, wenn Belastungen tatsächlich gleichzeitig oder ohne vollständige Anrechnung wirken. Wenn der Vertrag Anrechnung, Austausch, Zug-um-Zug-Mechanik, Bedingungen oder Ausnahmen vorsieht, muss dies die Einstufung mindern oder präzisieren. Wenn zwei oder mehr Punkte inhaltlich unmittelbar zusammenhängen (z.B. Leistungsverweigerungsrecht und Anordnungsrecht), benenne diesen Zusammenhang explizit in der Begründung beider Punkte als Kombinationsrisiko.
 Kalibrierung der Risikoverteilung: Verteile die Einstufungen realistisch und nicht zu gleichmäßig. "kritisch" ist die Ausnahme und gehört nur den wenigen wirklich gravierendsten Punkten im gesamten Vertrag. "hoch" ist eine kleinere bis mittlere Gruppe. Die Mehrheit der Punkte sollte "mittel" oder "niedrig" sein. Vermeide, dass am Ende ungefähr gleich viele Punkte in jeder Stufe landen.
 Konsolidierungsregel: Bewerte echte Einzelrisiken, aber vermeide künstliche Verschlechterung durch doppelte oder sehr ähnliche Punkte. Wenn mehrere Klauseln dasselbe Risikothema betreffen (z.B. Sicherheiten/Einbehalte, Abnahme/Dokumentation, Vertragsstrafe/Termine, Open-Book/Marge), dürfen sie nur dann mehrfach "hoch" oder "kritisch" sein, wenn jede Klausel eine eigenständige zusätzliche Belastung mit eigener Folge erzeugt. Andernfalls stufe Nebenpunkte niedriger ein und benenne in der Begründung den Zusammenhang zum Hauptrisiko.
@@ -3850,6 +3885,71 @@ function fallbackClassifyItem(item){
     auswirkung,
     begruendung: 'Fallback-Einstufung nach Schlüsselmerkmalen.'
   };
+}
+function getContractProfileInstruction(profile){
+  if(!profile) return '';
+  const labels = profile.labels && profile.labels.length ? profile.labels.join(', ') : 'keine harte Profilmarkierung';
+  const rules = [];
+  if(profile.vobBExcluded){
+    rules.push('Die VOB/B ist nach Profilhinweis ausgeschlossen: keine Einordnung als modifizierte VOB/B, keine VOB/B-§7-Abweichungsreferenz, keine VOB/B-Abnahmefolgen, außer der Vertrag übernimmt sie ausdrücklich trotz Ausschluss.');
+  }
+  if(profile.vobCIncluded){
+    rules.push('VOB/C ist technische Vertragsgrundlage: als technische Norm-/Ausführungsgrundlage darstellen, nicht mit VOB/B verwechseln.');
+  }
+  if(profile.unitPrice){
+    rules.push('Einheitspreischarakter ausdrücklich nennen: Abrechnung nach Aufmaß, Mengen-/Abrechnungsrisiko, Skonto und Kostenabzüge prüfen.');
+  }
+  if(!profile.consumer){
+    rules.push('Kein Verbraucherhinweis erkannt: nicht als Verbraucherbauvertrag bezeichnen.');
+  }
+  return `Harte Vertragsprofil-Hinweise der App: ${labels}. ${rules.join(' ')}`;
+}
+function enrichProjectContextWithProfile(projektKontext, profile){
+  if(!profile) return projektKontext || '';
+  const additions = [];
+  const base = String(projektKontext || '').trim();
+  const hay = normalizeDedupeText(base);
+  if(profile.vobBExcluded && !hay.includes('vob/b ausgeschlossen')) additions.push('VOB/B ausdrücklich ausgeschlossen');
+  if(profile.vobCIncluded && !hay.includes('vob/c')) additions.push('VOB/C als technische Vertragsgrundlage');
+  if(profile.unitPrice && !hay.includes('einheitspreis')) additions.push('Einheitspreisvertrag');
+  if(profile.lumpSum && !hay.includes('pauschal')) additions.push('Pauschalvertrag');
+  if(!additions.length) return base;
+  return [base, additions.join(', ')].filter(Boolean).join(' · ');
+}
+function sanitizeAnalysisItems(items, profile){
+  if(!Array.isArray(items)) return [];
+  const disallowedRefs = [];
+  if(profile?.vobBExcluded) disallowedRefs.push(/modifizierte vob\/?b/i, /abweichung von vob\/?b/i, /vob\/?b §\s*7/i);
+  if(!profile?.consumer) disallowedRefs.push(/verbraucherbauvertrag/i);
+  return items.map(item => {
+    const next = {...item};
+    const combined = [next.kategorie, next.text, next.begruendung, next.massnahme].filter(Boolean).join(' ');
+    let note = '';
+    if(profile?.vobBExcluded && /modifizierte vob\/?b|vob\/?b.*modifiziert|abweichung von vob\/?b|vob\/?b §\s*7/i.test(combined)){
+      next.text = String(next.text || '')
+        .replace(/BGB-Bauvertrag mit modifizierter VOB\/B/gi, 'BGB-Bauvertrag mit ausgeschlossener VOB/B')
+        .replace(/modifizierte VOB\/B/gi, 'ausgeschlossene VOB/B')
+        .replace(/Abweichung von VOB\/B §\s*7/gi, 'BGB-Gefahrtragungsregel');
+      note = 'VOB/B laut Profil ausgeschlossen; BGB/VOB-C-Kontext maßgeblich.';
+    }
+    if(!profile?.consumer && /verbraucherbauvertrag/i.test(combined)){
+      next.text = String(next.text || '').replace(/Verbraucherbauvertrag/gi, 'BGB-Bauvertrag');
+      note = 'Kein Verbraucherhinweis erkannt; Verbraucherbauvertrag entfernt.';
+      if(next.risiko === 'kritisch' || next.risiko === 'hoch') next.risiko = 'mittel';
+    }
+    if(/freistellungsbescheinigung|48b|bauabzugsteuer/i.test(combined) && !/(kündigung|zahlungssperre|fristlos|wesentlich|mehrere|kumul)/i.test(combined)){
+      if(next.risiko === 'kritisch' || next.risiko === 'hoch') next.risiko = 'niedrig';
+      if(!next.auswirkung) next.auswirkung = 'Liquidität';
+      note = note || 'Bauabzugsteuer ist administrativ steuerbar; nicht als Top-Risiko überhöhen.';
+    }
+    if(note){
+      next.begruendung = next.begruendung ? `${next.begruendung} ${note}` : note;
+    }
+    if(Array.isArray(next.referenzen) && disallowedRefs.length){
+      next.referenzen = next.referenzen.filter(ref => !disallowedRefs.some(pattern => pattern.test(String(ref || ''))));
+    }
+    return next;
+  });
 }
 async function classifyBatchRecursive(itemsBatch, options, signal, batchLabel){
   const prompt = buildClassificationPrompt(itemsBatch, options);
@@ -3970,6 +4070,8 @@ async function runAnalysis(){
   };
   const typText = TYP_TEXT[currentContractType] || TYP_TEXT.sonstige;
   const perspectiveText = `aus Sicht des/der ${currentRoleLabel} – bewerte Risiken, die diese Partei benachteiligen oder finanziell/rechtlich belasten`;
+  currentContractProfile = detectContractProfile(getPlausibilitySource());
+  const profileInstruction = getContractProfileInstruction(currentContractProfile);
 
   try{
     // Stage 1: Extraktion
@@ -3981,6 +4083,7 @@ async function runAnalysis(){
     const extractionFocusAreas = getExtractionFocusAreas(currentContractType);
     const extractionPrecisionRules = getExtractionPrecisionRules(currentContractType);
     const extractInstruction = `Du bist Experte für Bauvertragsprüfung (HOAI, VOB, Generalunternehmerverträge) mit langjähriger Praxis. Der vorliegende Vertrag ist ${typText}. Prüfe ${perspectiveText}. Analysiere den Vertragstext vollständig und extrahiere die wesentlichen vertraglich relevanten Punkte – bei umfangreichen Verträgen (GU-Vertrag, viele Paragrafen) typischerweise 12 bis 20 Punkte, bei kürzeren Verträgen entsprechend weniger.
+${profileInstruction}
 ${extractionFocusAreas}
 Kategorisierung: Ordne jeden Punkt der inhaltlich treffendsten Kategorie zu, nicht der oberflächlichsten. Beispiele: Eine Prüfpflicht mit Haftungsfolge bei übersehenen Fehlern gehört zu "Haftung", nicht zu "Frist", auch wenn eine Frist genannt wird. Bürgschaften und Sicherheitseinbehalte gehören zur eigenen Kategorie "Sicherheit", nicht zu "Sonstiges" oder "Zahlung".
 Wichtig: Bleibe so konkret wie der Vertrag es hergibt. Wenn der Vertrag Prozentsätze, Fristtage, Deckelungsgrenzen, konkrete Kündigungsgründe oder Paragrafen nennt, übernimm diese Zahlen/Bezeichnungen in die Paraphrase statt nur die allgemeine Kategorie zu benennen (z.B. "Vertragsstrafe 0,2%/Tag, Deckel 5% bei Endtermin-Verzug" statt nur "Vertragsstrafe vereinbart").
@@ -4013,6 +4116,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       }
       writeAnalysisCache('stage1', {items, projektkontext:projektKontext, marktvergleich});
     }
+    projektKontext = enrichProjectContextWithProfile(projektKontext, currentContractProfile);
     setPipelineStep(1,'done');
 
 
@@ -4083,13 +4187,15 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       typText,
       perspectiveText,
       classificationCalibration,
-      guReviewRules
+      guReviewRules,
+      profileInstruction
     }, analysisSignal);
     items = items.map(it => {
       const c = classifications.find(x => x.id === it.id) || {};
       const withCtx = itemsWithContext.find(x => x.id === it.id);
       return {...it, risiko: c.risiko || 'mittel', auswirkung: c.auswirkung || '', begruendung: c.begruendung || '', referenzen: withCtx ? withCtx._referenzTitel : []};
     });
+    items = sanitizeAnalysisItems(items, currentContractProfile);
     setPipelineStep(3,'done');
 
     // Stage 4: Maßnahmen
@@ -4102,6 +4208,7 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
         const a = actions.find(x => x.id === it.id);
         return a ? {...it, massnahme: a.massnahme} : it;
       });
+      items = sanitizeAnalysisItems(items, currentContractProfile);
     }
     setPipelineStep(4,'done');
     setStatus(fristenFailed ? 'Analyse abgeschlossen. Fristen-Erkennung wurde per Fallback ergänzt; Details siehe Fristen-Tab.' : 'Analyse abgeschlossen.', 'done');
