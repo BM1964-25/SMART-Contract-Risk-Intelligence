@@ -997,7 +997,7 @@
           <div class="pipe-line"></div>
           <div class="pipe-step" data-step="4"><div class="dot">4</div><div><div class="pipe-step-title">Maßnahmenvorschläge</div><div class="pipe-step-desc">Für kritische und hohe Risiken werden Verhandlungs- und Handlungsempfehlungen erstellt.</div></div></div>
           <div class="pipe-line"></div>
-          <div class="pipe-step" data-step="5"><div class="dot">5</div><div><div class="pipe-step-title">Qualitätsprüfung</div><div class="pipe-step-desc">Der Bericht wird nochmals gegen Vertrag, Profil und Wissensbasis-Widersprüche geprüft.</div></div></div>
+          <div class="pipe-step" data-step="5"><div class="dot">5</div><div><div class="pipe-step-title">Plausibilitätscheck</div><div class="pipe-step-desc">Die App prüft den Bericht regelbasiert auf typische Widersprüche und Warnsignale.</div></div></div>
         </div>
         <button class="btn secondary small" id="abortAnalysisBtn" type="button" style="width:100%; margin-top:12px; display:none;">Analyse abbrechen</button>
         <div class="status-line" id="statusLine"></div>
@@ -1680,7 +1680,7 @@ const HELP_CONTENT = [
     <p><b>Scan-Vorschau:</b> Bei gescannten PDFs kann nach der Analyse eine Scan-Vorschau geöffnet werden. Sie zeigt die für die Analyse vorbereiteten Seitenbilder und dient dem visuellen Abgleich. Diese Bildvorschau wird aus Datenschutz- und Speichergründen nicht im Verlauf gespeichert und ist nur in der aktuellen Sitzung verfügbar.</p>
     <p><b>Wird der Vertrag selbst gespeichert? Standardmäßig nein, optional ja.</b> Im Normalfall liegt der hochgeladene Vertragstext nur temporär im Arbeitsspeicher deines Browsers, solange die Analyse läuft bzw. das Ergebnis auf dem Bildschirm angezeigt wird. Er wird nicht lokal gespeichert und nicht an einen Server dieser App übertragen – lediglich für die Dauer der Analyse an die Anthropic-API gesendet. Schließt oder lädst du die Seite neu, ist der Originaltext weg.</p>
     <p>Über die Checkbox <b>„Vertragstext mit im Verlauf speichern"</b> im Bereich „Dokument" (Standard: <b>aus</b>) kannst du das bewusst ändern: Ist sie beim Start der Analyse aktiviert, wird der Vertragstext zusätzlich im Verlaufseintrag abgelegt und lässt sich dort später über „Vertragstext anzeigen" wieder einsehen – praktisch für die erneute Analyse oder den schnellen Abgleich, erhöht aber den lokalen Speicherbedarf spürbar (Verträge können mehrere hunderttausend Zeichen umfassen) und vergrößert die Menge an potenziell sensiblen Daten, die dauerhaft in deinem Browser liegen. Ist der verfügbare Speicherplatz knapp, speichert die App das Analyseergebnis trotzdem, lässt in diesem Fall aber automatisch nur den Vertragstext weg und informiert dich darüber.</p>
-    <p><b>Was wird dann im Verlauf gespeichert?</b> Standardmäßig nur das <b>Analyseergebnis</b>: Dateiname, Datum, die erkannten Risikopunkte samt Bewertung und Maßnahmen, die erkannten Fristen, die Projektzusammenfassung und der Marktvergleich. Das reicht aus, um ein früheres Ergebnis jederzeit wieder anzusehen, als PDF zu exportieren oder als JSON zu sichern. War beim Speichern zusätzlich die Checkbox „Vertragstext mit im Verlauf speichern" aktiviert, wird auch der Vertragstext selbst mit abgelegt und lässt sich über „Vertragstext anzeigen" im Ergebnis wieder aufrufen.</p>
+    <p><b>Was wird dann im Verlauf gespeichert?</b> Standardmäßig nur das <b>Analyseergebnis</b>: Dateiname, Datum, die erkannten Risikopunkte samt Bewertung und Maßnahmen, die erkannten Fristen, die Projektzusammenfassung, der Marktvergleich und der Plausibilitätscheck. Das reicht aus, um ein früheres Ergebnis jederzeit wieder anzusehen, als PDF zu exportieren oder als JSON zu sichern. War beim Speichern zusätzlich die Checkbox „Vertragstext mit im Verlauf speichern" aktiviert, wird auch der Vertragstext selbst mit abgelegt und lässt sich über „Vertragstext anzeigen" im Ergebnis wieder aufrufen.</p>
     <p><b>Datenverarbeitung im Übrigen:</b> Wissensbasis und Verlauf werden ausschließlich lokal in deinem Browser gespeichert (localStorage) und nicht automatisch synchronisiert oder irgendwohin hochgeladen. Sie bleiben so lange erhalten, bis du sie löschst oder die Browserdaten leerst.</p>
   `},
   { id:"ergebnisse", title:"Ergebnisse verstehen", body:`
@@ -1692,6 +1692,7 @@ const HELP_CONTENT = [
     <p><b>Grenze der automatischen Einordnung:</b> Diese Prüfung ist fachlich hilfreich, aber nicht perfekt. Die App kann nicht mit juristischer Sicherheit entscheiden, ob die VOB/B wirksam unverändert insgesamt einbezogen wurde oder ob einzelne Klauseln individuell ausgehandelt wurden. Dafür braucht es den vollständigen Vertragskontext und im Zweifel eine juristische Prüfung.</p>
     <p><b>Auswahl bei BGB mit VOB/B-Bezügen:</b> Ist „Bauvertrag nach BGB" gewählt und erkennt die App deutliche VOB/B-Bezüge, erscheint eine Rückfrage. Standard ist dann „BGB-Bauvertrag mit VOB/B-Bezügen prüfen". Auf „Bauvertrag nach VOB/B" sollte nur umgestellt werden, wenn die VOB/B tatsächlich die Hauptgrundlage des Vertrags sein soll. Ist bereits „Bauvertrag nach VOB/B" gewählt, erscheint keine zusätzliche VOB/B-Auswahlfrage.</p>
     <p><b>Qualitätssicherung der Wissensbasis:</b> Vor der Analyse prüft die App regelbasiert harte Vertragsprofil-Hinweise, z. B. ausdrücklicher Ausschluss der VOB/B, VOB/C als technische Grundlage für Ausführung/Aufmaß/Abrechnung, Einheitspreis-/Pauschalvertrag und Verbraucherhinweise. Unpassende Wissensbasis-Regeln werden technisch ausgefiltert. Nach der KI-Bewertung bereinigt die App offensichtliche Widersprüche, etwa „Verbraucherbauvertrag" ohne Verbraucher oder „modifizierte VOB/B" trotz ausdrücklichem VOB/B-Ausschluss. Das ersetzt keine fachliche Freigabe, reduziert aber typische Fehlübertragungen.</p>
+    <p><b>Plausibilitätscheck und KI-Qualitätsprüfung:</b> Schritt 5 der Pipeline ist ein kostenloser, regelbasierter Plausibilitätscheck. Er prüft typische Widersprüche, z. B. VOB/B-Ausschluss trotz modifizierter VOB/B, Verbraucherbauvertrag ohne Verbraucherhinweis, HOAI/Bauvertrag-Verwechslung, starke Terminwirkung ohne belastbare Fristenliste oder auffällig kritische Bewertung marktüblicher Bauvertragsstandards. Dieser Check verursacht keine zusätzlichen API-Kosten und läuft automatisch. Zusätzlich kann im Bericht bewusst eine <b>KI-Qualitätsprüfung</b> gestartet werden. Diese kostet zusätzliche API-Tokens, prüft vertieft und kann auch bei aus dem Verlauf geladenen Berichten ausgeführt werden. Ohne gespeicherten Vertragstext prüft sie jedoch im Wesentlichen den Bericht und die gespeicherten Auszüge, nicht den vollständigen Originalvertrag.</p>
     <p><b>AGB- und Privilegierungsprüfung:</b> Wenn ein Vertrag die VOB/B nur teilweise übernimmt, in wesentlichen Punkten ändert oder durch vorrangige Individualregelungen verdrängt, ist dies als eigener Prüfpunkt darzustellen. Vorformulierte belastende Klauseln sind dann besonders auf AGB-Kontrolle nach § 307 BGB und auf einen möglichen Wegfall der VOB/B-Privilegierung nach § 310 Abs. 1 Satz 3 BGB hinzuweisen.</p>
     <p><b>Risikoprofil:</b> Die Management Summary zeigt zuerst die Anzahl der erkannten Risikopunkte nach Stufe. „20 Risiken" bedeutet nicht automatisch gut oder schlecht, sondern: Es wurden 20 bewertungsrelevante Punkte erkannt. Entscheidend ist die Mischung aus kritisch/hoch/mittel/niedrig und ob einzelne Punkte marktüblich, ungewöhnlich oder klar abweichend sind.</p>
     <p><b>Management-Einschätzung und Risikoindex:</b> Die Ampel übersetzt Anzahl, Schwere und thematische Konzentration der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Ab Bewertungslogik V6 wird der Risikoindex konsolidiert berechnet: Mehrere ähnliche Einzelpunkte erhöhen den Index nur begrenzt, wenn sie zum selben Risikothema gehören. Der Wert ist kein Prozentwert, keine Schulnote und kein objektiver Marktpreis des Vertrags. Orientierung: 0-6 gering, 7-15 moderat, 16-31 erhöht, ab 32 kritisch. Die App bremst die Einstufung jedoch, wenn der Index überwiegend aus marktüblichen, verhandlungsrelevanten Bauvertragsmechanismen ohne echte kritische Einzelklausel entsteht.</p>
@@ -4024,9 +4025,80 @@ function normalizeQualityReview(raw){
     findings
   };
 }
-async function runQualityReview(items, fristenItems, fristenFailed, projektKontext, marktvergleich, profile, contractExcerpt, signal){
-  const cached = readAnalysisCache('quality');
-  if(cached && cached.status && cached.kurzfazit) return cached;
+function runRuleBasedQualityCheck(items, fristenItems, fristenFailed, projektKontext, marktvergleich, profile){
+  const findings = [];
+  const allText = [
+    projektKontext,
+    JSON.stringify(marktvergleich || {}),
+    ...(items || []).flatMap(it => [it.text, it.begruendung, it.massnahme, ...(it.referenzen || [])])
+  ].filter(Boolean).join(' ');
+  const normalized = normalizeDedupeText(allText);
+  const riskCounts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
+  (items || []).forEach(it => { if(riskCounts[it.risiko] !== undefined) riskCounts[it.risiko]++; });
+  const axisScores = {};
+  AUSWIRKUNG_ACHSEN.forEach(axis => axisScores[axis] = 0);
+  (items || []).forEach(it => {
+    if(axisScores[it.auswirkung] !== undefined) axisScores[it.auswirkung] += (RISK_WEIGHT[it.risiko] || 1);
+  });
+  const strongestAxis = AUSWIRKUNG_ACHSEN.map(axis => ({axis, score:axisScores[axis] || 0})).sort((a,b) => b.score - a.score)[0];
+
+  if(profile?.vobBExcluded && /(modifizierte vob\/?b|vob\/?b.*modifiziert|abweichung von vob\/?b|vob\/?b §\s*7)/i.test(allText)){
+    findings.push({
+      thema:'VOB/B-Widerspruch',
+      bewertung:'Der Vertrag enthält laut Profil einen VOB/B-Ausschluss, im Bericht erscheinen aber noch Formulierungen zu modifizierter VOB/B oder VOB/B-Abweichungen.',
+      handlung:'VOB/B-Bezüge auf ausdrücklich übernommene Regelungen begrenzen und ansonsten als BGB-/VOB-C-Kontext darstellen.'
+    });
+  }
+  if(!profile?.consumer && /verbraucherbauvertrag/i.test(allText)){
+    findings.push({
+      thema:'Verbraucherbauvertrag',
+      bewertung:'Im Bericht wird ein Verbraucherbauvertrag erwähnt, obwohl kein belastbarer Verbraucherhinweis erkannt wurde.',
+      handlung:'Bei B2B-Verträgen als BGB-Bauvertrag, Einheitspreisvertrag, GU-/Pauschalvertrag oder sonstige passende Vertragsart formulieren.'
+    });
+  }
+  if(currentContractType === 'planung' && /bauvertrag|generalunternehmer|vob\/?b|vob\/?c|vertragserfuellungssicherheit|bauleistung/i.test(allText)){
+    findings.push({
+      thema:'HOAI/Bauvertrag abgrenzen',
+      bewertung:'Die gewählte Grundlage ist HOAI/Planung, im Bericht erscheinen jedoch deutliche Bauvertragsbegriffe.',
+      handlung:'Prüfen, ob tatsächlich ein Architekten-/Ingenieurvertrag vorliegt; sonst Bauvertragsgrundlage wählen.'
+    });
+  }
+  if((fristenFailed || !(fristenItems || []).length) && strongestAxis?.axis === 'Termin' && strongestAxis.score >= 8){
+    findings.push({
+      thema:'Terminwirkung ohne belastbare Fristenliste',
+      bewertung:'Die Terminachse ist stark, obwohl keine vollständige oder belastbare Fristenliste vorliegt.',
+      handlung:'Terminwirkung im Bericht als nicht vollständig abgesichert kennzeichnen oder Fristenprüfung erneut ausführen.'
+    });
+  }
+  const standardCritical = (items || []).filter(it => it.risiko === 'kritisch' && /(vertragserfuellungssicherheit|vertragserfüllungssicherheit|foermliche abnahme|förmliche abnahme|schlussrechnung.*abnahme|abnahme.*schlussrechnung)/i.test([it.text,it.begruendung].join(' ')));
+  if(standardCritical.length){
+    findings.push({
+      thema:'Mögliche Überbewertung marktüblicher Standards',
+      bewertung:'Einige grundsätzlich marktübliche Bauvertragsmechanismen wurden als kritisch erkannt. Das kann richtig sein, braucht aber besondere Begründung durch Höhe, Kumulation, Blockadewirkung oder fehlende Rückgabelogik.',
+      handlung:'Kritisch nur beibehalten, wenn die konkrete Verschärfung ausdrücklich belegt ist; sonst eher hoch oder mittel.'
+    });
+  }
+  if(riskCounts.kritisch === 0 && riskCounts.hoch === 0 && (items || []).length){
+    findings.push({
+      thema:'Management Summary',
+      bewertung:'Es wurden keine hohen oder kritischen Risiken erkannt. Die Management Summary sollte dann nicht von den fünf größten Projektrisiken mit niedrigen/mittleren Punkten sprechen.',
+      handlung:'Formulierung auf beobachtete bzw. prüfungsrelevante Punkte umstellen oder Bericht erneut prüfen.'
+    });
+  }
+
+  const status = findings.length ? 'eingeschraenkt' : 'plausibel';
+  return {
+    source:'rule',
+    status,
+    kurzfazit: findings.length
+      ? `Der regelbasierte Plausibilitätscheck hat ${findings.length} Hinweis${findings.length === 1 ? '' : 'e'} gefunden. Die Hauptanalyse ist erstellt; die markierten Punkte sollten vor Weitergabe geprüft werden.`
+      : 'Der regelbasierte Plausibilitätscheck hat keine typischen Widersprüche erkannt. Eine fachliche Prüfung bleibt bei verbindlichen Entscheidungen weiterhin erforderlich.',
+    findings
+  };
+}
+async function runQualityReview(items, fristenItems, fristenFailed, projektKontext, marktvergleich, profile, contractExcerpt, signal, useCache = true){
+  const cached = useCache ? readAnalysisCache('quality') : null;
+  if(cached && cached.status && cached.kurzfazit) return {...cached, source:cached.source || 'ai'};
   const payload = buildQualityReviewPayload(items, fristenItems, fristenFailed, projektKontext, marktvergleich, profile, contractExcerpt);
   const prompt = `Du bist zweiter fachlicher Prüflauf für eine KI-Vertragsanalyse im Bau-/Immobilienkontext.
 Prüfe den erzeugten Analysebericht gegen Vertragsprofil, Vertragsauszug und extrahierte Daten.
@@ -4046,15 +4118,16 @@ Daten:
 ${JSON.stringify(payload)}`;
   try{
     const raw = await callClaudeWithRetry(prompt, 'Qualitätsprüfung des Analyseberichts …', 4200, signal);
-    const parsed = normalizeQualityReview(parseJson(raw));
+    const parsed = {...normalizeQualityReview(parseJson(raw)), source:'ai'};
     writeAnalysisCache('quality', parsed);
     return parsed;
   }catch(err){
     if(err.name === 'AbortError') throw err;
     console.warn('Qualitätsprüfung fehlgeschlagen, Analyse wird ohne zweiten Prüflauf angezeigt:', err);
     return {
+      source:'ai',
       status:'eingeschraenkt',
-      kurzfazit:'Die automatische Qualitätsprüfung konnte nicht abgeschlossen werden. Der Analysebericht wurde erstellt, sollte aber vor Weitergabe fachlich plausibilisiert werden.',
+      kurzfazit:'Die KI-Qualitätsprüfung konnte nicht abgeschlossen werden. Der Analysebericht bleibt erhalten, sollte aber vor Weitergabe fachlich plausibilisiert werden.',
       findings:[{thema:'Qualitätsprüfung nicht abgeschlossen', bewertung:err.message || 'Technischer Fehler im zweiten Prüflauf.', handlung:'Bericht vor Freigabe manuell oder mit separatem Plausibilitätscheck prüfen.'}]
     };
   }
@@ -4161,7 +4234,55 @@ ${JSON.stringify(payload)}`;
   }finally{
     if(btn){
       btn.disabled = false;
-      btn.textContent = oldText || 'Bericht anhand Qualitätsprüfung überarbeiten';
+      btn.textContent = oldText || 'Bericht anhand Prüfhinweisen überarbeiten';
+    }
+  }
+}
+async function startAiQualityReview(){
+  if(isAnalysisRunning){
+    setError('Während eine Analyse läuft, kann keine zusätzliche KI-Qualitätsprüfung gestartet werden.');
+    return;
+  }
+  if(!latestReportData){
+    setError('Es liegt kein aktueller Bericht für die KI-Qualitätsprüfung vor.');
+    return;
+  }
+  if(!apiKey){
+    setError('Bitte zuerst den API-Key speichern.');
+    return;
+  }
+  const btn = document.getElementById('startAiQualityBtn');
+  const oldText = btn ? btn.textContent : '';
+  if(btn){
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> KI prüft …';
+  }
+  setError('');
+  setStatus('Starte vertiefte KI-Qualitätsprüfung …', 'loading');
+  try{
+    const profile = currentContractProfile || detectContractProfile([latestReportData.filename, latestReportData.contractExcerpt, latestReportData.projektKontext].filter(Boolean).join(' '));
+    const qualityReview = await runQualityReview(
+      latestReportData.items,
+      latestReportData.fristenItems,
+      latestReportData.fristenFailed,
+      latestReportData.projektKontext,
+      latestReportData.marktvergleich,
+      profile,
+      latestReportData.contractExcerpt || '',
+      null,
+      false
+    );
+    renderResults(latestReportData.items, latestReportData.fristenItems, latestReportData.fristenFailed, latestReportData.projektKontext, latestReportData.marktvergleich, latestReportData.vertragstext || '', latestReportData.scanPreviewImages || [], qualityReview);
+    saveHistoryEntry(latestReportData.items, latestReportData.fristenItems, latestReportData.fristenFailed, latestReportData.projektKontext, latestReportData.marktvergleich, qualityReview);
+    setStatus('KI-Qualitätsprüfung abgeschlossen und im Verlauf gespeichert.', qualityReview.status === 'plausibel' ? 'done' : 'warn');
+  }catch(err){
+    console.error(err);
+    setError('KI-Qualitätsprüfung fehlgeschlagen: ' + err.message);
+    setStatus('KI-Qualitätsprüfung konnte nicht abgeschlossen werden.', 'warn');
+  }finally{
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = oldText || 'KI-Qualitätsprüfung starten';
     }
   }
 }
@@ -4426,12 +4547,12 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
     }
     setPipelineStep(4,'done');
 
-    // Stage 5: Qualitätsprüfung gegen Vertrag/Profil/Bericht
+    // Stage 5: kostenloser Plausibilitätscheck gegen typische Widersprüche
     setPipelineStep(5,'active');
-    setStatus('Prüfe Analysebericht nochmals auf Plausibilität …', 'loading');
-    const qualityReview = await runQualityReview(items, fristenItems, fristenFailed, projektKontext, marktvergleich, currentContractProfile, docExcerpt, analysisSignal);
+    setStatus('Prüfe Bericht regelbasiert auf Plausibilität …', 'loading');
+    const qualityReview = runRuleBasedQualityCheck(items, fristenItems, fristenFailed, projektKontext, marktvergleich, currentContractProfile);
     setPipelineStep(5, qualityReview.status === 'plausibel' ? 'done' : 'warn');
-    setStatus(fristenFailed ? 'Analyse abgeschlossen. Fristen-Erkennung wurde per Fallback ergänzt; Qualitätsprüfung siehe Bericht.' : 'Analyse abgeschlossen. Qualitätsprüfung ergänzt.', 'done');
+    setStatus(fristenFailed ? 'Analyse abgeschlossen. Fristen-Erkennung wurde per Fallback ergänzt; Plausibilitätscheck siehe Bericht.' : 'Analyse abgeschlossen. Plausibilitätscheck ergänzt.', 'done');
 
     renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, document.getElementById('saveContractCheckbox')?.checked ? extractedText : '', isScanned ? documentImages : [], qualityReview);
     saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich, qualityReview);
@@ -4907,17 +5028,18 @@ function renderRiskProfileCharts(summary){
 function renderQualityReviewCard(review){
   if(!review) return '';
   const statusMap = {
-    plausibel:{label:'Plausibel', cls:'', desc:'Der zweite Prüflauf hat keine wesentliche Auffälligkeit festgestellt.'},
-    eingeschraenkt:{label:'Mit Einschränkungen plausibel', cls:'warn', desc:'Der Bericht ist nutzbar, einzelne Punkte sollten fachlich geprüft werden.'},
+    plausibel:{label:'Plausibel', cls:'', desc:'Der Plausibilitätscheck hat keine wesentliche Auffälligkeit festgestellt.'},
+    eingeschraenkt:{label:'Prüfhinweise vorhanden', cls:'warn', desc:'Der Bericht ist nutzbar, einzelne Punkte sollten fachlich geprüft werden.'},
     nicht_freigabefaehig:{label:'Nicht freigabefähig', cls:'fail', desc:'Der Bericht sollte vor Weitergabe korrigiert oder erneut geprüft werden.'}
   };
   const cfg = statusMap[review.status] || statusMap.eingeschraenkt;
   const findings = Array.isArray(review.findings) ? review.findings : [];
+  const isAiReview = review.source === 'ai';
   const canRevise = findings.length || review.status === 'nicht_freigabefaehig' || review.status === 'eingeschraenkt';
   return `
     <div class="card quality-card ${cfg.cls}">
       <div class="quality-head">
-        <h2>Qualitätsprüfung</h2>
+        <h2>${isAiReview ? 'KI-Qualitätsprüfung' : 'Plausibilitätscheck'}</h2>
         <span class="quality-badge">${escapeHtml(cfg.label)}</span>
       </div>
       <p class="quality-summary">${escapeHtml(review.kurzfazit || cfg.desc)}</p>
@@ -4928,7 +5050,10 @@ function renderQualityReviewCard(review){
             ${f.handlung ? `<br><span class="hint">Empfehlung: ${escapeHtml(f.handlung)}</span>` : ''}
           </li>`).join('')}
       </ol>` : `<p class="hint">${escapeHtml(cfg.desc)}</p>`}
-      ${canRevise ? `<div class="quality-actions no-print"><button class="btn secondary small" id="reviseQualityBtn" type="button" onclick="reviseReportFromQuality()">Bericht anhand Qualitätsprüfung überarbeiten</button></div>` : ''}
+      <div class="quality-actions no-print">
+        ${!isAiReview ? `<button class="btn secondary small" id="startAiQualityBtn" type="button" onclick="startAiQualityReview()">KI-Qualitätsprüfung starten</button>` : ''}
+        ${canRevise ? `<button class="btn secondary small" id="reviseQualityBtn" type="button" onclick="reviseReportFromQuality()">Bericht anhand Prüfhinweisen überarbeiten</button>` : ''}
+      </div>
     </div>`;
 }
 function buildManagementSummary(items, deadlineQuality = {}){
