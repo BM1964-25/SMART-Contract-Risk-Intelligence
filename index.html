@@ -1033,7 +1033,7 @@
   </div>
 
   <div class="top-actions" id="topActions" style="display:none;">
-    <button class="btn secondary small" onclick="window.print()">Als PDF exportieren</button>
+    <button class="btn secondary small" onclick="printCurrentReport()">Als PDF exportieren</button>
     <button class="btn secondary small" id="htmlExportBtn" type="button">Passwortgeschützten HTML-Bericht exportieren</button>
   </div>
   <div id="resultsArea">
@@ -2543,6 +2543,24 @@ function safeReportPdfFilename(name){
 function buildReportBaseName(name, stamp = exportTimestamp()){
   const base = safeFileSlug(name, 'analyse');
   return `Vertragsrisikoanalyse_${stamp}_${base}`;
+}
+function getCurrentReportBaseName(){
+  const name = latestReportSnapshot?.filename || currentFileName || 'analyse';
+  const createdAt = latestReportSnapshot?.createdAt ? new Date(latestReportSnapshot.createdAt) : null;
+  if(createdAt && !Number.isNaN(createdAt.getTime())){
+    const pad = n => String(n).padStart(2, '0');
+    const stamp = `${createdAt.getFullYear()}-${pad(createdAt.getMonth()+1)}-${pad(createdAt.getDate())}-${pad(createdAt.getHours())}${pad(createdAt.getMinutes())}`;
+    return buildReportBaseName(name, stamp);
+  }
+  return buildReportBaseName(name);
+}
+function printCurrentReport(){
+  if(!latestReportSnapshot && !document.getElementById('resultsArea')?.querySelector('.result-tab-pane')){
+    alert('Bitte zuerst eine Analyse durchführen oder einen Eintrag aus dem Verlauf öffnen.');
+    return;
+  }
+  document.title = getCurrentReportBaseName();
+  setTimeout(() => window.print(), 0);
 }
 function buildPlainHtmlReport(reportNames){
   const resultClone = document.getElementById('resultsArea').cloneNode(true);
