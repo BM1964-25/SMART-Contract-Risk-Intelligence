@@ -493,6 +493,18 @@
     line-height:1.45; color:var(--text-muted);
   }
   .result-tab-info strong{ color:var(--navy); }
+  .quality-card{
+    border-left:4px solid var(--green);
+    background:#fbfdfb;
+  }
+  .quality-card.warn{ border-left-color:var(--amber); background:#fffaf0; }
+  .quality-card.fail{ border-left-color:#a32020; background:#fff6f6; }
+  .quality-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:8px; }
+  .quality-badge{ display:inline-flex; align-items:center; border-radius:999px; padding:5px 9px; font-size:11px; font-weight:bold; background:#edf7ef; color:#1f6f46; white-space:nowrap; }
+  .quality-card.warn .quality-badge{ background:#fff2ce; color:#8a5d00; }
+  .quality-card.fail .quality-badge{ background:#f7dada; color:#8b1e1e; }
+  .quality-summary{ color:var(--text-muted); font-size:12.5px; line-height:1.45; margin:0 0 10px; }
+  .quality-list{ margin:0; padding-left:18px; color:var(--text); font-size:12.5px; line-height:1.45; }
   @media (max-width:900px){ .result-tabs{ grid-template-columns:1fr; } }
   .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
   .top-actions .btn{ white-space:nowrap; }
@@ -982,6 +994,8 @@
           <div class="pipe-step" data-step="3"><div class="dot">3</div><div><div class="pipe-step-title">Risiko-Klassifikation</div><div class="pipe-step-desc">Jeder Punkt wird bewertet, wirtschaftlich eingeordnet und mit der Wissensbasis abgeglichen.</div></div></div>
           <div class="pipe-line"></div>
           <div class="pipe-step" data-step="4"><div class="dot">4</div><div><div class="pipe-step-title">Maßnahmenvorschläge</div><div class="pipe-step-desc">Für kritische und hohe Risiken werden Verhandlungs- und Handlungsempfehlungen erstellt.</div></div></div>
+          <div class="pipe-line"></div>
+          <div class="pipe-step" data-step="5"><div class="dot">5</div><div><div class="pipe-step-title">Qualitätsprüfung</div><div class="pipe-step-desc">Der Bericht wird nochmals gegen Vertrag, Profil und Wissensbasis-Widersprüche geprüft.</div></div></div>
         </div>
         <button class="btn secondary small" id="abortAnalysisBtn" type="button" style="width:100%; margin-top:12px; display:none;">Analyse abbrechen</button>
         <div class="status-line" id="statusLine"></div>
@@ -1675,7 +1689,7 @@ const HELP_CONTENT = [
     <p><b>VOB/B, BGB und gemischte Bauverträge:</b> Die App kann inzwischen deutlich besser unterscheiden, ob die VOB/B erwähnt oder einbezogen wird, ob BGB-Regelungen zusätzlich oder abweichend verwendet werden, ob VOB/B-Regelungen ausgeschlossen oder verändert werden, ob der Einzelvertrag in der Rangfolge vor der VOB/B steht und ob typische Abweichungen vorkommen, z. B. Ausschluss der fiktiven Abnahme, geänderte Behandlung von § 7 VOB/B, abweichende Verjährung oder eigene Nachtragslogik. Das gilt nicht nur für GU-Verträge, sondern auch für Pauschalpreis-, Einheitspreis-, GMP-, Cost-plus-/Open-Book- und Mischverträge.</p>
     <p><b>Grenze der automatischen Einordnung:</b> Diese Prüfung ist fachlich hilfreich, aber nicht perfekt. Die App kann nicht mit juristischer Sicherheit entscheiden, ob die VOB/B wirksam unverändert insgesamt einbezogen wurde oder ob einzelne Klauseln individuell ausgehandelt wurden. Dafür braucht es den vollständigen Vertragskontext und im Zweifel eine juristische Prüfung.</p>
     <p><b>Was die zwei Optionen bedeuten:</b> „VOB/B als Hauptgrundlage prüfen" startet die Analyse stärker mit VOB/B-Benchmark, sucht aber trotzdem nach Abweichungen und modifizierter VOB/B. „Bauvertrag mit VOB/B-Bezügen prüfen" bleibt stärker auf dem konkreten Bauvertrag kalibriert und behandelt VOB/B eher als ergänzende oder modifizierte Bezugsgrundlage. Bei Bauverträgen mit umfangreichen eigenen Regelungen ist diese zweite Option häufig der sauberere Startpunkt.</p>
-    <p><b>Qualitätssicherung der Wissensbasis:</b> Vor der Analyse prüft die App regelbasiert harte Vertragsprofil-Hinweise, z. B. ausdrücklicher Ausschluss der VOB/B, VOB/C als technische Vertragsgrundlage, Einheitspreis-/Pauschalvertrag und Verbraucherhinweise. Unpassende Wissensbasis-Regeln werden technisch ausgefiltert. Nach der KI-Bewertung bereinigt die App offensichtliche Widersprüche, etwa „Verbraucherbauvertrag" ohne Verbraucher oder „modifizierte VOB/B" trotz ausdrücklichem VOB/B-Ausschluss. Das ersetzt keine fachliche Freigabe, reduziert aber typische Fehlübertragungen.</p>
+    <p><b>Qualitätssicherung der Wissensbasis:</b> Vor der Analyse prüft die App regelbasiert harte Vertragsprofil-Hinweise, z. B. ausdrücklicher Ausschluss der VOB/B, VOB/C als technische Grundlage für Ausführung/Aufmaß/Abrechnung, Einheitspreis-/Pauschalvertrag und Verbraucherhinweise. Unpassende Wissensbasis-Regeln werden technisch ausgefiltert. Nach der KI-Bewertung bereinigt die App offensichtliche Widersprüche, etwa „Verbraucherbauvertrag" ohne Verbraucher oder „modifizierte VOB/B" trotz ausdrücklichem VOB/B-Ausschluss. Das ersetzt keine fachliche Freigabe, reduziert aber typische Fehlübertragungen.</p>
     <p><b>AGB- und Privilegierungsprüfung:</b> Wenn ein Vertrag die VOB/B nur teilweise übernimmt, in wesentlichen Punkten ändert oder durch vorrangige Individualregelungen verdrängt, ist dies als eigener Prüfpunkt darzustellen. Vorformulierte belastende Klauseln sind dann besonders auf AGB-Kontrolle nach § 307 BGB und auf einen möglichen Wegfall der VOB/B-Privilegierung nach § 310 Abs. 1 Satz 3 BGB hinzuweisen.</p>
     <p><b>Risikoprofil:</b> Die Management Summary zeigt zuerst die Anzahl der erkannten Risikopunkte nach Stufe. „20 Risiken" bedeutet nicht automatisch gut oder schlecht, sondern: Es wurden 20 bewertungsrelevante Punkte erkannt. Entscheidend ist die Mischung aus kritisch/hoch/mittel/niedrig und ob einzelne Punkte marktüblich, ungewöhnlich oder klar abweichend sind.</p>
     <p><b>Management-Einschätzung und Risikoindex:</b> Die Ampel übersetzt Anzahl, Schwere und thematische Konzentration der Risiken in eine schnelle KI-gestützte Einordnung: gering, moderat, erhöht oder kritisch. Ab Bewertungslogik V6 wird der Risikoindex konsolidiert berechnet: Mehrere ähnliche Einzelpunkte erhöhen den Index nur begrenzt, wenn sie zum selben Risikothema gehören. Der Wert ist kein Prozentwert, keine Schulnote und kein objektiver Marktpreis des Vertrags. Orientierung: 0-6 gering, 7-15 moderat, 16-31 erhöht, ab 32 kritisch. Die App bremst die Einstufung jedoch, wenn der Index überwiegend aus marktüblichen, verhandlungsrelevanten Bauvertragsmechanismen ohne echte kritische Einzelklausel entsteht.</p>
@@ -1927,7 +1941,7 @@ function getRequiredAreas(contractType){
   if(contractType === 'planung'){
     return 'Folgende Bereiche MÜSSEN bei Planungsverträgen/HOAI aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten klassischer Bauvertragsklauseln: Leistungsphasen und stufenweise Beauftragung, Honorar/Pauschalhonorar und Abgrenzung Grundleistungen/Besondere Leistungen, Kostensteuerungs- und Hinweispflichten (insbesondere KG 400), Projektziele wie DGNB/LEED/Energieeffizienz/Wirtschaftlichkeit/Freihamer Gebäudestandard/maximale Mietflächen/BIM/Schnittstellenkoordination als eigener Risikoblock, BIM-/IFC-/Projektplattformpflichten, Nutzungsrechte an Plänen/digitalen Unterlagen/BIM-Modellen, Freigabe- und Prüffristen je Leistungsphase oder Zwischenergebnis, Koordinationspflichten, Kündigungsrechte, Haftungsregelungen, Zahlungs- und Rechnungsprüfungsfristen, Sicherungsrechte/Sicherungshypothek und deren Ausschluss sowie Nachtrags-/Vergütungsanpassungslogik. Bewerte außerdem die Projektkomplexität mit: Projektgröße, Anzahl der Beteiligten, Nachhaltigkeitsanforderungen, Genehmigungsaufwand, Schnittstellenkoordination und digitale/BIM-Anforderungen. Wende VOB/B-Marktwerte oder GU-Vertragsmuster nur an, wenn der Vertrag sie ausdrücklich enthält.';
   }
-  return 'Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: rechtliche Einordnung der Vertragsgrundlage und Vergütungsart (BGB-/VOB/B-Bauvertrag, Einheitspreisvertrag, Pauschalvertrag, GU-/Open-Book-Vertrag, VOB/C als technische Vertragsgrundlage), insbesondere ob die VOB/B unverändert insgesamt einbezogen, nur erwähnt, durch vorrangige Vertragsregelungen wesentlich geändert oder ausdrücklich ausgeschlossen wird, Vertragsstrafe mit exakt benannten Prozentsätzen, Deckeln, strafbewehrten Terminen, Anrechnungen und Bezugsgrößen, Sicherheiten als getrennte Punkte mit eigenem Prozentsatz, Zweck, Wahlrecht, Bürgschaftsqualität und Rückgabe-/Austauschlogik, Zahlungsbürgschaft des Auftraggebers, kumulierte Sicherheiten nur bei erkennbarer zeitlicher Überschneidung inklusive Vorauszahlungsbürgschaft und Dokumentationseinbehalten, Versicherungen und vertragliche Kostenabzüge (Betriebshaftpflichtversicherung, Bauleistungsversicherung, Bauwasser, Energie, Sanitäreinrichtungen, Baustellengemeinkosten), Abnahmevoraussetzungen mit Ausnahmen für vom AN nicht zu beschaffende Unterlagen, gestufte/gesonderte Abnahmen und zurückgestellte Leistungen, Gefahrtragung nur bei echter Abweichung von der einschlägigen Vertragsgrundlage, Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen oder ungeklärter Vergütung nach § 650b/650c BGB die Ausführung verlangt wird), Nachtragsmanagement-Anforderungen einschließlich Teilvergütung, unbestrittener Vergütung, Kostenerstattung für Beschleunigungsmaßnahmen und Unterschied zwischen verpflichtendem Inhalt und nur "möglichst" einzuhaltendem Zeitpunkt, Dokumentations-/Berichtspflichten und Dokumentationseinbehalte mit konkreten Beträgen (z.B. 100.000€), Open-Book-/Cost-plus-fee-Mechanismen mit erstattungsfähigen Kosten, AG-Einsicht in Kalkulationen, Angebote, Abrechnungen, Vergaben, Kostenausschlüssen, Abzugspositionen, Nachunternehmer-Informationspflichten und Prozessführungspflichten einschließlich Kostentragungsregel, Lean-Construction-Pflichten (Taktplanung, Last Planner, tägliche Lean-Besprechungen, Ressourcenverstärkung, Schulungen), Pandemie-/Corona-Klauseln mit Bauzeit-, Mehrkosten-, Lieferengpass-, Materialalternativen-, Kündigungs- und Dokumentationsfolgen, Festpreis-/Gleitklausel-Regelung (insbesondere wenn Eigenleistungen als Festpreis oder ohne Gleitklausel geregelt sind – das ist ein Margenrisiko), Preisbindung und Vorhaltekosten bei nachlaufenden Leistungen oder nicht verkauften/vermieteten Einheiten, Vertretungs-/Vollmachtsregelungen des AG und des AN für Anordnungen, Nachträge und Vergütungsvereinbarungen, Freistellungspflichten gegenüber Ansprüchen Dritter, risikomindernde Regelungen zur Planungsverantwortung des AG sowie das Zusammenspiel von Vollständigkeitsklausel mit erkennbaren/erforderlichen Leistungen und funktionaler Leistungsbeschreibung. Achte zusätzlich auf häufig übersehene Nebenrisiken: witterungsbedingte Behinderungen ohne Bauzeitverlängerung, Zahlungspausen oder Prüfhemmungen über Feiertage/Jahreswechsel, Abtretungs- und Aufrechnungsbeschränkungen, Fälligkeit von Abschlagsrechnungen nur bei Leistungsstandsnachweis/ordnungsgemäßer Rechnung/kumulierter Rechnungsstellung, Stundenlohnzettel, arbeitstägliche Bautagesberichte, monatliche Nachunternehmerlisten, Bauabzugsteuer/Freistellungsbescheinigung nach § 48b EStG einschließlich Steuerabzug statt bloßem Sicherungseinbehalt, Erneuerung/Änderungsanzeige der Freistellungsbescheinigung, unverzügliche Mehrkostenanzeigen, Aufmaß nach Kündigung sowie zusätzliche Baustelleneinrichtungs-, Logistik- oder Lagerflächen auf Kosten des AN.';
+  return 'Folgende Bereiche MÜSSEN aufgenommen werden, sofern der Vertrag sie regelt – überspringe sie nicht zugunsten weniger wichtiger Punkte, auch wenn dadurch mehr Punkte als üblich entstehen: rechtliche Einordnung der Vertragsgrundlage und Vergütungsart (BGB-/VOB/B-Bauvertrag, Einheitspreisvertrag, Pauschalvertrag, GU-/Open-Book-Vertrag, VOB/C nur als technische Grundlage für Ausführung, Aufmaß und Abrechnung), insbesondere ob die VOB/B unverändert insgesamt einbezogen, nur erwähnt, durch vorrangige Vertragsregelungen wesentlich geändert oder ausdrücklich ausgeschlossen wird, Vertragsstrafe mit exakt benannten Prozentsätzen, Deckeln, strafbewehrten Terminen, Anrechnungen und Bezugsgrößen, Sicherheiten als getrennte Punkte mit eigenem Prozentsatz, Zweck, Wahlrecht, Bürgschaftsqualität und Rückgabe-/Austauschlogik, Zahlungsbürgschaft des Auftraggebers, kumulierte Sicherheiten nur bei erkennbarer zeitlicher Überschneidung inklusive Vorauszahlungsbürgschaft und Dokumentationseinbehalten, Versicherungen und vertragliche Kostenabzüge (Betriebshaftpflichtversicherung, Bauleistungsversicherung, Bauwasser, Energie, Sanitäreinrichtungen, Baustellengemeinkosten), Abnahmevoraussetzungen mit Ausnahmen für vom AN nicht zu beschaffende Unterlagen, gestufte/gesonderte Abnahmen und zurückgestellte Leistungen, Gefahrtragung nur bei echter Abweichung von der einschlägigen Vertragsgrundlage, Leistungsverweigerungs-/Zurückbehaltungsrecht (insbesondere wenn bei Anordnungen oder ungeklärter Vergütung nach § 650b/650c BGB die Ausführung verlangt wird), Nachtragsmanagement-Anforderungen einschließlich Teilvergütung, unbestrittener Vergütung, Kostenerstattung für Beschleunigungsmaßnahmen und Unterschied zwischen verpflichtendem Inhalt und nur "möglichst" einzuhaltendem Zeitpunkt, Dokumentations-/Berichtspflichten und Dokumentationseinbehalte mit konkreten Beträgen (z.B. 100.000€), Open-Book-/Cost-plus-fee-Mechanismen mit erstattungsfähigen Kosten, AG-Einsicht in Kalkulationen, Angebote, Abrechnungen, Vergaben, Kostenausschlüssen, Abzugspositionen, Nachunternehmer-Informationspflichten und Prozessführungspflichten einschließlich Kostentragungsregel, Lean-Construction-Pflichten (Taktplanung, Last Planner, tägliche Lean-Besprechungen, Ressourcenverstärkung, Schulungen), Pandemie-/Corona-Klauseln mit Bauzeit-, Mehrkosten-, Lieferengpass-, Materialalternativen-, Kündigungs- und Dokumentationsfolgen, Festpreis-/Gleitklausel-Regelung (insbesondere wenn Eigenleistungen als Festpreis oder ohne Gleitklausel geregelt sind – das ist ein Margenrisiko), Preisbindung und Vorhaltekosten bei nachlaufenden Leistungen oder nicht verkauften/vermieteten Einheiten, Vertretungs-/Vollmachtsregelungen des AG und des AN für Anordnungen, Nachträge und Vergütungsvereinbarungen, Freistellungspflichten gegenüber Ansprüchen Dritter, risikomindernde Regelungen zur Planungsverantwortung des AG sowie das Zusammenspiel von Vollständigkeitsklausel mit erkennbaren/erforderlichen Leistungen und funktionaler Leistungsbeschreibung. Achte zusätzlich auf häufig übersehene Nebenrisiken: witterungsbedingte Behinderungen ohne Bauzeitverlängerung, Zahlungspausen oder Prüfhemmungen über Feiertage/Jahreswechsel, Abtretungs- und Aufrechnungsbeschränkungen, Fälligkeit von Abschlagsrechnungen nur bei Leistungsstandsnachweis/ordnungsgemäßer Rechnung/kumulierter Rechnungsstellung, Stundenlohnzettel, arbeitstägliche Bautagesberichte, monatliche Nachunternehmerlisten, Bauabzugsteuer/Freistellungsbescheinigung nach § 48b EStG einschließlich Steuerabzug statt bloßem Sicherungseinbehalt, Erneuerung/Änderungsanzeige der Freistellungsbescheinigung, unverzügliche Mehrkostenanzeigen, Aufmaß nach Kündigung sowie zusätzliche Baustelleneinrichtungs-, Logistik- oder Lagerflächen auf Kosten des AN.';
 }
 function getExtractionFocusAreas(contractType){
   if(contractType === 'planung'){
@@ -1939,7 +1953,7 @@ function getExtractionPrecisionRules(contractType){
   if(contractType === 'planung'){
     return 'Wende VOB/B- oder GU-Marktwerte nur an, wenn der Vertrag sie ausdrücklich enthält. Projektziele und Projektkomplexität nur aufnehmen, wenn sie im Vertrag konkret geregelt sind.';
   }
-  return 'Wenn VOB/B erwähnt wird, unterscheide strikt: ausdrückliche Einbeziehung, bloße Bezugnahme, modifizierte VOB/B oder ausdrücklicher Ausschluss. Ist die VOB/B ausdrücklich ausgeschlossen, darf der Vertrag nicht als "BGB-Bauvertrag mit modifizierter VOB/B" bezeichnet werden; dann sind BGB-Regeln und ggf. VOB/C als technische Vertragsgrundlage maßgeblich. Verbraucherbauvertrag nur nennen, wenn eine Partei Verbraucher/Privatperson ist oder § 650i BGB ausdrücklich passt. Bei Sicherheiten, Vertragsstrafen, Aufmaß, Kündigung, Open Book und VOB/C nur konkrete Vertragsangaben übernehmen.';
+  return 'Wenn VOB/B erwähnt wird, unterscheide strikt: ausdrückliche Einbeziehung, bloße Bezugnahme, modifizierte VOB/B oder ausdrücklicher Ausschluss. Ist die VOB/B ausdrücklich ausgeschlossen, darf der Vertrag nicht als "BGB-Bauvertrag mit modifizierter VOB/B" bezeichnet werden; dann sind BGB-Regeln maßgeblich. VOB/C ist in diesem Fall nur als technische Grundlage für Ausführung, Aufmaß und Abrechnung zu behandeln, nicht als Ersatz für VOB/B-Rechtsfolgen. Verbraucherbauvertrag nur nennen, wenn eine Partei Verbraucher/Privatperson ist oder § 650i BGB ausdrücklich passt. Bei Sicherheiten, Vertragsstrafen, Aufmaß, Kündigung, Open Book und VOB/C nur konkrete Vertragsangaben übernehmen.';
 }
 function getGuReviewCorrectionRules(contractType){
   if(contractType === 'planung') return '';
@@ -2078,7 +2092,7 @@ const DEFAULT_KB = [
    text:"Wird die VOB/B in einem Bauvertrag zwar einbezogen, aber durch vorrangige Vertragsregelungen wesentlich geändert, teilweise ausgeschlossen oder durch BGB-Regelungen ersetzt, liegt regelmäßig kein unverändert privilegierter VOB/B-Vertrag vor. Die Rechtsfolge ist präzise einzuschränken: Bei Verwendung als vorformulierte, nicht im Einzelnen ausgehandelte Vertragsbedingung kommt eine klauselspezifische AGB-Kontrolle nach § 307 BGB in Betracht; individuell ausgehandelte Regelungen sind keine AGB im Sinne von § 305 Abs. 1 BGB. Es folgt keine Gesamtnichtigkeit des Vertrags. Besonders prüfungsbedürftig sind Sicherheiten, Ausschluss fiktiver Abnahme, Abnahmevoraussetzungen, Ausführungspflicht ohne Vergütungseinigung, Zurückbehaltungsrechte, Vollständigkeitsklauseln und verlängerte Mängelverjährung.",
    tags:["vob","bgb","agb","privilegierung","310","307","modifizierte-vob","rangfolge","abnahme","sicherheiten"]},
   {id:"kb13b", title:"BGB-Einheitspreisvertrag mit VOB/C und ausgeschlossener VOB/B", typ:["bgb","sonstige"],
-   text:"Ist die VOB/B ausdrücklich ausgeschlossen, aber die VOB/C als technische Vertragsgrundlage vereinbart, darf der Vertrag nicht als modifizierter VOB/B-Vertrag eingeordnet werden. Richtig ist dann regelmäßig: BGB-Einheitspreisbauvertrag zwischen Unternehmern unter Einbeziehung der VOB/C und ausdrücklichem Ausschluss der VOB/B. VOB/B-Referenzen wie § 7 VOB/B oder VOB/B-Abnahmefolgen dürfen nur verwendet werden, wenn der Vertrag sie trotz Ausschluss ausdrücklich übernimmt. Verbraucherbauvertrag ist nur einschlägig, wenn ein Verbraucher beteiligt ist.",
+   text:"Ist die VOB/B ausdrücklich ausgeschlossen, aber die VOB/C vereinbart, darf der Vertrag nicht als modifizierter VOB/B-Vertrag eingeordnet werden. Richtig ist dann regelmäßig: BGB-Einheitspreisbauvertrag zwischen Unternehmern mit VOB/C als technischer Grundlage für Ausführung, Aufmaß und Abrechnung sowie ausdrücklichem Ausschluss der VOB/B. VOB/B-Referenzen wie § 7 VOB/B oder VOB/B-Abnahmefolgen dürfen nur verwendet werden, wenn der Vertrag sie trotz Ausschluss ausdrücklich übernimmt. Verbraucherbauvertrag ist nur einschlägig, wenn ein Verbraucher beteiligt ist.",
    tags:["einheitspreis","bgb","vob/c","vob-b-ausgeschlossen","vob/b","vertragsgrundlage","unternehmer","verbraucherbauvertrag"]},
   {id:"kb14", title:"BGB – Verbraucherbauvertrag & Baubeschreibung", typ:["bgb"],
    text:"Bei Verbraucherbauverträgen (§ 650i BGB, Vertragspartner ist Privatperson) gelten Sonderpflichten: verbindliche Baubeschreibung vor Vertragsschluss, 14-tägiges Widerrufsrecht, verbindlicher Fertigstellungstermin. Fehlt die Baubeschreibung oder ist sie unvollständig, drohen Auslegungsnachteile zu Lasten des Unternehmers.",
@@ -2366,7 +2380,7 @@ function loadHistory(){
   }
   renderHistory();
 }
-function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich){
+function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich, qualityReview){
   const counts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
   const wantsContract = document.getElementById('saveContractCheckbox')?.checked;
@@ -2382,6 +2396,7 @@ function saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, ma
     fristenFailed: !!fristenFailed,
     projektKontext: projektKontext || '',
     marktvergleich: marktvergleich || {},
+    qualityReview: qualityReview || null,
     vertragstext: wantsContract ? extractedText : ''
   };
   historyEntries.unshift(entry);
@@ -2444,7 +2459,7 @@ window.openHistoryEntry = function(id){
   }
   document.getElementById('topActions').style.display = 'flex';
   closeModal();
-  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '', entry.marktvergleich || {}, entry.vertragstext || '', []);
+  renderResults(JSON.parse(JSON.stringify(entry.items)), JSON.parse(JSON.stringify(entry.fristenItems || [])), !!entry.fristenFailed, entry.projektKontext || '', entry.marktvergleich || {}, entry.vertragstext || '', [], entry.qualityReview || null);
   document.getElementById('resultsArea').scrollIntoView({behavior:'smooth', block:'start'});
 };
 window.deleteHistoryEntry = function(id){
@@ -3356,7 +3371,7 @@ function setPipelineStep(step, state){
   el.classList.remove('active','done','warn');
   if(state) el.classList.add(state);
 }
-function resetPipeline(){ [1,2,3,4].forEach(s => setPipelineStep(s, null)); }
+function resetPipeline(){ [1,2,3,4,5].forEach(s => setPipelineStep(s, null)); }
 function setStatus(msg, mode){
   const el = document.getElementById('statusLine');
   if(!msg){ el.innerHTML = ''; return; }
@@ -3894,7 +3909,7 @@ function getContractProfileInstruction(profile){
     rules.push('Die VOB/B ist nach Profilhinweis ausgeschlossen: keine Einordnung als modifizierte VOB/B, keine VOB/B-§7-Abweichungsreferenz, keine VOB/B-Abnahmefolgen, außer der Vertrag übernimmt sie ausdrücklich trotz Ausschluss.');
   }
   if(profile.vobCIncluded){
-    rules.push('VOB/C ist technische Vertragsgrundlage: als technische Norm-/Ausführungsgrundlage darstellen, nicht mit VOB/B verwechseln.');
+    rules.push('VOB/C ist nur technische Grundlage für Ausführung, Aufmaß und Abrechnung: nicht mit VOB/B-Rechtsfolgen verwechseln.');
   }
   if(profile.unitPrice){
     rules.push('Einheitspreischarakter ausdrücklich nennen: Abrechnung nach Aufmaß, Mengen-/Abrechnungsrisiko, Skonto und Kostenabzüge prüfen.');
@@ -3910,7 +3925,7 @@ function enrichProjectContextWithProfile(projektKontext, profile){
   const base = String(projektKontext || '').trim();
   const hay = normalizeDedupeText(base);
   if(profile.vobBExcluded && !hay.includes('vob/b ausgeschlossen')) additions.push('VOB/B ausdrücklich ausgeschlossen');
-  if(profile.vobCIncluded && !hay.includes('vob/c')) additions.push('VOB/C als technische Vertragsgrundlage');
+  if(profile.vobCIncluded && !hay.includes('vob/c')) additions.push('VOB/C für Ausführung/Aufmaß/Abrechnung');
   if(profile.unitPrice && !hay.includes('einheitspreis')) additions.push('Einheitspreisvertrag');
   if(profile.lumpSum && !hay.includes('pauschal')) additions.push('Pauschalvertrag');
   if(!additions.length) return base;
@@ -3950,6 +3965,88 @@ function sanitizeAnalysisItems(items, profile){
     }
     return next;
   });
+}
+function buildQualityReviewPayload(items, fristenItems, fristenFailed, projektKontext, marktvergleich, profile, contractExcerpt){
+  const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
+  const sortedItems = [...(items || [])].sort((a,b) => (order[a.risiko]??2) - (order[b.risiko]??2));
+  return {
+    vertragsprofil:{
+      auswahl:currentContractType,
+      perspektive:currentRoleLabel,
+      profileType:profile?.profileType || 'unknown',
+      hinweise:profile?.labels || []
+    },
+    projektKontext,
+    marktvergleich,
+    fristenStatus: fristenFailed ? 'Fallback/teilweise' : 'primaer',
+    risiken: sortedItems.slice(0, 55).map(it => ({
+      id:it.id,
+      kategorie:it.kategorie,
+      text:it.text,
+      risiko:it.risiko,
+      auswirkung:it.auswirkung,
+      begruendung:it.begruendung,
+      referenzen:it.referenzen || []
+    })),
+    fristen:(fristenItems || []).slice(0, 65).map(f => ({
+      bezeichnung:f.bezeichnung,
+      datum:f.datum,
+      bezug:f.bezug,
+      kategorie:f.kategorie,
+      folge:f.folge,
+      prioritaet:f.prioritaet
+    })),
+    vertragsauszug: String(contractExcerpt || '').slice(0, 18000)
+  };
+}
+function normalizeQualityReview(raw){
+  const review = raw && typeof raw === 'object' ? raw : {};
+  const status = ['plausibel','eingeschraenkt','nicht_freigabefaehig'].includes(review.status) ? review.status : 'eingeschraenkt';
+  const findings = Array.isArray(review.findings) ? review.findings.slice(0, 8).map(f => ({
+    thema:String(f?.thema || 'Prüfhinweis').slice(0, 80),
+    bewertung:String(f?.bewertung || '').slice(0, 360),
+    handlung:String(f?.handlung || '').slice(0, 260)
+  })) : [];
+  return {
+    status,
+    kurzfazit:String(review.kurzfazit || 'Der Bericht wurde automatisch auf Plausibilität geprüft. Auffälligkeiten sollten fachlich freigegeben werden.').slice(0, 520),
+    findings
+  };
+}
+async function runQualityReview(items, fristenItems, fristenFailed, projektKontext, marktvergleich, profile, contractExcerpt, signal){
+  const cached = readAnalysisCache('quality');
+  if(cached && cached.status && cached.kurzfazit) return cached;
+  const payload = buildQualityReviewPayload(items, fristenItems, fristenFailed, projektKontext, marktvergleich, profile, contractExcerpt);
+  const prompt = `Du bist zweiter fachlicher Prüflauf für eine KI-Vertragsanalyse im Bau-/Immobilienkontext.
+Prüfe den erzeugten Analysebericht gegen Vertragsprofil, Vertragsauszug und extrahierte Daten.
+Aufgabe: Plausibilitätsprüfung, keine vollständige Neu-Analyse.
+
+Prüfe besonders:
+- Vertragsart: BGB/VOB/B/HOAI, Einheitspreis/Pauschal/GU, VOB/C nur technisch für Ausführung/Aufmaß/Abrechnung.
+- Widersprüche: VOB/B ausgeschlossen vs. modifizierte VOB/B, Verbraucherbauvertrag ohne Verbraucher, VOB/C mit VOB/B verwechselt.
+- Top-Risiken: normale Bauvertragsstandards nicht überhöhen; echte Risiken nicht unterdrücken.
+- Fristen: Vertragsstrafen nur für ausdrücklich strafbewehrte Termine; keine pauschalen Folgen.
+- Belegtreue: keine erfundenen Paragraphen, Beträge, Parteienrechte oder Rückgaberegeln.
+
+Antworte AUSSCHLIESSLICH mit JSON:
+{"status":"plausibel|eingeschraenkt|nicht_freigabefaehig","kurzfazit":"max 70 Wörter","findings":[{"thema":"...","bewertung":"...","handlung":"..."}]}
+
+Daten:
+${JSON.stringify(payload)}`;
+  try{
+    const raw = await callClaudeWithRetry(prompt, 'Qualitätsprüfung des Analyseberichts …', 4200, signal);
+    const parsed = normalizeQualityReview(parseJson(raw));
+    writeAnalysisCache('quality', parsed);
+    return parsed;
+  }catch(err){
+    if(err.name === 'AbortError') throw err;
+    console.warn('Qualitätsprüfung fehlgeschlagen, Analyse wird ohne zweiten Prüflauf angezeigt:', err);
+    return {
+      status:'eingeschraenkt',
+      kurzfazit:'Die automatische Qualitätsprüfung konnte nicht abgeschlossen werden. Der Analysebericht wurde erstellt, sollte aber vor Weitergabe fachlich plausibilisiert werden.',
+      findings:[{thema:'Qualitätsprüfung nicht abgeschlossen', bewertung:err.message || 'Technischer Fehler im zweiten Prüflauf.', handlung:'Bericht vor Freigabe manuell oder mit separatem Plausibilitätscheck prüfen.'}]
+    };
+  }
 }
 async function classifyBatchRecursive(itemsBatch, options, signal, batchLabel){
   const prompt = buildClassificationPrompt(itemsBatch, options);
@@ -4064,7 +4161,7 @@ async function runAnalysis(){
 
   const TYP_TEXT = {
     vob: "einen Bauvertrag, in den die VOB/B ausdrücklich einbezogen ist (Werkvertrag zwischen Auftraggeber und bauausführendem Unternehmen nach VOB/B)",
-    bgb: "einen BGB-Bauvertrag, ggf. als Einheitspreis-, Pauschal-, GU- oder VOB/C-bezogener Bauvertrag; falls die VOB/B ausdrücklich ausgeschlossen ist, ist sie nicht als modifizierte VOB/B zu behandeln",
+    bgb: "einen BGB-Bauvertrag, ggf. als Einheitspreis-, Pauschal- oder GU-Vertrag; VOB/C betrifft nur technische Ausführung, Aufmaß und Abrechnung, während eine ausdrücklich ausgeschlossene VOB/B nicht als modifizierte VOB/B zu behandeln ist",
     planung: "einen Planungsvertrag (HOAI-Vertrag mit Architekt/Ingenieur)",
     sonstige: "einen Vertrag aus dem Bau-/Immobilienkontext, dessen genaue Vertragsgrundlage hier bewusst offen bleibt"
   };
@@ -4211,10 +4308,16 @@ Antworte AUSSCHLIESSLICH mit JSON, ohne Einleitung, ohne Markdown-Codeblock. For
       items = sanitizeAnalysisItems(items, currentContractProfile);
     }
     setPipelineStep(4,'done');
-    setStatus(fristenFailed ? 'Analyse abgeschlossen. Fristen-Erkennung wurde per Fallback ergänzt; Details siehe Fristen-Tab.' : 'Analyse abgeschlossen.', 'done');
 
-    renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, document.getElementById('saveContractCheckbox')?.checked ? extractedText : '', isScanned ? documentImages : []);
-    saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich);
+    // Stage 5: Qualitätsprüfung gegen Vertrag/Profil/Bericht
+    setPipelineStep(5,'active');
+    setStatus('Prüfe Analysebericht nochmals auf Plausibilität …', 'loading');
+    const qualityReview = await runQualityReview(items, fristenItems, fristenFailed, projektKontext, marktvergleich, currentContractProfile, docExcerpt, analysisSignal);
+    setPipelineStep(5, qualityReview.status === 'plausibel' ? 'done' : 'warn');
+    setStatus(fristenFailed ? 'Analyse abgeschlossen. Fristen-Erkennung wurde per Fallback ergänzt; Qualitätsprüfung siehe Bericht.' : 'Analyse abgeschlossen. Qualitätsprüfung ergänzt.', 'done');
+
+    renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, document.getElementById('saveContractCheckbox')?.checked ? extractedText : '', isScanned ? documentImages : [], qualityReview);
+    saveHistoryEntry(items, fristenItems, fristenFailed, projektKontext, marktvergleich, qualityReview);
   }catch(err){
     if(err.name === 'AbortError'){
       console.warn('Analyse abgebrochen');
@@ -4684,6 +4787,31 @@ function renderRiskProfileCharts(summary){
       ${renderDonutCard('Geschätzte wirtschaftliche Wirkung', axisEntries, 'Achsenpunkte', `Normalisierter Wirkungsindex ${Math.round(impactTotal)} Punkte: ${impactLabel}. Die Achsenwerte zeigen die fachlichen Schwerpunkte.`)}
     </div>`;
 }
+function renderQualityReviewCard(review){
+  if(!review) return '';
+  const statusMap = {
+    plausibel:{label:'Plausibel', cls:'', desc:'Der zweite Prüflauf hat keine wesentliche Auffälligkeit festgestellt.'},
+    eingeschraenkt:{label:'Mit Einschränkungen plausibel', cls:'warn', desc:'Der Bericht ist nutzbar, einzelne Punkte sollten fachlich geprüft werden.'},
+    nicht_freigabefaehig:{label:'Nicht freigabefähig', cls:'fail', desc:'Der Bericht sollte vor Weitergabe korrigiert oder erneut geprüft werden.'}
+  };
+  const cfg = statusMap[review.status] || statusMap.eingeschraenkt;
+  const findings = Array.isArray(review.findings) ? review.findings : [];
+  return `
+    <div class="card quality-card ${cfg.cls}">
+      <div class="quality-head">
+        <h2>Qualitätsprüfung</h2>
+        <span class="quality-badge">${escapeHtml(cfg.label)}</span>
+      </div>
+      <p class="quality-summary">${escapeHtml(review.kurzfazit || cfg.desc)}</p>
+      ${findings.length ? `<ol class="quality-list">
+        ${findings.map(f => `
+          <li>
+            <b>${escapeHtml(f.thema || 'Prüfhinweis')}:</b> ${escapeHtml(f.bewertung || '')}
+            ${f.handlung ? `<br><span class="hint">Empfehlung: ${escapeHtml(f.handlung)}</span>` : ''}
+          </li>`).join('')}
+      </ol>` : `<p class="hint">${escapeHtml(cfg.desc)}</p>`}
+    </div>`;
+}
 function buildManagementSummary(items, deadlineQuality = {}){
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
   const sorted = [...items].sort((a,b) => {
@@ -4709,7 +4837,7 @@ function buildManagementSummary(items, deadlineQuality = {}){
   return { topRisks, riskCounts, axisScores, metrics, deadlineQuality };
 }
 
-function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext, scanPreviewImages = []){
+function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext, scanPreviewImages = [], qualityReview = null){
   fristenItems = enrichCriticalDeadlines(fristenItems || []);
   marktvergleich = marktvergleich || {};
   const order = {kritisch:0, hoch:1, mittel:2, niedrig:3};
@@ -4757,6 +4885,7 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
   };
   const summary = buildManagementSummary(items, deadlineQuality);
   const projectInsightHtml = renderProjectInsight(items);
+  const qualityReviewHtml = renderQualityReviewCard(qualityReview);
   const summaryHtml = `
     <div class="card">
       <h2>Management Summary</h2>
@@ -4871,6 +5000,7 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
       <hr>
     </div>
     ${summaryHtml}
+    ${qualityReviewHtml}
     ${marktvergleichHtml}
     <div class="result-tabs no-print">
       <button class="result-tab active" data-pane="pane-risiko" data-info="${escapeHtml(tabInfos["pane-risiko"])}">
