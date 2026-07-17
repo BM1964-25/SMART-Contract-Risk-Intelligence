@@ -505,6 +505,8 @@
   .quality-card.fail .quality-badge{ background:#f7dada; color:#8b1e1e; }
   .quality-summary{ color:var(--text-muted); font-size:12.5px; line-height:1.45; margin:0 0 10px; }
   .quality-list{ margin:0; padding-left:18px; color:var(--text); font-size:12.5px; line-height:1.45; }
+  .quality-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+  .quality-actions .btn{ width:auto; }
   @media (max-width:900px){ .result-tabs{ grid-template-columns:1fr; } }
   .top-actions{ display:flex; justify-content:flex-end; gap:10px; margin-bottom:14px; }
   .top-actions .btn{ white-space:nowrap; }
@@ -1823,6 +1825,7 @@ let currentContractType = "vob";
 let currentPerspective = "auftragnehmer";
 let currentRoleLabel = "Auftragnehmer";
 let latestReportSnapshot = null;
+let latestReportData = null;
 let analysisAbortController = null;
 let isAnalysisRunning = false;
 let currentDocumentSignature = "";
@@ -3068,6 +3071,7 @@ function resetWorkspace(){
   contractBasisConfirmed = false;
   currentBasisIssue = null;
   latestReportSnapshot = null;
+  latestReportData = null;
   fileInput.value = "";
   document.getElementById('fileInfo').innerHTML = "";
   document.getElementById('uploadNotices').innerHTML = "";
@@ -3104,6 +3108,7 @@ async function handleFile(file){
   setStatus('Lese Dokument …', 'loading');
   resetPipeline();
   latestReportSnapshot = null;
+  latestReportData = null;
   document.getElementById('topActions').style.display = 'none';
   document.getElementById('resultsArea').innerHTML = emptyResultsHtml();
   isScanned = false;
@@ -4048,6 +4053,112 @@ ${JSON.stringify(payload)}`;
     };
   }
 }
+function normalizeRevisedReport(raw, fallback){
+  const data = raw && typeof raw === 'object' ? raw : {};
+  const revisedItems = Array.isArray(data.items) ? data.items : fallback.items;
+  const items = revisedItems.map((item, index) => ({
+    id:String(item?.id || fallback.items?.[index]?.id || `R${index + 1}`),
+    kategorie:String(item?.kategorie || fallback.items?.[index]?.kategorie || 'Sonstiges').slice(0, 80),
+    text:String(item?.text || fallback.items?.[index]?.text || '').slice(0, 900),
+    risiko:['kritisch','hoch','mittel','niedrig'].includes(item?.risiko) ? item.risiko : (fallback.items?.[index]?.risiko || 'mittel'),
+    auswirkung:AUSWIRKUNG_ACHSEN.includes(item?.auswirkung) ? item.auswirkung : (fallback.items?.[index]?.auswirkung || 'Sonstiges'),
+    begruendung:String(item?.begruendung || fallback.items?.[index]?.begruendung || '').slice(0, 900),
+    massnahme:String(item?.massnahme || fallback.items?.[index]?.massnahme || '').slice(0, 700),
+    referenzen:Array.isArray(item?.referenzen) ? item.referenzen.slice(0, 5).map(r => String(r).slice(0, 120)) : (fallback.items?.[index]?.referenzen || [])
+  })).filter(item => item.text);
+  const fristenItems = Array.isArray(data.fristenItems) ? data.fristenItems : fallback.fristenItems;
+  const qualityReview = normalizeQualityReview(data.qualityReview || {
+    status:'eingeschraenkt',
+    kurzfazit:data.revisionNote || 'Der Bericht wurde anhand der Qualitätsprüfung gezielt nachbearbeitet. Eine fachliche Freigabe bleibt erforderlich.',
+    findings:[]
+  });
+  return {
+    items:sanitizeAnalysisItems(items.length ? items : fallback.items, currentContractProfile),
+    fristenItems:Array.isArray(fristenItems) ? fristenItems : [],
+    fristenFailed:typeof data.fristenFailed === 'boolean' ? data.fristenFailed : fallback.fristenFailed,
+    projektKontext:String(data.projektKontext || fallback.projektKontext || ''),
+    marktvergleich:normalizeMarketComparison(data.marktvergleich || fallback.marktvergleich || {}),
+    qualityReview
+  };
+}
+async function reviseReportFromQuality(){
+  if(isAnalysisRunning){
+    setError('Während eine Analyse läuft, kann der Bericht nicht parallel nachbearbeitet werden.');
+    return;
+  }
+  if(!latestReportData || !latestReportData.qualityReview){
+    setError('Es liegt kein aktueller Bericht mit Qualitätsprüfung vor.');
+    return;
+  }
+  if(!apiKey){
+    setError('Bitte zuerst den API-Key speichern.');
+    return;
+  }
+  const btn = document.getElementById('reviseQualityBtn');
+  const oldText = btn ? btn.textContent : '';
+  if(btn){
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> Bericht wird überarbeitet …';
+  }
+  setError('');
+  setStatus('Überarbeite Bericht gezielt anhand der Qualitätsprüfung …', 'loading');
+  const fallback = JSON.parse(JSON.stringify(latestReportData));
+  const payload = {
+    vertragsprofil:{
+      auswahl:currentContractType,
+      perspektive:currentRoleLabel,
+      profileType:currentContractProfile?.profileType || 'unknown',
+      hinweise:currentContractProfile?.labels || []
+    },
+    qualitaetspruefung:latestReportData.qualityReview,
+    projektKontext:latestReportData.projektKontext,
+    marktvergleich:latestReportData.marktvergleich,
+    items:latestReportData.items,
+    fristenItems:latestReportData.fristenItems,
+    fristenFailed:latestReportData.fristenFailed,
+    vertragsauszug:String(latestReportData.contractExcerpt || '').slice(0, 16000)
+  };
+  const prompt = `Du überarbeitest einen bestehenden Vertragsanalysebericht gezielt anhand der Qualitätsprüfung.
+Erzeuge KEINE neue Vollanalyse. Korrigiere nur belegte Widersprüche, Überbewertungen, Unterbewertungen, falsche Vertragsart-Bezüge, VOB/B/VOB/C-Verwechslungen, Fristenfehler oder unklare Management-Aussagen.
+
+Regeln:
+- Normale Bauvertragsstandards wie angemessene Vertragserfüllungssicherheit, förmliche Abnahme oder Schlussrechnung nach Abnahme nicht unnötig als kritisch darstellen.
+- Echte Abweichungen, Kumulationen, Zahlungsblockaden, Vertragsstrafen, Einbehalte, Nachtrags-/Aufmaßrisiken und Haftungsrisiken bleiben erhalten.
+- VOB/C nur als technische Grundlage für Ausführung, Aufmaß und Abrechnung behandeln.
+- Wenn Fristen nicht belastbar erkannt wurden, keine Terminachse als gesicherte stärkste Wirkung ausweisen.
+- Fasse gleichartige Punkte zusammen, statt künstlich viele Risiken zu erzeugen.
+- Entferne nur Punkte, die klar falsch oder doppelt sind.
+- Alle Angaben müssen aus den gelieferten Daten oder dem Vertragsauszug ableitbar sein.
+
+Antworte AUSSCHLIESSLICH mit JSON:
+{
+  "projektKontext":"...",
+  "marktvergleich":{},
+  "fristenFailed":true|false,
+  "fristenItems":[],
+  "items":[{"id":"...","kategorie":"...","text":"...","risiko":"kritisch|hoch|mittel|niedrig","auswirkung":"Liquidität|Nachtrag|Marge|Termin|Haftung|Sonstiges","begruendung":"...","massnahme":"...","referenzen":[]}],
+  "qualityReview":{"status":"plausibel|eingeschraenkt|nicht_freigabefaehig","kurzfazit":"...","findings":[{"thema":"...","bewertung":"...","handlung":"..."}]}
+}
+
+Daten:
+${JSON.stringify(payload)}`;
+  try{
+    const raw = await callClaudeWithRetry(prompt, 'Überarbeite Bericht anhand Qualitätsprüfung …', 5200, null);
+    const parsed = normalizeRevisedReport(parseJson(raw), fallback);
+    renderResults(parsed.items, parsed.fristenItems, parsed.fristenFailed, parsed.projektKontext, parsed.marktvergleich, latestReportData.vertragstext || '', latestReportData.scanPreviewImages || [], parsed.qualityReview);
+    saveHistoryEntry(parsed.items, parsed.fristenItems, parsed.fristenFailed, parsed.projektKontext, parsed.marktvergleich, parsed.qualityReview);
+    setStatus('Bericht wurde anhand der Qualitätsprüfung überarbeitet und im Verlauf gespeichert.', 'done');
+  }catch(err){
+    console.error(err);
+    setError('Nachbearbeitung fehlgeschlagen: ' + err.message);
+    setStatus('Nachbearbeitung konnte nicht abgeschlossen werden.', 'warn');
+  }finally{
+    if(btn){
+      btn.disabled = false;
+      btn.textContent = oldText || 'Bericht anhand Qualitätsprüfung überarbeiten';
+    }
+  }
+}
 async function classifyBatchRecursive(itemsBatch, options, signal, batchLabel){
   const prompt = buildClassificationPrompt(itemsBatch, options);
   try{
@@ -4796,6 +4907,7 @@ function renderQualityReviewCard(review){
   };
   const cfg = statusMap[review.status] || statusMap.eingeschraenkt;
   const findings = Array.isArray(review.findings) ? review.findings : [];
+  const canRevise = findings.length || review.status === 'nicht_freigabefaehig' || review.status === 'eingeschraenkt';
   return `
     <div class="card quality-card ${cfg.cls}">
       <div class="quality-head">
@@ -4810,6 +4922,7 @@ function renderQualityReviewCard(review){
             ${f.handlung ? `<br><span class="hint">Empfehlung: ${escapeHtml(f.handlung)}</span>` : ''}
           </li>`).join('')}
       </ol>` : `<p class="hint">${escapeHtml(cfg.desc)}</p>`}
+      ${canRevise ? `<div class="quality-actions no-print"><button class="btn secondary small" id="reviseQualityBtn" type="button" onclick="reviseReportFromQuality()">Bericht anhand Qualitätsprüfung überarbeiten</button></div>` : ''}
     </div>`;
 }
 function buildManagementSummary(items, deadlineQuality = {}){
@@ -5092,6 +5205,18 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
   latestReportSnapshot = {
     filename: currentFileName,
     createdAt: new Date().toISOString()
+  };
+  latestReportData = {
+    filename: currentFileName,
+    items: JSON.parse(JSON.stringify(items || [])),
+    fristenItems: JSON.parse(JSON.stringify(fristenItems || [])),
+    fristenFailed: !!fristenFailed,
+    projektKontext: projektKontext || '',
+    marktvergleich: marktvergleich || {},
+    vertragstext: vertragstext || '',
+    scanPreviewImages: scanPreviewImages || [],
+    qualityReview: qualityReview || null,
+    contractExcerpt: extractedText ? String(extractedText).slice(0, 70000) : String(vertragstext || '').slice(0, 70000)
   };
   document.querySelectorAll('.result-tab').forEach(tab => {
     tab.onclick = () => {
