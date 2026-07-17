@@ -1663,7 +1663,7 @@ const HELP_CONTENT = [
     <ol>
       <li>Vertragsgrundlage und Rolle festlegen – das steuert, welche Wissensbasis-Einträge einbezogen werden und aus welcher Rechtsgrundlage heraus bewertet wird.</li>
       <li>Vertrag hochladen. Bei sehr langen Textdokumenten zeigt die App eine Seitenschätzung und ggf. einen Hinweis, falls das Zeichenlimit überschritten wird. Bei Scan-PDFs werden alle Seiten als Bilder vorbereitet und später paketweise analysiert. Beim Laden einer neuen Datei wird der aktuelle Arbeitsbereich für diese neue Prüfung vorbereitet; gespeicherte Verläufe bleiben erhalten.</li>
-      <li>Vertragsgrundlage prüfen. Wenn Dateiname oder ausgelesener Text nicht plausibel zur gewählten Grundlage passen, zeigt die App eine Bestätigungstafel. Die Analyse startet erst, wenn die aktuelle Auswahl bewusst bestätigt oder auf VOB/B, Bauvertrag mit VOB/B-Bezügen oder HOAI umgestellt wurde. Bei Bauverträgen unterscheidet die App zwischen „VOB/B als Hauptgrundlage prüfen" und „Bauvertrag mit VOB/B-Bezügen prüfen". Die App kann VOB/B-Bezüge, Abweichungen und Rangfolgen fachlich erkennen, aber nicht mit juristischer Sicherheit entscheiden, ob die VOB/B wirksam unverändert insgesamt einbezogen oder einzelne Klauseln individuell ausgehandelt wurden.</li>
+      <li>Vertragsgrundlage prüfen. Wenn Dateiname oder ausgelesener Text nicht plausibel zur gewählten Grundlage passen, zeigt die App eine Bestätigungstafel. Bei „Bauvertrag nach VOB/B" kommt keine zusätzliche Auswahlfrage zur VOB/B, weil diese Grundlage bereits gewählt ist. Bei „Bauvertrag nach BGB" erscheint nur dann ein Hinweis, wenn deutliche VOB/B-Bezüge erkannt werden. HOAI/Planung ist ausschließlich für Architekten- und Ingenieurverträge vorgesehen und wird nicht als Bauvertrag geprüft.</li>
       <li>Analyse starten – die vier Stufen (Klausel- und Vertragsstruktur, Fristen & Folgen, Risiko-Klassifikation, Maßnahmenvorschläge) laufen automatisch nacheinander. Bei Scan-PDFs kann dieser Vorgang wegen der Bilderkennung deutlich länger dauern.</li>
       <li>Management Summary zuerst lesen für den Überblick, dann bei Bedarf den Marktvergleich prüfen, anschließend gezielt in die drei Tabs wechseln.</li>
       <li>Bei kritischen/hohen Punkten die vorgeschlagenen Maßnahmen als Verhandlungsgrundlage nutzen – sie sind bewusst als Verhandlungsrahmen formuliert, nicht als starre Zielvorgabe.</li>
@@ -1690,7 +1690,7 @@ const HELP_CONTENT = [
     <p><b>Belegtreue:</b> Vertragsstrafen, Sicherheiten-Kumulationen, Paragraphenverweise und konkrete Rechtsfolgen werden nur dann als Vertragsinhalt behandelt, wenn sie im Vertrag ausdrücklich angelegt sind. Marktwerte, Risikoindex, Wirkungsindex, Risikostufen und Maßnahmen sind KI-gestützte Einordnungen der App und keine aus dem Vertrag übernommenen Tatsachen.</p>
     <p><b>VOB/B, BGB und gemischte Bauverträge:</b> Die App kann inzwischen deutlich besser unterscheiden, ob die VOB/B erwähnt oder einbezogen wird, ob BGB-Regelungen zusätzlich oder abweichend verwendet werden, ob VOB/B-Regelungen ausgeschlossen oder verändert werden, ob der Einzelvertrag in der Rangfolge vor der VOB/B steht und ob typische Abweichungen vorkommen, z. B. Ausschluss der fiktiven Abnahme, geänderte Behandlung von § 7 VOB/B, abweichende Verjährung oder eigene Nachtragslogik. Das gilt nicht nur für GU-Verträge, sondern auch für Pauschalpreis-, Einheitspreis-, GMP-, Cost-plus-/Open-Book- und Mischverträge.</p>
     <p><b>Grenze der automatischen Einordnung:</b> Diese Prüfung ist fachlich hilfreich, aber nicht perfekt. Die App kann nicht mit juristischer Sicherheit entscheiden, ob die VOB/B wirksam unverändert insgesamt einbezogen wurde oder ob einzelne Klauseln individuell ausgehandelt wurden. Dafür braucht es den vollständigen Vertragskontext und im Zweifel eine juristische Prüfung.</p>
-    <p><b>Was die zwei Optionen bedeuten:</b> „VOB/B als Hauptgrundlage prüfen" startet die Analyse stärker mit VOB/B-Benchmark, sucht aber trotzdem nach Abweichungen und modifizierter VOB/B. „Bauvertrag mit VOB/B-Bezügen prüfen" bleibt stärker auf dem konkreten Bauvertrag kalibriert und behandelt VOB/B eher als ergänzende oder modifizierte Bezugsgrundlage. Bei Bauverträgen mit umfangreichen eigenen Regelungen ist diese zweite Option häufig der sauberere Startpunkt.</p>
+    <p><b>Auswahl bei BGB mit VOB/B-Bezügen:</b> Ist „Bauvertrag nach BGB" gewählt und erkennt die App deutliche VOB/B-Bezüge, erscheint eine Rückfrage. Standard ist dann „BGB-Bauvertrag mit VOB/B-Bezügen prüfen". Auf „Bauvertrag nach VOB/B" sollte nur umgestellt werden, wenn die VOB/B tatsächlich die Hauptgrundlage des Vertrags sein soll. Ist bereits „Bauvertrag nach VOB/B" gewählt, erscheint keine zusätzliche VOB/B-Auswahlfrage.</p>
     <p><b>Qualitätssicherung der Wissensbasis:</b> Vor der Analyse prüft die App regelbasiert harte Vertragsprofil-Hinweise, z. B. ausdrücklicher Ausschluss der VOB/B, VOB/C als technische Grundlage für Ausführung/Aufmaß/Abrechnung, Einheitspreis-/Pauschalvertrag und Verbraucherhinweise. Unpassende Wissensbasis-Regeln werden technisch ausgefiltert. Nach der KI-Bewertung bereinigt die App offensichtliche Widersprüche, etwa „Verbraucherbauvertrag" ohne Verbraucher oder „modifizierte VOB/B" trotz ausdrücklichem VOB/B-Ausschluss. Das ersetzt keine fachliche Freigabe, reduziert aber typische Fehlübertragungen.</p>
     <p><b>AGB- und Privilegierungsprüfung:</b> Wenn ein Vertrag die VOB/B nur teilweise übernimmt, in wesentlichen Punkten ändert oder durch vorrangige Individualregelungen verdrängt, ist dies als eigener Prüfpunkt darzustellen. Vorformulierte belastende Klauseln sind dann besonders auf AGB-Kontrolle nach § 307 BGB und auf einen möglichen Wegfall der VOB/B-Privilegierung nach § 310 Abs. 1 Satz 3 BGB hinzuweisen.</p>
     <p><b>Risikoprofil:</b> Die Management Summary zeigt zuerst die Anzahl der erkannten Risikopunkte nach Stufe. „20 Risiken" bedeutet nicht automatisch gut oder schlecht, sondern: Es wurden 20 bewertungsrelevante Punkte erkannt. Entscheidend ist die Mischung aus kritisch/hoch/mittel/niedrig und ob einzelne Punkte marktüblich, ungewöhnlich oder klar abweichend sind.</p>
@@ -1832,7 +1832,7 @@ let currentDocumentSignature = "";
 
 const ROLE_MAP = {
   vob:      {contractType:"vob", perspective:"auftragnehmer", roleLabel:"Auftragnehmer (Bauunternehmen)",
-             hint:"VOB/B als Hauptgrundlage. Die Analyse prüft zusätzlich, ob der Vertrag die VOB/B wesentlich ändert oder verdrängt."},
+             hint:"VOB/B als gewählte Hauptgrundlage. Die Analyse bewertet den Vertrag aus dieser Grundlage heraus; rechtliche Abweichungsfragen bleiben fachlich zu prüfen."},
   bgb:      {contractType:"bgb", perspective:"auftragnehmer", roleLabel:"Auftragnehmer (Bauunternehmen)",
              hint:"BGB-/GU-Bauvertrag. VOB/B-Bezüge werden berücksichtigt, wenn sie im Vertrag ergänzend oder modifiziert vorkommen."},
   planung:  {contractType:"planung", perspective:"auftragnehmer", roleLabel:"Auftragnehmer (Architekt/Ingenieur)",
@@ -2941,9 +2941,9 @@ function getContractBasisIssue(source){
     return {
       kind:'construction-vs-planning',
       title:'Vertragsgrundlage prüfen',
-      text:`${sourceLabel} enthalten Hinweise auf einen Bauvertrag. Aktuell ist jedoch „Planungsvertrag / HOAI“ ausgewählt. Bitte bestätigen Sie die Auswahl oder stellen Sie auf die passende Bauvertragsgrundlage um, bevor die Analyse startet.`,
+      text:`${sourceLabel} enthalten Hinweise auf einen Bauvertrag. HOAI/Planung ist nur für Architekten- und Ingenieurleistungen vorgesehen. Bitte bestätigen Sie die HOAI-Auswahl nur, wenn tatsächlich ein Planer-/Ingenieurvertrag geprüft werden soll, oder stellen Sie auf die passende Bauvertragsgrundlage um.`,
       actions:[
-        {label:'Auswahl beibehalten', action:'confirm', primary:false},
+        {label:'HOAI-Auswahl beibehalten', action:'confirm', primary:false},
         {label:'Auf Bauvertrag nach VOB/B umstellen', action:'vob', primary:!looksBgb},
         {label:'Auf Bauvertrag nach BGB umstellen', action:'bgb', primary:looksBgb}
       ]
@@ -2953,9 +2953,9 @@ function getContractBasisIssue(source){
     return {
       kind:'planning-vs-construction',
       title:'Vertragsgrundlage prüfen',
-      text:`${sourceLabel} enthalten Hinweise auf einen Planungs-/HOAI-Vertrag. Aktuell ist eine Bauvertragsgrundlage ausgewählt. Bitte bestätigen Sie die Auswahl oder stellen Sie auf Planungsvertrag / HOAI um, bevor die Analyse startet.`,
+      text:`${sourceLabel} enthalten Hinweise auf einen Architekten-/Ingenieurvertrag nach HOAI. Solche Verträge sollen nicht als Bauvertrag geprüft werden. Bitte stellen Sie auf Planungsvertrag / HOAI um oder bestätigen Sie die Bauvertragsauswahl nur, wenn der Vertrag tatsächlich Bauleistungen regelt.`,
       actions:[
-        {label:'Auswahl beibehalten', action:'confirm', primary:false},
+        {label:'Bauvertragsauswahl beibehalten', action:'confirm', primary:false},
         {label:'Auf Planungsvertrag / HOAI umstellen', action:'planung', primary:true}
       ]
     };
@@ -2963,13 +2963,13 @@ function getContractBasisIssue(source){
   if(currentContractType === 'vob' && (looksBgb || profile.vobBExcluded)){
     return {
       kind:'bgb-vs-vob',
-      title:'VOB/B-Einbeziehung prüfen',
+      title:'Vertragsgrundlage prüfen',
       text: profile.vobBExcluded
-        ? 'Die Datei enthält Hinweise, dass die VOB/B ausdrücklich ausgeschlossen ist. Eine Analyse als VOB/B-Hauptgrundlage wäre voraussichtlich falsch. Bitte auf Bauvertrag nach BGB umstellen oder die Auswahl bewusst bestätigen.'
-        : 'Die Datei enthält Hinweise auf einen eigenständig geregelten Bauvertrag und zugleich VOB/B-Bezüge. Wähle, ob die VOB/B als Hauptgrundlage geprüft werden soll oder ob der konkrete Bauvertrag mit ergänzenden bzw. modifizierten VOB/B-Bezügen plausibler ist. Das kann Pauschalpreis-, Einheitspreis-, GU-/GÜ-, GMP-, Cost-plus-/Open-Book- oder Mischverträge betreffen. Die App kann dies fachlich vorbereiten, aber nicht mit juristischer Sicherheit abschließend entscheiden.',
+        ? 'Die Datei enthält Hinweise, dass die VOB/B ausdrücklich ausgeschlossen ist. Eine Analyse als Bauvertrag nach VOB/B wäre voraussichtlich falsch. Bitte auf Bauvertrag nach BGB umstellen oder die VOB/B-Auswahl bewusst bestätigen.'
+        : 'Die Datei enthält Hinweise auf einen BGB-/Werkvertragsbezug. Da „Bauvertrag nach VOB/B“ gewählt ist, startet keine zusätzliche VOB/B-Auswahlfrage. Bitte stellen Sie nur dann auf BGB um, wenn die VOB/B nicht Hauptgrundlage des Vertrags sein soll.',
       actions:[
-        {label:'VOB/B als Hauptgrundlage prüfen', action:'confirm', primary:!profile.vobBExcluded},
-        {label:'Bauvertrag mit VOB/B-Bezügen prüfen', action:'bgb', primary:true}
+        {label:'VOB/B-Auswahl bewusst beibehalten', action:'confirm', primary:!profile.vobBExcluded},
+        {label:'Auf Bauvertrag nach BGB umstellen', action:'bgb', primary:true}
       ]
     };
   }
@@ -2977,22 +2977,10 @@ function getContractBasisIssue(source){
     return {
       kind:'vob-vs-bgb',
       title:'VOB/B-Einbeziehung prüfen',
-      text:'Die Datei enthält deutliche Hinweise auf VOB/B-Bezüge. Wähle, ob die VOB/B als Hauptgrundlage dienen soll oder ob der Vertrag besser als Bauvertrag mit ergänzenden bzw. modifizierten VOB/B-Bezügen geprüft wird. Das betrifft auch Pauschalpreis-, Einheitspreis-, GU-/GÜ-, GMP-, Cost-plus-/Open-Book- oder Mischverträge. Eine wirksame unveränderte VOB/B-Einbeziehung kann die App nicht endgültig juristisch bestätigen.',
+      text:'Die Datei enthält deutliche Hinweise auf VOB/B-Bezüge. Da „Bauvertrag nach BGB“ ausgewählt ist, kann der Vertrag als BGB-Bauvertrag mit VOB/B-Bezügen geprüft werden. Stellen Sie nur dann auf VOB/B um, wenn die VOB/B tatsächlich die Hauptgrundlage des Vertrags sein soll.',
       actions:[
-        {label:'VOB/B als Hauptgrundlage prüfen', action:'vob', primary:true},
-        {label:'Bauvertrag mit VOB/B-Bezügen prüfen', action:'confirm', primary:false}
-      ]
-    };
-  }
-  if((currentContractType === 'vob' || currentContractType === 'bgb') && looksConstruction && !looksVob && !looksBgb){
-    return {
-      kind:'construction-basis-unclear',
-      title:'Bauvertragsgrundlage bestätigen',
-      text:'Die Datei weist auf einen Bauvertrag hin. Für die Analyse ist entscheidend, ob die VOB/B unverändert einbezogen ist, nur modifiziert herangezogen wird oder BGB/Werkvertragsrecht gilt.',
-      actions:[
-        {label:'VOB/B als Hauptgrundlage prüfen', action:'vob', primary:currentContractType === 'vob'},
-        {label:'Bauvertrag mit VOB/B-Bezügen prüfen', action:'bgb', primary:currentContractType === 'bgb'},
-        {label:'Aktuelle Auswahl beibehalten', action:'confirm', primary:false}
+        {label:'BGB-Bauvertrag mit VOB/B-Bezügen prüfen', action:'confirm', primary:true},
+        {label:'Auf Bauvertrag nach VOB/B umstellen', action:'vob', primary:false}
       ]
     };
   }
