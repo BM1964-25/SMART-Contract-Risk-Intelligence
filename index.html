@@ -3375,6 +3375,10 @@ function parseJson(raw){
     throw new Error('Modellantwort war kein gültiges JSON (' + e.message + '). Ausschnitt: ' + cleaned.slice(0,150));
   }
 }
+function isInvalidJsonModelError(err){
+  const detail = `${err?.message || ''}`.toLowerCase();
+  return /kein gültiges json|ungueltiges json|json parse error|expected|unterminated|unexpected end|unexpected token/.test(detail);
+}
 function isOutputLimitError(err){
   const detail = `${err?.message || ''} ${err?.bodyText || ''}`.toLowerCase();
   return /token-limit|token limit|erreichen des token-limits|max_tokens|antwort.*abgeschnitten|kein text mehr erzeugt|zu viel ausgabe|ausgabelimit|output.*long|response.*long/.test(detail);
@@ -3647,9 +3651,22 @@ function buildImageBatchContent(images, instruction, startPage, endPage, totalPa
     type:"text",
     text: `${instruction}
 
-Du siehst nur den Seitenabschnitt ${startPage}-${endPage} von insgesamt ${totalPages} Seiten. Analysiere diesen Abschnitt vollständig. Spätere Abschnitte werden separat geprüft und anschließend zusammengeführt.`
+Du siehst nur den Seitenabschnitt ${startPage}-${endPage} von insgesamt ${totalPages} Seiten. Analysiere diesen Abschnitt vollständig, aber gib pro Seite maximal 3 bis 5 konkrete, wirtschaftlich oder rechtlich wesentliche Punkte zurück. Lasse rein beschreibende, doppelte oder nur formale Punkte weg. Spätere Abschnitte werden separat geprüft und anschließend zusammengeführt.`
   });
   return content;
+}
+function buildStrictStageOneRetryInstruction(baseInstruction, label){
+  return `${baseInstruction}
+
+Die vorherige Modellantwort für ${label} war formal kein gültiges JSON. Wiederhole den Schritt deshalb kompakter und strenger:
+- Antworte ausschließlich mit einem einzigen gültigen JSON-Objekt.
+- Keine Einleitung, kein Markdown, keine Kommentare.
+- Maximal 3 bis 5 wesentliche Punkte für diesen Abschnitt.
+- Jeder String muss vollständig geschlossen sein.
+- Kurze Paraphrasen mit maximal 22 Wörtern.
+- Wenn kein belastbarer Punkt erkennbar ist: "items":[].
+Format exakt:
+{"projektkontext":"","marktvergleich":{},"items":[{"id":"1","kategorie":"Frist|Pflicht|Haftung|Kündigung|Vertragsstrafe|Zahlung|Sicherheit|Sonstiges","text":"kurze konkrete Paraphrase"}]}`;
 }
 function chunkTextForAnalysis(text, size){
   const chunks = [];
@@ -3678,6 +3695,12 @@ async function extractTextClauseChunkRecursive(extractInstruction, textChunk, si
     return parseStageOneResult(parseJson(raw));
   }catch(err){
     if(err.name === 'AbortError') throw err;
+    if(isInvalidJsonModelError(err)){
+      setStatus(`${label}: Modellantwort war ungültig, wiederhole kompakt …`, 'loading');
+      const retryPrompt = buildStrictStageOneRetryInstruction(extractInstruction, label) + "\n\nVertragstext-Abschnitt:\n" + textChunk;
+      const retryRaw = await callClaudeWithRetry(retryPrompt, `Wiederhole Klausel-Extraktion aus ${statusLabel} kompakt …`, Math.min(CLAUDE_STAGE1_MAX_TOKENS, 3600), signal);
+      return parseStageOneResult(parseJson(retryRaw));
+    }
     if(shouldSplitExtractionChunk(err) && textChunk.length > 2500){
       const mid = Math.ceil(textChunk.length / 2);
       let splitAt = textChunk.lastIndexOf('\n', mid);
@@ -3750,6 +3773,12 @@ async function extractScannedClauseBatchRecursive(extractInstruction, images, st
     return parseStageOneResult(parseJson(raw));
   }catch(err){
     if(err.name === 'AbortError') throw err;
+    if(isInvalidJsonModelError(err)){
+      setStatus(`${statusLabel}: Modellantwort war ungültig, wiederhole kompakt …`, 'loading');
+      const retryContent = buildImageBatchContent(images, buildStrictStageOneRetryInstruction(extractInstruction, statusLabel), startPage, endPage, totalPages);
+      const retryRaw = await callClaudeWithRetry(retryContent, `Wiederhole Klausel-Extraktion aus ${statusLabel} kompakt …`, Math.min(CLAUDE_STAGE1_MAX_TOKENS, 3600), signal);
+      return parseStageOneResult(parseJson(retryRaw));
+    }
     if(shouldSplitExtractionChunk(err) && images.length > 1){
       const mid = Math.ceil(images.length / 2);
       setStatus(`${statusLabel} erzeugt zu viel Ausgabe, teile in kleinere Scan-Pakete …`, 'loading');
