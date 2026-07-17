@@ -1828,6 +1828,7 @@ const CLAUDE_CONSOLIDATION_MAX_TOKENS = 8000;
 const CLAUDE_DEADLINES_MAX_TOKENS = 8000;
 const CLAUDE_CLASSIFICATION_MAX_TOKENS = 7000;
 const CLAUDE_ACTION_MAX_TOKENS = 6000;
+const SCAN_PREVIEW_LIMIT = 3;
 const SCAN_RENDER_MAX_DIMENSION = 1400;
 const SCAN_RENDER_JPEG_QUALITY = 0.62;
 const ANALYSIS_CACHE_VERSION = "v3";
@@ -5130,21 +5131,22 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
   items.forEach(it => { if(counts[it.risiko] !== undefined) counts[it.risiko]++; });
   const contractTextChars = vertragstext ? vertragstext.length : 0;
   const contractTextPages = contractTextChars ? Math.max(1, Math.round(contractTextChars / 2800)) : 0;
+  const visibleScanPreviews = (scanPreviewImages || []).slice(0, SCAN_PREVIEW_LIMIT);
   const scanPreviewHtml = (scanPreviewImages && scanPreviewImages.length) ? `
     <div class="card no-print">
       <details>
         <summary class="vt-summary">Scan-Vorschau anzeigen (${scanPreviewImages.length.toLocaleString('de-DE')} Seite${scanPreviewImages.length===1?'':'n'})</summary>
-        <p class="hint" style="margin-top:10px;">Diese Vorschau zeigt die für die Analyse vorbereiteten Scan-Seiten der aktuellen Sitzung. Sie wird nicht im Verlauf gespeichert und ersetzt keine sichere Vertragsablage.</p>
+        <p class="hint" style="margin-top:10px;">Diese Vorschau zeigt aus Platz- und Datenschutzgründen nur die ersten ${visibleScanPreviews.length.toLocaleString('de-DE')} von ${scanPreviewImages.length.toLocaleString('de-DE')} vorbereiteten Scan-Seiten. Sie dient nur dem visuellen Abgleich, wird nicht im Verlauf gespeichert und erscheint nicht im PDF-Ausdruck.</p>
         <div class="vt-panel">
           <div class="vt-toolbar">
             <div>
               <div class="vt-title">${escapeHtml(currentFileName || 'Gescanntes PDF')}</div>
-              <div class="vt-meta">${scanPreviewImages.length.toLocaleString('de-DE')} gerenderte Seite${scanPreviewImages.length===1?'':'n'} · nur in der aktuellen Sitzung verfügbar</div>
+              <div class="vt-meta">${scanPreviewImages.length.toLocaleString('de-DE')} gerenderte Seite${scanPreviewImages.length===1?'':'n'} · Vorschau auf ${visibleScanPreviews.length.toLocaleString('de-DE')} Seite${visibleScanPreviews.length===1?'':'n'} begrenzt</div>
             </div>
             <span class="vt-badge">Scan-Vorschau</span>
           </div>
           <div class="scan-preview">
-            ${scanPreviewImages.map((b64, index) => `
+            ${visibleScanPreviews.map((b64, index) => `
               <div class="scan-page">
                 <div class="scan-page-label">Seite ${index + 1}</div>
                 <img loading="lazy" src="data:image/jpeg;base64,${b64}" alt="Scan-Seite ${index + 1}">
