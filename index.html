@@ -1512,7 +1512,7 @@ const HELP_CONTENT = [
     <h3>Überblick</h3>
     <p><b>SMART Vertrags- & Risikoanalyse</b> prüft Bauverträge sowie Architekten- und Ingenieurverträge nach HOAI automatisiert auf rechtliche und wirtschaftliche Risiken. Dazu gehören insbesondere VOB/B- und BGB-Bauverträge, GU-/GÜ-Verträge, Planerverträge und Fachplanerverträge. Zielgruppe sind Baufirmen und Planungsbüros, die einen Vertrag vor Unterschrift oder während der laufenden Abwicklung fachlich einordnen wollen – als schnelle Ersteinschätzung, nicht als Ersatz für eine juristische Prüfung.</p>
     <p>Die App macht mehr als nur einzelne Klauseln aufzulisten: Sie extrahiert die relevanten Regelungen, erkennt die im Text auffindbaren Fristen und Termine, bewertet jeden Punkt nach Risikostufe und wirtschaftlicher Auswirkungsebene (Liquidität, Termin, Haftung, Nachtrag, Marge), erstellt konkrete Maßnahmenvorschläge und stellt die wichtigsten Werte einem Marktvergleich gegenüber.</p>
-    <p>Am Ende steht kein reiner Klauselkatalog, sondern eine Management Summary, die die fünf größten Projektrisiken und deren wirtschaftliche Tragweite auf einen Blick zeigt – gedacht für Projektleiter und Geschäftsführung gleichermaßen.</p>
+    <p>Am Ende steht kein reiner Klauselkatalog, sondern eine Management Summary, die die wichtigsten hohen und kritischen Projektrisiken und deren wirtschaftliche Tragweite auf einen Blick zeigt – gedacht für Projektleiter und Geschäftsführung gleichermaßen.</p>
     <p><b>Was die App bewusst nicht ist:</b> kein Ersatz für anwaltliche Beratung, kein automatischer Vertragsgenerator und keine Garantie auf Richtigkeit oder Vollständigkeit – jede Ausgabe ist eine KI-gestützte fachliche Orientierung, die am Ende von einer Person mit Fachkenntnis geprüft werden sollte, besonders bei wirtschaftlich bedeutsamen Verträgen.</p>
     <p>Die App läuft vollständig im Browser als einzelne, eigenständige HTML-Datei (BYOK – <i>Bring Your Own Key</i>, d. h. du bringst deinen eigenen Anthropic-API-Key mit). Es gibt kein Backend und keinen Server dieser App – die Kommunikation läuft ausschließlich direkt zwischen deinem Browser und der Anthropic-API.</p>
   `},
@@ -1618,7 +1618,7 @@ const HELP_CONTENT = [
     </ul>
     <p><b>Ergebnisbereich (erscheint nach der ersten Analyse):</b></p>
     <ul>
-      <li><b>Management Summary</b> – immer sichtbar, unabhängig vom gewählten Tab: kurze Einordnung von Bauvorhaben/Vertragsparteien, die fünf größten Risiken, ein kompaktes Risikoprofil mit Diagrammen, bei HOAI-Verträgen zusätzlich Projektziele und Projektkomplexität, danach das Balkendiagramm der wirtschaftlichen Auswirkungsachsen.</li>
+      <li><b>Management Summary</b> – immer sichtbar, unabhängig vom gewählten Tab: kurze Einordnung von Bauvorhaben/Vertragsparteien, die wichtigsten hohen und kritischen Risiken, ein kompaktes Risikoprofil mit Diagrammen, bei HOAI-Verträgen zusätzlich Projektziele und Projektkomplexität, danach das Balkendiagramm der wirtschaftlichen Auswirkungsachsen.</li>
       <li><b>Marktvergleich</b> – erscheint automatisch, wenn vergleichbare Werte im Vertrag gefunden wurden. Die Richtwerte passen sich an die Vertragsgrundlage an: Bauvertrag/VOB/B/BGB oder Planungsvertrag/HOAI.</li>
       <li><b>Drei Tabs</b> darunter: Risikobewertung (strukturierte Tabelle), Terminkritische Klauseln (Fristen mit finanzieller/rechtlicher Folge, priorisiert), Fristen (Zeitstrahl für datierte Termine plus nach Kategorie gruppierte Liste der erkannten Fristen).</li>
     </ul>
@@ -4556,7 +4556,7 @@ function buildManagementSummary(items, deadlineQuality = {}){
     return Math.abs(scoreDiff) > 0.01 ? scoreDiff : (order[a.risiko]??2) - (order[b.risiko]??2);
   });
   const majorItems = sorted.filter(it => it.risiko === 'kritisch' || it.risiko === 'hoch');
-  const top5 = (majorItems.length >= 5 ? majorItems : [...majorItems, ...sorted.filter(it => it.risiko !== 'kritisch' && it.risiko !== 'hoch')]).slice(0,5);
+  const topRisks = majorItems.slice(0,5);
   const riskCounts = {kritisch:0, hoch:0, mittel:0, niedrig:0};
   const axisScores = {};
   AUSWIRKUNG_ACHSEN.forEach(a => axisScores[a] = 0);
@@ -4571,7 +4571,7 @@ function buildManagementSummary(items, deadlineQuality = {}){
   applyPlanningAxisCalibration(items, axisScores);
   applyConstructionAxisCalibration(items, axisScores);
   const metrics = calculateConsolidatedRiskMetrics(items, riskCounts, axisScores);
-  return { top5, riskCounts, axisScores, metrics, deadlineQuality };
+  return { topRisks, riskCounts, axisScores, metrics, deadlineQuality };
 }
 
 function renderResults(items, fristenItems, fristenFailed, projektKontext, marktvergleich, vertragstext, scanPreviewImages = []){
@@ -4626,10 +4626,10 @@ function renderResults(items, fristenItems, fristenFailed, projektKontext, markt
     <div class="card">
       <h2>Management Summary</h2>
       <p class="intro-text">${escapeHtml(introText)}</p>
-      <div class="summary-section-title">Die fünf größten Projektrisiken auf einen Blick</div>
-      <ol class="top5-list">
-        ${summary.top5.map(it => `<li><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span> <span>${escapeHtml(it.text)}</span></li>`).join('')}
-      </ol>
+      <div class="summary-section-title">Die wichtigsten hohen und kritischen Projektrisiken auf einen Blick</div>
+      ${summary.topRisks.length ? `<ol class="top5-list">
+        ${summary.topRisks.map(it => `<li><span class="badge ${it.risiko}">${escapeHtml(it.risiko)}</span> <span>${escapeHtml(it.text)}</span></li>`).join('')}
+      </ol>` : '<p class="hint">Keine hohen oder kritischen Projektrisiken erkannt. Mittlere und niedrige Punkte sind in der Risikobewertung vollständig aufgeführt.</p>'}
       <div class="summary-section-title">Risikoprofil auf einen Blick</div>
       ${renderRiskProfileCharts(summary)}
       ${projectInsightHtml}
